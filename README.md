@@ -19,13 +19,18 @@ npm run dev
 
 El proyecto está configurado para desplegarse en **Vercel** mediante `vercel.json`.
 
+| Entorno | URL |
+|---|---|
+| **Producción** (`main`) | [finance-tracker-ruby-mu.vercel.app](https://finance-tracker-ruby-mu.vercel.app) |
+| **Staging** (`dev`) | [finance-tracker-git-dev-joseppascualbadia-8623s-projects.vercel.app](https://finance-tracker-git-dev-joseppascualbadia-8623s-projects.vercel.app) |
+
 ### Rama `main` — producción
 
-La rama `main` se despliega automáticamente en el entorno de producción al hacer merge.
+La rama `main` se despliega automáticamente en el entorno de producción al hacer merge. La URL de producción siempre apunta al último deployment.
 
 ### Rama `dev` — preview permanente
 
-La rama `dev` se despliega como preview de staging. Para activarla:
+La rama `dev` se despliega como preview de staging. La URL de staging siempre apunta al último deployment de la rama `dev`. Para activarla:
 
 1. En el dashboard de Vercel, ve a **Project Settings > Git > Preview Branches**.
 2. Añade `dev` a la lista de ramas con preview permanente.
