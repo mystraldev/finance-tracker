@@ -1,11 +1,16 @@
-# finance-tracker
+# Finance Tracker
 
-Personal finance tracking application.
+Aplicación web para el seguimiento de finanzas personales.
 
-## Getting Started
+## Desarrollo
 
-_To be added._
+```bash
+npm install
+npm run dev
+```
 
-## Development
+## Comandos
 
-_To be added._
+- `npm run dev`: inicia el servidor de desarrollo.
+- `npm run build`: genera la versión de producción.
+- `npm run lint`: ejecuta ESLint.
