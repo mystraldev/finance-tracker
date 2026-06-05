@@ -1,11 +1,24 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
+import Layout from './components/Layout'
+import DashboardPage from './pages/DashboardPage'
+import TransactionsPage from './pages/TransactionsPage'
+import CategoriesPage from './pages/CategoriesPage'
+import AccountsPage from './pages/AccountsPage'
 
 function App() {
   return (
-    <main className="app">
-      <h1>Hello world</h1>
-      <p>Finance Tracker is ready to grow.</p>
-    </main>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/movimientos" element={<TransactionsPage />} />
+          <Route path="/categorias" element={<CategoriesPage />} />
+          <Route path="/cuentas" element={<AccountsPage />} />
+          <Route path="*" element={<DashboardPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   )
 }
 
