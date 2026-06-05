@@ -12,6 +12,7 @@ import {
   monthLabel,
 } from '../utils/derive'
 import { formatSignedCurrency, formatGroupDate } from '../utils/format'
+import type { Transaction } from '../types/finance'
 
 function TransactionsPage() {
   const { transactions, categories, accounts, updateTransaction, deleteTransaction } =
@@ -25,8 +26,8 @@ function TransactionsPage() {
   const [categoryId, setCategoryId] = useState('all')
   const [accountId, setAccountId] = useState('all')
   const [type, setType] = useState('all')
-  const [editing, setEditing] = useState(null)
-  const [deleting, setDeleting] = useState(null)
+  const [editing, setEditing] = useState<Transaction | null>(null)
+  const [deleting, setDeleting] = useState<Transaction | null>(null)
 
   const filtered = transactions
     .filter((t) => month === 'all' || monthKey(t.date) === month)
@@ -39,8 +40,7 @@ function TransactionsPage() {
 
   const net = filtered.reduce((s, t) => s + t.amount, 0)
 
-  // Agrupar por fecha conservando el orden (más reciente primero).
-  const groups = []
+  const groups: { date: string; items: Transaction[] }[] = []
   filtered.forEach((t) => {
     const last = groups[groups.length - 1]
     if (last && last.date === t.date) last.items.push(t)
@@ -66,7 +66,6 @@ function TransactionsPage() {
         <AddTransactionButton />
       </header>
 
-      {/* Filtros */}
       <section className="filters">
         <div className="filters__group">
           <Icon name="filter" size={16} />
@@ -115,7 +114,6 @@ function TransactionsPage() {
         )}
       </section>
 
-      {/* Resumen del filtro */}
       <div className="tx-summary">
         <span className="tnum">{filtered.length} movimientos</span>
         <span className={`tx-summary__net tnum ${net >= 0 ? 'is-in' : 'is-out'}`}>
@@ -123,7 +121,6 @@ function TransactionsPage() {
         </span>
       </div>
 
-      {/* Lista */}
       {groups.length === 0 ? (
         <div className="card empty">
           <Icon name="transactions" size={28} />
@@ -142,14 +139,14 @@ function TransactionsPage() {
                     <li key={t.id} className="txrow">
                       <span
                         className="txrow__icon"
-                        style={{ '--c': income ? '#10b981' : cat?.color ?? '#94a3b8' }}
+                        style={{ '--c': income ? '#10b981' : cat?.color ?? '#94a3b8' } as Record<string, string>}
                       >
                         <Icon name={cat?.icon ?? 'package'} size={18} />
                       </span>
                       <div className="txrow__info">
                         <span className="txrow__desc">{t.description}</span>
                         <span className="txrow__meta">
-                          <span className="pill" style={{ '--c': cat?.color ?? '#94a3b8' }}>
+                          <span className="pill" style={{ '--c': cat?.color ?? '#94a3b8' } as Record<string, string>}>
                             {cat?.label ?? 'Sin categoría'}
                           </span>
                           <span className="txrow__account">
@@ -194,7 +191,7 @@ function TransactionsPage() {
             categories={categories}
             initial={editing}
             onSubmit={(tx) => {
-              updateTransaction(tx)
+              updateTransaction(tx as Partial<Transaction> & { id: string })
               setEditing(null)
             }}
             onCancel={() => setEditing(null)}

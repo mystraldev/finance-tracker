@@ -6,8 +6,9 @@ import ConfirmDialog from '../components/ConfirmDialog'
 import { useFinance } from '../store/financeContext'
 import { accountsWithBalance, netWorthAsOf } from '../utils/derive'
 import { formatCurrency, formatPercent } from '../utils/format'
+import type { Account } from '../types/finance'
 
-const TYPE_LABEL = {
+const TYPE_LABEL: Record<string, string> = {
   cash: 'Efectivo',
   savings: 'Remunerada',
   investment: 'Inversión',
@@ -18,16 +19,16 @@ function AccountsPage() {
   const { transactions, addAccount, updateAccount, deleteAccount } = state
 
   const [creating, setCreating] = useState(false)
-  const [editing, setEditing] = useState(null)
-  const [deleting, setDeleting] = useState(null)
-  const [blocked, setBlocked] = useState(null)
+  const [editing, setEditing] = useState<Account | null>(null)
+  const [deleting, setDeleting] = useState<Account | null>(null)
+  const [blocked, setBlocked] = useState<Account | null>(null)
 
-  const accounts = accountsWithBalance(state) // saldo actual (histórico completo)
+  const accounts = accountsWithBalance(state)
   const total = netWorthAsOf(state)
 
-  const usageCount = (id) => transactions.filter((t) => t.accountId === id).length
+  const usageCount = (id: string) => transactions.filter((t) => t.accountId === id).length
 
-  function handleDelete(acc) {
+  function handleDelete(acc: Account) {
     if (usageCount(acc.id) > 0) setBlocked(acc)
     else setDeleting(acc)
   }
@@ -91,7 +92,7 @@ function AccountsPage() {
         <Modal title="Nueva cuenta" onClose={() => setCreating(false)}>
           <AccountForm
             onSubmit={(acc) => {
-              addAccount(acc)
+              addAccount(acc as Omit<Account, 'id'>)
               setCreating(false)
             }}
             onCancel={() => setCreating(false)}
@@ -104,7 +105,7 @@ function AccountsPage() {
           <AccountForm
             initial={editing}
             onSubmit={(acc) => {
-              updateAccount(acc)
+              updateAccount(acc as Partial<Account> & { id: string })
               setEditing(null)
             }}
             onCancel={() => setEditing(null)}

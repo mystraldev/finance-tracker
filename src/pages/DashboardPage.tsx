@@ -21,7 +21,6 @@ function DashboardPage() {
   const state = useFinance()
   const month = state.selectedMonth
 
-  // Cuentas con saldo, variación y serie para el sparkline (todo derivado).
   const accounts = accountsWithBalance(state, month).map((a) => ({
     ...a,
     monthlyGrowthRate: monthlyGrowthRate(a, state.transactions, month),

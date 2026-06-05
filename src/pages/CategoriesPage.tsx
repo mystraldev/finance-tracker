@@ -5,6 +5,7 @@ import CategoryForm from '../components/CategoryForm'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { useFinance } from '../store/financeContext'
 import { formatCurrency } from '../utils/format'
+import type { Category } from '../types/finance'
 
 const INCOME_CATEGORY_ID = 'income'
 
@@ -13,15 +14,13 @@ function CategoriesPage() {
     useFinance()
 
   const [creating, setCreating] = useState(false)
-  const [editing, setEditing] = useState(null)
-  const [deleting, setDeleting] = useState(null)
-  const [blocked, setBlocked] = useState(null)
+  const [editing, setEditing] = useState<Category | null>(null)
+  const [deleting, setDeleting] = useState<Category | null>(null)
+  const [blocked, setBlocked] = useState<Category | null>(null)
 
-  // Categorías gestionables (la de ingresos es del sistema).
   const managed = categories.filter((c) => c.id !== INCOME_CATEGORY_ID)
 
-  // Uso por categoría: nº de movimientos y total gastado (histórico).
-  const usage = (id) => {
+  const usage = (id: string) => {
     const txs = transactions.filter((t) => t.categoryId === id)
     return {
       count: txs.length,
@@ -29,7 +28,7 @@ function CategoriesPage() {
     }
   }
 
-  function handleDelete(cat) {
+  function handleDelete(cat: Category) {
     if (usage(cat.id).count > 0) setBlocked(cat)
     else setDeleting(cat)
   }
@@ -91,7 +90,7 @@ function CategoriesPage() {
         <Modal title="Nueva categoría" onClose={() => setCreating(false)}>
           <CategoryForm
             onSubmit={(cat) => {
-              addCategory(cat)
+              addCategory(cat as Omit<Category, 'id'>)
               setCreating(false)
             }}
             onCancel={() => setCreating(false)}
@@ -104,7 +103,7 @@ function CategoriesPage() {
           <CategoryForm
             initial={editing}
             onSubmit={(cat) => {
-              updateCategory(cat)
+              updateCategory(cat as Partial<Category> & { id: string })
               setEditing(null)
             }}
             onCancel={() => setEditing(null)}
