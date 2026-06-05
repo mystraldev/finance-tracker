@@ -55,7 +55,7 @@ pnpm exec tsc --noEmit --project tsconfig.app.json
 pnpm exec tsc --noEmit                         # + tsconfig.node.json (configs)
 ```
 
-### Docker
+## Docker
 
 ```bash
 # Desarrollo (hot-reload)
