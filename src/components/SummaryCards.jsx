@@ -18,7 +18,7 @@ function SummaryCards({ accounts }) {
   return (
     <div className="summary-cards">
       {accounts.map((account, i) => {
-        const positive = account.monthlyChange >= 0
+        const positive = account.monthlyGrowthRate >= 0
         return (
           <article
             key={account.id}
@@ -40,7 +40,7 @@ function SummaryCards({ accounts }) {
             <footer className="summary-card__footer">
               <span className={`delta ${positive ? 'delta--up' : 'delta--down'}`}>
                 <Icon name={positive ? 'up' : 'down'} size={13} strokeWidth={2.4} />
-                {formatPercent(Math.abs(account.monthlyChange))}
+                {formatPercent(Math.abs(account.monthlyGrowthRate))}
               </span>
               {account.interestRate != null ? (
                 <span className="summary-card__note tnum">

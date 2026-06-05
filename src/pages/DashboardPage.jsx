@@ -8,7 +8,7 @@ import AddTransactionButton from '../components/AddTransactionButton'
 import MonthSelector from '../components/MonthSelector'
 import {
   accountsWithBalance,
-  monthlyChange,
+  monthlyGrowthRate,
   accountSeries,
   netWorthSeries,
   incomeExpenses,
@@ -24,7 +24,7 @@ function DashboardPage() {
   // Cuentas con saldo, variación y serie para el sparkline (todo derivado).
   const accounts = accountsWithBalance(state, month).map((a) => ({
     ...a,
-    monthlyChange: monthlyChange(a, state.transactions, month),
+    monthlyGrowthRate: monthlyGrowthRate(a, state.transactions, month),
     history: accountSeries(a, state.transactions, 7, month),
   }))
 
