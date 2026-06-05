@@ -2,18 +2,23 @@
 
 Aplicación web para el seguimiento de finanzas personales.
 
+## Tracker de incidencias
+
+Usamos [GitHub Issues](https://github.com/hatsydev/finance-tracker/issues) para la gestión de tareas y bugs.
+
 ## Desarrollo
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 ## Comandos
 
-- `npm run dev`: inicia el servidor de desarrollo.
-- `npm run build`: genera la versión de producción.
-- `npm run lint`: ejecuta ESLint.
+- `pnpm run dev`: inicia el servidor de desarrollo.
+- `pnpm run build`: genera la versión de producción.
+- `pnpm run lint`: ejecuta ESLint.
+- `pnpm run test`: ejecuta los tests con Vitest.
 
 ## Deployment
 
