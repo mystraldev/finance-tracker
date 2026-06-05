@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import Icon from './Icon'
+import { useTheme } from '../store/themeContext'
 
 const navItems = [
   { id: 'dashboard', label: 'Resumen', icon: 'dashboard', to: '/' },
@@ -11,6 +12,17 @@ const navItems = [
 ]
 
 function Sidebar() {
+  const { mode, theme, cycleMode } = useTheme()
+  const nextLabel =
+    mode === 'system' ? 'Forzar claro' : mode === 'light' ? 'Forzar oscuro' : 'Usar sistema'
+  const themeLabel =
+    mode === 'system'
+      ? `Sistema (${theme === 'dark' ? 'oscuro' : 'claro'})`
+      : mode === 'dark'
+        ? 'Oscuro'
+        : 'Claro'
+  const themeIcon = mode === 'system' ? 'system' : mode === 'dark' ? 'moon' : 'sun'
+
   return (
     <aside className="sidebar">
       <div className="sidebar__brand">
@@ -47,6 +59,22 @@ function Sidebar() {
       </nav>
 
       <div className="sidebar__footer">
+        <button
+          type="button"
+          className="theme-toggle"
+          onClick={cycleMode}
+          aria-label={`Tema actual: ${themeLabel}. ${nextLabel}`}
+          title={nextLabel}
+        >
+          <span className="theme-toggle__icon">
+            <Icon name={themeIcon} size={17} />
+          </span>
+          <span className="theme-toggle__text">
+            <span className="theme-toggle__label">Tema</span>
+            <span className="theme-toggle__value">{themeLabel}</span>
+          </span>
+        </button>
+
         <div className="user-chip">
           <span className="user-chip__avatar">F</span>
           <div className="user-chip__info">

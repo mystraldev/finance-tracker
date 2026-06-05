@@ -18,8 +18,10 @@
   --bg: #f4f6fa;
   --surface: #ffffff;
   --surface-2: #fbfcfe;
+  --sidebar-bg: rgba(255, 255, 255, 0.72);
   --border: #e8ecf3;
   --border-strong: #dce2ec;
+  --bg-glow: rgba(99, 102, 241, 0.04);
 
   /* ---- Texto ---- */
   --text: #131a26;
@@ -53,12 +55,63 @@
   /* Sombra de acento: elevación sobria, no neón. */
   --shadow-accent: 0 6px 16px -8px rgba(79, 70, 229, 0.5);
 
+  color-scheme: light;
   color: var(--text);
   background-color: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+[data-theme='dark'] {
+  --gray-50: #161c27;
+  --gray-100: #1d2533;
+  --gray-200: #293345;
+  --gray-300: #374255;
+  --gray-400: #687589;
+  --gray-500: #94a3b8;
+  --gray-600: #c4ccd8;
+  --gray-700: #dce3ee;
+  --gray-800: #edf2f8;
+  --gray-900: #f8fafc;
+
+  --bg: #090d16;
+  --surface: #111827;
+  --surface-2: #151e2e;
+  --sidebar-bg: rgba(12, 18, 30, 0.78);
+  --border: #243044;
+  --border-strong: #334158;
+  --bg-glow: rgba(129, 140, 248, 0.1);
+
+  --text: #eef2f7;
+  --text-soft: #b8c2d1;
+  --text-faint: #78869a;
+
+  --indigo: #a5b4fc;
+  --indigo-strong: #818cf8;
+  --violet: #c4b5fd;
+  --blue: #93c5fd;
+  --emerald: #34d399;
+  --emerald-strong: #6ee7b7;
+  --amber: #fbbf24;
+  --rose: #fb7185;
+
+  --grad-primary: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+  --grad-emerald: linear-gradient(135deg, #10b981 0%, #6ee7b7 100%);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-sm:
+    0 1px 3px rgba(0, 0, 0, 0.28), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md:
+    0 8px 18px -10px rgba(0, 0, 0, 0.55),
+    0 3px 8px -6px rgba(0, 0, 0, 0.4);
+  --shadow-lg:
+    0 18px 42px -18px rgba(0, 0, 0, 0.72),
+    0 8px 18px -12px rgba(0, 0, 0, 0.5);
+  --shadow-accent: 0 10px 26px -14px rgba(129, 140, 248, 0.65);
+
+  color-scheme: dark;
 }
 
 * {
@@ -81,8 +134,11 @@ body {
   background-color: var(--bg);
   /* Tinte ambiental muy tenue para dar profundidad sin saturar. */
   background-image:
-    radial-gradient(1100px 520px at 15% -10%, rgba(99, 102, 241, 0.04), transparent 60%);
+    radial-gradient(1100px 520px at 15% -10%, var(--bg-glow), transparent 60%);
   background-attachment: fixed;
+  transition:
+    background-color 0.22s ease,
+    color 0.22s ease;
 }
 
 #root {
