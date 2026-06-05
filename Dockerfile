@@ -5,7 +5,7 @@ RUN corepack enable && pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm run build
 
-FROM node:22-alpine
+FROM node:22-alpine AS production
 RUN corepack enable && pnpm install -g serve
 COPY --from=build /app/dist /app/dist
 EXPOSE 3000

@@ -79,11 +79,11 @@ src/utils/math.test.ts     → fractionOf
 
 Vercel con configuración en `vercel.json`. El framework se detecta automáticamente como Vite.
 
-| Entorno | Rama |
-|---------|------|
-| Producción | `main` |
-| Staging (preview permanente) | `dev` |
-| Preview por PR | automática |
+| Entorno | Rama | URL |
+|---------|------|-----|
+| **Producción** | `main` | [finance-tracker-ruby-mu.vercel.app](https://finance-tracker-ruby-mu.vercel.app) |
+| **Staging** (preview permanente) | `dev` | [finance-tracker-git-dev-joseppascualbadia-8623s-projects.vercel.app](https://finance-tracker-git-dev-joseppascualbadia-8623s-projects.vercel.app) |
+| Preview por PR | automática | generada automáticamente |
 
 ## Tracker de incidencias
 
