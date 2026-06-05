@@ -29,7 +29,7 @@ type AccountFormProps = {
 
 function AccountForm({ initial, onSubmit, onCancel }: AccountFormProps) {
   const [name, setName] = useState(initial?.name ?? '')
-  const [type, setType] = useState<'cash' | 'savings' | 'investment'>(initial?.type ?? 'cash')
+  const [type, setType] = useState(initial?.type ?? 'cash')
   const [icon, setIcon] = useState(initial?.icon ?? 'wallet')
   const [accent, setAccent] = useState(initial?.accent ?? 'indigo')
   const accentColor = ACCENTS.find((a) => a.value === accent)?.color ?? '#6366f1'
@@ -96,7 +96,7 @@ function AccountForm({ initial, onSubmit, onCancel }: AccountFormProps) {
           value={type}
           onChange={(e) => {
             const next = e.target.value
-            setType(next)
+            setType(next as 'cash' | 'savings' | 'investment')
             setIcon(TYPES.find((t) => t.value === next)?.icon ?? 'wallet')
           }}
         >

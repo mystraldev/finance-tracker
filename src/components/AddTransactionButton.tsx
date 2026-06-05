@@ -3,6 +3,7 @@ import Icon from './Icon'
 import Modal from './Modal'
 import TransactionForm from './TransactionForm'
 import { useFinance } from '../store/financeContext'
+import type { Transaction } from '../types/finance'
 
 type AddTransactionButtonProps = {
   label?: string
@@ -25,7 +26,7 @@ function AddTransactionButton({ label = 'Añadir movimiento' }: AddTransactionBu
             accounts={accounts}
             categories={categories}
             onSubmit={(tx) => {
-              addTransaction(tx)
+              addTransaction(tx as Omit<Transaction, 'id'>)
               setOpen(false)
             }}
             onCancel={() => setOpen(false)}

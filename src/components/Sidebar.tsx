@@ -8,7 +8,7 @@ const navItems = [
   { id: 'accounts', label: 'Cuentas', icon: 'accounts', to: '/cuentas' },
   { id: 'investments', label: 'Inversiones', icon: 'investments' },
   { id: 'settings', label: 'Ajustes', icon: 'settings' },
-] as const
+]
 
 function Sidebar() {
   return (

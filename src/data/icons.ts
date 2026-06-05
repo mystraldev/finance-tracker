@@ -1,4 +1,4 @@
-import type { ComponentType, LucideProps } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import {
   Wallet,
   PiggyBank,
@@ -51,7 +51,7 @@ import {
 
 export type IconName = 'dashboard' | 'transactions' | 'categories' | 'accounts' | 'investments' | 'settings' | 'wallet' | 'piggy' | 'trending' | 'plus' | 'up' | 'down' | 'chevronLeft' | 'chevronRight' | 'close' | 'delete' | 'edit' | 'check' | 'filter' | 'calendar' | 'home' | 'cart' | 'car' | 'leisure' | 'health' | 'package' | 'salary' | 'fuel' | 'film' | 'utensils' | 'plane' | 'gift' | 'phone' | 'gym' | 'education' | 'pet' | 'clothes' | 'coffee' | 'bus' | 'heart' | 'energy' | 'wifi' | 'book' | 'card' | 'games' | 'music' | 'shopping'
 
-export const registry: Record<string, ComponentType<LucideProps>> = {
+export const registry: Record<string, LucideIcon> = {
   dashboard: LayoutGrid,
   transactions: ArrowLeftRight,
   categories: Tags,

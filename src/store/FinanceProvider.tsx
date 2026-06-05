@@ -7,7 +7,7 @@ import type { Account, Category, FinanceAction, FinanceData, FinanceState, Trans
 const STORAGE_KEY = 'finance-tracker:v1'
 
 function uid(): string {
-  if (globalThis.crypto?.randomUUID) {
+  if (typeof globalThis.crypto?.randomUUID === 'function') {
     try {
       return crypto.randomUUID()
     } catch {

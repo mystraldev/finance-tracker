@@ -1,6 +1,6 @@
-import type { ComponentType, LucideProps } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
-export type IconRegistry = Record<string, ComponentType<LucideProps>>
+export type IconRegistry = Record<string, LucideIcon>
 
 export type Account = {
   id: string
@@ -9,6 +9,7 @@ export type Account = {
   icon: string
   accent: string
   openingBalance: number
+  interestRate?: number
 }
 
 export type AccountWithBalance = Account & {
