@@ -90,6 +90,11 @@ export function accountBalanceAsOf(account, transactions, month = null) {
   return account.openingBalance + sum
 }
 
+// TODO: estas funciones iteran todas las transacciones cada vez que se
+//       llaman, y se llaman múltiples veces por render desde DashboardPage.
+//       Cuando exista la capa de acceso a datos (issue #9), este tipo de
+//       consultas irán al repositorio y la optimización se gestiona allí.
+
 /** Cuentas con su saldo derivado al cierre de `month`. */
 export function accountsWithBalance(state, month = null) {
   return state.accounts.map((a) => ({
@@ -155,6 +160,8 @@ export function categoryBreakdown(transactions, categories, month) {
 // ---------- Movimientos recientes (enriquecidos para la UI) ----------
 
 /** Últimos n movimientos con la etiqueta e icono de su categoría resueltos. */
+// TODO: el sort y límite se gestionarán en la capa de acceso a datos
+//       (API/query) cuando exista. Aquí es provisional.
 export function recentTransactions(state, n = 6) {
   const cats = categoryMap(state.categories)
   return [...state.transactions]
