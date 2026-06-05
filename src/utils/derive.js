@@ -106,8 +106,8 @@ export function netWorthAsOf(state, month = null) {
   )
 }
 
-/** Variación del saldo de una cuenta respecto al mes anterior. */
-export function monthlyChange(account, transactions, month) {
+/** Variación relativa del saldo de una cuenta respecto al mes anterior. */
+export function monthlyGrowthRate(account, transactions, month) {
   const [prev] = monthsBack(month, 2)
   const cur = accountBalanceAsOf(account, transactions, month)
   const before = accountBalanceAsOf(account, transactions, prev)
