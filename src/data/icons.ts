@@ -47,9 +47,12 @@ import {
   Gamepad2,
   Music,
   ShoppingBag,
+  Sun,
+  Moon,
+  Monitor,
 } from 'lucide-react'
 
-export type IconName = 'dashboard' | 'transactions' | 'categories' | 'accounts' | 'investments' | 'settings' | 'wallet' | 'piggy' | 'trending' | 'plus' | 'up' | 'down' | 'chevronLeft' | 'chevronRight' | 'close' | 'delete' | 'edit' | 'check' | 'filter' | 'calendar' | 'home' | 'cart' | 'car' | 'leisure' | 'health' | 'package' | 'salary' | 'fuel' | 'film' | 'utensils' | 'plane' | 'gift' | 'phone' | 'gym' | 'education' | 'pet' | 'clothes' | 'coffee' | 'bus' | 'heart' | 'energy' | 'wifi' | 'book' | 'card' | 'games' | 'music' | 'shopping'
+export type IconName = 'dashboard' | 'transactions' | 'categories' | 'accounts' | 'investments' | 'settings' | 'wallet' | 'piggy' | 'trending' | 'plus' | 'up' | 'down' | 'chevronLeft' | 'chevronRight' | 'close' | 'delete' | 'edit' | 'check' | 'filter' | 'calendar' | 'home' | 'cart' | 'car' | 'leisure' | 'health' | 'package' | 'salary' | 'fuel' | 'film' | 'utensils' | 'plane' | 'gift' | 'phone' | 'gym' | 'education' | 'pet' | 'clothes' | 'coffee' | 'bus' | 'heart' | 'energy' | 'wifi' | 'book' | 'card' | 'games' | 'music' | 'shopping' | 'sun' | 'moon' | 'system'
 
 export const registry: Record<string, LucideIcon> = {
   dashboard: LayoutGrid,
@@ -99,4 +102,7 @@ export const registry: Record<string, LucideIcon> = {
   games: Gamepad2,
   music: Music,
   shopping: ShoppingBag,
+  sun: Sun,
+  moon: Moon,
+  system: Monitor,
 }
