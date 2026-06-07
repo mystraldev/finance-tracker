@@ -6,21 +6,19 @@ import ConfirmDialog from '../components/ConfirmDialog'
 import AddTransactionButton from '../components/AddTransactionButton'
 import { useFinance } from '../store/financeContext'
 import {
-  availableMonths,
   categoryMap,
-  monthKey,
   monthLabel,
 } from '../utils/derive'
 import { formatSignedCurrency, formatGroupDate } from '../utils/format'
 import type { Transaction } from '../types/finance'
 
 function TransactionsPage() {
-  const { transactions, categories, accounts, updateTransaction, deleteTransaction } =
+  const { categories, accounts, getTransactions, getAvailableMonths, updateTransaction, deleteTransaction } =
     useFinance()
 
   const cats = categoryMap(categories)
   const accById = Object.fromEntries(accounts.map((a) => [a.id, a]))
-  const months = availableMonths(transactions)
+  const months = getAvailableMonths()
 
   const [month, setMonth] = useState('all')
   const [categoryId, setCategoryId] = useState('all')
@@ -29,14 +27,13 @@ function TransactionsPage() {
   const [editing, setEditing] = useState<Transaction | null>(null)
   const [deleting, setDeleting] = useState<Transaction | null>(null)
 
-  const filtered = transactions
-    .filter((t) => month === 'all' || monthKey(t.date) === month)
-    .filter((t) => categoryId === 'all' || t.categoryId === categoryId)
-    .filter((t) => accountId === 'all' || t.accountId === accountId)
-    .filter((t) =>
-      type === 'all' ? true : type === 'ingreso' ? t.amount > 0 : t.amount < 0,
-    )
-    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+  const filtered = getTransactions({
+    month,
+    categoryId,
+    accountId,
+    type: type === 'ingreso' ? 'income' : type === 'gasto' ? 'expense' : 'all',
+    sort: 'date-desc',
+  })
 
   const net = filtered.reduce((s, t) => s + t.amount, 0)
 
