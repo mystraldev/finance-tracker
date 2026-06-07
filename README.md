@@ -68,11 +68,24 @@ docker run -p 3000:3000 finance-tracker
 
 ## Tests
 
-Actualmente cubren utilidades puras (2 ficheros, 3 tests). No hay tests de componentes ni páginas.
+Vitest con entorno `jsdom` y Testing Library. La configuración vive en `vite.config.ts`
+(`test` block) con `src/test/setup.ts` (jest-dom + cleanup). Cobertura vía `@vitest/coverage-v8`.
+
+```bash
+pnpm run test            # ejecuta la suite
+pnpm run test:watch      # modo watch
+pnpm run test:coverage   # con informe de cobertura (aplica thresholds)
+```
+
+Cobertura actual: lógica pura (`src/utils`) ~98 %; umbral global mínimo para evitar regresiones.
 
 ```
-src/utils/format.test.ts   → formatDate
-src/utils/math.test.ts     → fractionOf
+src/utils/derive.test.ts        → selectores (saldos, patrimonio, desglose, series…)
+src/utils/format.test.ts        → currency / percent / signed / fechas
+src/utils/math.test.ts          → fractionOf
+src/store/theme.test.ts         → resolveTheme / isThemeMode
+src/store/FinanceProvider.test.tsx → acciones del reducer (add/delete/setMonth/reset)
+src/components/*.test.tsx        → Sparkline, Modal, ConfirmDialog, SavingsRate
 ```
 
 ## Deployment
