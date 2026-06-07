@@ -1,19 +1,22 @@
-import { formatCurrency, formatPercent } from '../utils/format'
+import BudgetProgress from './BudgetProgress'
 import Icon from './Icon'
 import { budgetStatusLabel } from './budgetStatus'
 import type { CategoryBudget } from '../types/finance'
 
 type BudgetsCardProps = {
   budgets: CategoryBudget[]
+  totalCount?: number
 }
 
-function BudgetsCard({ budgets }: BudgetsCardProps) {
+function BudgetsCard({ budgets, totalCount = budgets.length }: BudgetsCardProps) {
   return (
     <section className="card budgets">
       <header className="card__header">
         <h3 className="card__title">Presupuestos</h3>
         <span className="card__subtitle">
-          {budgets.length} {budgets.length === 1 ? 'categoría' : 'categorías'}
+          {totalCount > budgets.length
+            ? `${budgets.length} prioritarias de ${totalCount}`
+            : `${totalCount} ${totalCount === 1 ? 'categoría' : 'categorías'}`}
         </span>
       </header>
 
@@ -38,22 +41,7 @@ function BudgetsCard({ budgets }: BudgetsCardProps) {
                 </span>
               </div>
 
-              <div className="budget-bar">
-                <span
-                  className={`budget-bar__fill budget-bar__fill--${b.status}`}
-                  style={{
-                    width: `${Math.min(b.pct, 1) * 100}%`,
-                    ...(b.status === 'ok' ? { background: b.color } : {}),
-                  }}
-                />
-              </div>
-
-              <div className="budget-row__meta tnum">
-                <span>
-                  {formatCurrency(b.spent)} / {formatCurrency(b.budget)}
-                </span>
-                <span className="budget-row__pct">{formatPercent(b.pct)}</span>
-              </div>
+              <BudgetProgress budget={b} showBadge={false} showPercent />
             </div>
           </li>
         ))}

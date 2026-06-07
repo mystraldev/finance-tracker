@@ -5,6 +5,7 @@ import SavingsRate from '../components/SavingsRate'
 import CategoryBreakdown from '../components/CategoryBreakdown'
 import RecentTransactions from '../components/RecentTransactions'
 import BudgetsCard from '../components/BudgetsCard'
+import { budgetStatusRank } from '../components/budgetStatus'
 import AddTransactionButton from '../components/AddTransactionButton'
 import MonthSelector from '../components/MonthSelector'
 import {
@@ -33,6 +34,9 @@ function DashboardPage() {
   const { income, expenses } = incomeExpenses(state.transactions, month)
   const breakdown = categoryBreakdown(state.transactions, state.categories, month)
   const budgets = categoryBudgets(state.transactions, state.categories, month)
+  const priorityBudgets = [...budgets]
+    .sort((a, b) => budgetStatusRank[a.status] - budgetStatusRank[b.status] || b.pct - a.pct)
+    .slice(0, 5)
   const recent = recentTransactions(state, 6)
 
   return (
@@ -59,7 +63,7 @@ function DashboardPage() {
 
       <CategoryBreakdown categories={breakdown} />
 
-      {budgets.length > 0 && <BudgetsCard budgets={budgets} />}
+      {budgets.length > 0 && <BudgetsCard budgets={priorityBudgets} totalCount={budgets.length} />}
     </>
   )
 }

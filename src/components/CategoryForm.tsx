@@ -15,12 +15,13 @@ type CategoryFormProps = {
   onCancel: () => void
 }
 
-/** '' -> undefined (no budget); invalid -> null; otherwise the parsed number. */
+/** '' or 0 -> undefined (no budget); invalid -> null; otherwise the parsed number. */
 function parseBudget(text: string): number | undefined | null {
   const trimmed = text.trim()
   if (!trimmed) return undefined
   const value = parseFloat(trimmed.replace(',', '.'))
-  return Number.isFinite(value) && value >= 0 ? value : null
+  if (!Number.isFinite(value) || value < 0) return null
+  return value === 0 ? undefined : value
 }
 
 function CategoryForm({ initial, onSubmit, onCancel }: CategoryFormProps) {
