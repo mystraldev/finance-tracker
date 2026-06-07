@@ -1,5 +1,7 @@
-import type { Account, AccountWithBalance, Category, CategoryBreakdownItem, EnrichedTransaction, FinanceData, SparklineDatum, Transaction } from '../types/finance'
+import type { Account, AccountWithBalance, BudgetStatus, Category, CategoryBreakdownItem, CategoryBudget, EnrichedTransaction, FinanceData, SparklineDatum, Transaction } from '../types/finance'
 import { fractionOf } from './math'
+
+const BUDGET_WARNING_RATIO = 0.8
 
 export function monthKey(date: string): string {
   return String(date).slice(0, 7)
@@ -125,6 +127,28 @@ export function categoryBreakdown(transactions: Transaction[], categories: Categ
     .map((c) => ({ ...c, amount: totals.get(c.id) || 0 }))
     .filter((c) => c.amount > 0)
     .sort((a, b) => b.amount - a.amount)
+}
+
+/** Spend vs budget for each budgeted category in a month, sorted by usage desc.
+ *  Categories without a budget are excluded. `pct` may exceed 1 when over budget. */
+export function categoryBudgets(transactions: Transaction[], categories: Category[], month: string): CategoryBudget[] {
+  const spentByCat = new Map<string, number>()
+  monthTransactions(transactions, month)
+    .filter((t) => t.amount < 0)
+    .forEach((t) => {
+      spentByCat.set(t.categoryId, (spentByCat.get(t.categoryId) || 0) + Math.abs(t.amount))
+    })
+
+  return categories
+    .filter((c): c is Category & { budget: number } => typeof c.budget === 'number' && c.budget > 0)
+    .map((c) => {
+      const spent = spentByCat.get(c.id) || 0
+      const pct = fractionOf(spent, c.budget)
+      const status: BudgetStatus =
+        spent > c.budget ? 'over' : pct >= BUDGET_WARNING_RATIO ? 'warning' : 'ok'
+      return { ...c, budget: c.budget, spent, remaining: c.budget - spent, pct, status }
+    })
+    .sort((a, b) => b.pct - a.pct)
 }
 
 export function recentTransactions(state: FinanceData, n = 6): EnrichedTransaction[] {

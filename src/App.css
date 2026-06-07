@@ -1395,7 +1395,7 @@ select.field__input {
 }
 .cat-card {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.9rem;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -1421,6 +1421,102 @@ select.field__input {
 }
 .cat-card__meta {
   font-size: 0.8rem;
+  color: var(--text-faint);
+}
+
+/* ---- Presupuestos ---- */
+.cat-budget {
+  margin-top: 0.55rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.cat-budget__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.5rem;
+  font-size: 0.78rem;
+  color: var(--text-soft);
+}
+.cat-budget__meta .tnum {
+  white-space: nowrap;
+}
+
+.budget-bar {
+  height: 7px;
+  border-radius: 999px;
+  background: var(--gray-100);
+  overflow: hidden;
+}
+.budget-bar__fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.budget-bar__fill--warning { background: var(--amber); }
+.budget-bar__fill--over { background: var(--rose); }
+
+.budget-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.14rem 0.5rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.budget-badge--ok { color: var(--emerald-strong); background: rgba(16, 185, 129, 0.13); }
+.budget-badge--warning { color: #b45309; background: rgba(245, 158, 11, 0.16); }
+.budget-badge--over { color: var(--rose); background: rgba(244, 63, 94, 0.13); }
+
+/* Dashboard "Presupuestos" card */
+.budget-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+.budget-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+.budget-row__icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  flex: 0 0 auto;
+}
+.budget-row__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.budget-row__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.budget-row__label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.budget-row__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--text-soft);
+}
+.budget-row__pct {
   color: var(--text-faint);
 }
 .cat-card__actions {

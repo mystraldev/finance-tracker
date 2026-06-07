@@ -30,10 +30,10 @@ export const accounts: Account[] = [
 
 export const categories: Category[] = [
   { id: 'income', label: 'Ingresos', color: '#22c55e', icon: 'salary' },
-  { id: 'home', label: 'Vivienda', color: '#6366f1', icon: 'home' },
-  { id: 'food', label: 'Alimentación', color: '#10b981', icon: 'cart' },
-  { id: 'transport', label: 'Transporte', color: '#f59e0b', icon: 'car' },
-  { id: 'leisure', label: 'Ocio', color: '#ec4899', icon: 'leisure' },
+  { id: 'home', label: 'Vivienda', color: '#6366f1', icon: 'home', budget: 1100 },
+  { id: 'food', label: 'Alimentación', color: '#10b981', icon: 'cart', budget: 400 },
+  { id: 'transport', label: 'Transporte', color: '#f59e0b', icon: 'car', budget: 200 },
+  { id: 'leisure', label: 'Ocio', color: '#ec4899', icon: 'leisure', budget: 400 },
   { id: 'health', label: 'Salud', color: '#06b6d4', icon: 'health' },
   { id: 'other', label: 'Otros', color: '#94a3b8', icon: 'package' },
 ]

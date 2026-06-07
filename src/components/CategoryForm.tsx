@@ -15,16 +15,33 @@ type CategoryFormProps = {
   onCancel: () => void
 }
 
+/** '' -> undefined (no budget); invalid -> null; otherwise the parsed number. */
+function parseBudget(text: string): number | undefined | null {
+  const trimmed = text.trim()
+  if (!trimmed) return undefined
+  const value = parseFloat(trimmed.replace(',', '.'))
+  return Number.isFinite(value) && value >= 0 ? value : null
+}
+
 function CategoryForm({ initial, onSubmit, onCancel }: CategoryFormProps) {
   const [label, setLabel] = useState(initial?.label ?? '')
   const [color, setColor] = useState(initial?.color ?? PALETTE[0])
   const [icon, setIcon] = useState(initial?.icon ?? 'package')
+  const [budget, setBudget] = useState(initial?.budget != null ? String(initial.budget) : '')
   const [error, setError] = useState('')
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!label.trim()) return setError('Ponle un nombre a la categoría.')
-    onSubmit({ ...(initial?.id ? { id: initial.id } : {}), label: label.trim(), color, icon })
+    const parsedBudget = parseBudget(budget)
+    if (parsedBudget === null) return setError('El presupuesto no es válido.')
+    onSubmit({
+      ...(initial?.id ? { id: initial.id } : {}),
+      label: label.trim(),
+      color,
+      icon,
+      budget: parsedBudget,
+    })
   }
 
   return (
@@ -46,6 +63,20 @@ function CategoryForm({ initial, onSubmit, onCancel }: CategoryFormProps) {
           onChange={(e) => setLabel(e.target.value)}
           autoFocus
         />
+      </label>
+
+      <label className="field">
+        <span className="field__label">Presupuesto mensual (opcional)</span>
+        <div className="field__money">
+          <input
+            className="field__input"
+            inputMode="decimal"
+            placeholder="Sin límite"
+            value={budget}
+            onChange={(e) => setBudget(e.target.value)}
+          />
+          <span className="field__suffix">€</span>
+        </div>
       </label>
 
       <div className="field">

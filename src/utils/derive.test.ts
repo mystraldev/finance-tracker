@@ -7,6 +7,7 @@ import {
   addMonths,
   availableMonths,
   categoryBreakdown,
+  categoryBudgets,
   categoryMap,
   currentMonth,
   incomeExpenses,
@@ -156,5 +157,39 @@ describe('recentTransactions', () => {
       transactions: [{ id: 'x', date: '2026-06-30', amount: -10, description: 'Misterio', accountId: 'checking', categoryId: 'ghost' }],
     }
     expect(recentTransactions(orphan, 1)[0]).toMatchObject({ category: 'Sin categoría', icon: 'package' })
+  })
+})
+
+describe('categoryBudgets', () => {
+  // June spend in the fixture: home 600, food 300, transport 0.
+  const budgeted: Category[] = [
+    { id: 'income', label: 'Ingresos', color: '#22c55e', icon: 'salary' }, // no budget
+    { id: 'home', label: 'Vivienda', color: '#6366f1', icon: 'home', budget: 700 }, // 600/700 -> warning
+    { id: 'food', label: 'Alimentación', color: '#10b981', icon: 'cart', budget: 250 }, // 300/250 -> over
+    { id: 'transport', label: 'Transporte', color: '#f59e0b', icon: 'car', budget: 200 }, // 0 -> ok
+    { id: 'health', label: 'Salud', color: '#06b6d4', icon: 'health' }, // no budget
+  ]
+
+  it('computes status and remaining per budgeted category, sorted by usage', () => {
+    const result = categoryBudgets(transactions, budgeted, '2026-06')
+    expect(result.map((b) => b.id)).toEqual(['food', 'home', 'transport'])
+
+    const food = result.find((b) => b.id === 'food')!
+    expect(food).toMatchObject({ budget: 250, spent: 300, remaining: -50, status: 'over' })
+    expect(food.pct).toBeCloseTo(1.2, 5)
+
+    expect(result.find((b) => b.id === 'home')?.status).toBe('warning')
+    expect(result.find((b) => b.id === 'transport')?.status).toBe('ok')
+  })
+
+  it('excludes categories without a budget', () => {
+    const ids = categoryBudgets(transactions, budgeted, '2026-06').map((b) => b.id)
+    expect(ids).not.toContain('income')
+    expect(ids).not.toContain('health')
+  })
+
+  it('treats a month with no spend as ok', () => {
+    const result = categoryBudgets(transactions, budgeted, '2026-04')
+    expect(result.every((b) => b.status === 'ok' && b.spent === 0)).toBe(true)
   })
 })

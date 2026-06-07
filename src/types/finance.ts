@@ -21,6 +21,18 @@ export type Category = {
   label: string
   icon: string
   color: string
+  /** Optional monthly spending budget, in EUR. Undefined = no budget. */
+  budget?: number
+}
+
+export type BudgetStatus = 'ok' | 'warning' | 'over'
+
+export type CategoryBudget = Category & {
+  budget: number
+  spent: number
+  remaining: number
+  pct: number
+  status: BudgetStatus
 }
 
 export type CategoryBreakdownItem = Category & {

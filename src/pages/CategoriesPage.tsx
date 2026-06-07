@@ -4,14 +4,21 @@ import Modal from '../components/Modal'
 import CategoryForm from '../components/CategoryForm'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { useFinance } from '../store/financeContext'
+import { budgetStatusLabel } from '../components/budgetStatus'
+import { categoryBudgets } from '../utils/derive'
 import { formatCurrency } from '../utils/format'
 import type { Category } from '../types/finance'
 
 const INCOME_CATEGORY_ID = 'income'
 
 function CategoriesPage() {
-  const { categories, transactions, addCategory, updateCategory, deleteCategory } =
+  const { categories, transactions, selectedMonth, addCategory, updateCategory, deleteCategory } =
     useFinance()
+
+  // Budget status (for the selected month) indexed by category id.
+  const budgetById = new Map(
+    categoryBudgets(transactions, categories, selectedMonth).map((b) => [b.id, b]),
+  )
 
   const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState<Category | null>(null)
@@ -49,6 +56,7 @@ function CategoriesPage() {
       <div className="cat-grid">
         {managed.map((c) => {
           const { count, total } = usage(c.id)
+          const budget = budgetById.get(c.id)
           return (
             <article key={c.id} className="cat-card">
               <span
@@ -62,6 +70,27 @@ function CategoriesPage() {
                 <span className="cat-card__meta tnum">
                   {count} {count === 1 ? 'movimiento' : 'movimientos'} · {formatCurrency(total)}
                 </span>
+                {budget && (
+                  <div className="cat-budget">
+                    <div className="budget-bar">
+                      <span
+                        className={`budget-bar__fill budget-bar__fill--${budget.status}`}
+                        style={{
+                          width: `${Math.min(budget.pct, 1) * 100}%`,
+                          ...(budget.status === 'ok' ? { background: c.color } : {}),
+                        }}
+                      />
+                    </div>
+                    <div className="cat-budget__meta">
+                      <span className="tnum">
+                        {formatCurrency(budget.spent)} / {formatCurrency(budget.budget)}
+                      </span>
+                      <span className={`budget-badge budget-badge--${budget.status}`}>
+                        {budgetStatusLabel[budget.status]}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="cat-card__actions">
                 <button
