@@ -4,6 +4,8 @@ import NetWorthHero from '../components/NetWorthHero'
 import SavingsRate from '../components/SavingsRate'
 import CategoryBreakdown from '../components/CategoryBreakdown'
 import RecentTransactions from '../components/RecentTransactions'
+import BudgetsCard from '../components/BudgetsCard'
+import { budgetStatusRank } from '../components/budgetStatus'
 import AddTransactionButton from '../components/AddTransactionButton'
 import MonthSelector from '../components/MonthSelector'
 import {
@@ -13,6 +15,7 @@ import {
   netWorthSeries,
   incomeExpenses,
   categoryBreakdown,
+  categoryBudgets,
   recentTransactions,
   monthLabel,
 } from '../utils/derive'
@@ -30,6 +33,10 @@ function DashboardPage() {
   const history = netWorthSeries(state, 7, month)
   const { income, expenses } = incomeExpenses(state.transactions, month)
   const breakdown = categoryBreakdown(state.transactions, state.categories, month)
+  const budgets = categoryBudgets(state.transactions, state.categories, month)
+  const priorityBudgets = [...budgets]
+    .sort((a, b) => budgetStatusRank[a.status] - budgetStatusRank[b.status] || b.pct - a.pct)
+    .slice(0, 5)
   const recent = recentTransactions(state, 6)
 
   return (
@@ -55,6 +62,8 @@ function DashboardPage() {
       </div>
 
       <CategoryBreakdown categories={breakdown} />
+
+      {budgets.length > 0 && <BudgetsCard budgets={priorityBudgets} totalCount={budgets.length} />}
     </>
   )
 }

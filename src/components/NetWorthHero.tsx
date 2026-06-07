@@ -26,8 +26,6 @@ function NetWorthHero({ accounts, history, month }: NetWorthHeroProps) {
 
   return (
     <section className="hero">
-      <div className="hero__glow" aria-hidden />
-
       <div className="hero__main">
         <div className="hero__intro">
           <p className="hero__label">Patrimonio total</p>

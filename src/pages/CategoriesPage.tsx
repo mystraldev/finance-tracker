@@ -3,15 +3,25 @@ import Icon from '../components/Icon'
 import Modal from '../components/Modal'
 import CategoryForm from '../components/CategoryForm'
 import ConfirmDialog from '../components/ConfirmDialog'
+import MonthSelector from '../components/MonthSelector'
+import BudgetProgress from '../components/BudgetProgress'
 import { useFinance } from '../store/financeContext'
+import { categoryBudgets, monthLabel, monthTransactions } from '../utils/derive'
 import { formatCurrency } from '../utils/format'
 import type { Category } from '../types/finance'
 
 const INCOME_CATEGORY_ID = 'income'
 
 function CategoriesPage() {
-  const { categories, transactions, addCategory, updateCategory, deleteCategory } =
+  const { categories, transactions, selectedMonth, addCategory, updateCategory, deleteCategory } =
     useFinance()
+
+  const selectedMonthTransactions = monthTransactions(transactions, selectedMonth)
+
+  // Budget status (for the selected month) indexed by category id.
+  const budgetById = new Map(
+    categoryBudgets(transactions, categories, selectedMonth).map((b) => [b.id, b]),
+  )
 
   const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState<Category | null>(null)
@@ -20,16 +30,18 @@ function CategoriesPage() {
 
   const managed = categories.filter((c) => c.id !== INCOME_CATEGORY_ID)
 
-  const usage = (id: string) => {
-    const txs = transactions.filter((t) => t.categoryId === id)
+  const monthlyUsage = (id: string) => {
+    const txs = selectedMonthTransactions.filter((t) => t.categoryId === id)
     return {
       count: txs.length,
       total: txs.reduce((s, t) => s + Math.abs(t.amount), 0),
     }
   }
 
+  const usageCount = (id: string) => transactions.filter((t) => t.categoryId === id).length
+
   function handleDelete(cat: Category) {
-    if (usage(cat.id).count > 0) setBlocked(cat)
+    if (usageCount(cat.id) > 0) setBlocked(cat)
     else setDeleting(cat)
   }
 
@@ -39,16 +51,21 @@ function CategoriesPage() {
         <div>
           <p className="page-header__greeting">Tus finanzas</p>
           <h1 className="page-header__title">Categorías</h1>
+          <p className="page-header__description">Presupuestos de {monthLabel(selectedMonth)}</p>
         </div>
-        <button type="button" className="btn-primary" onClick={() => setCreating(true)}>
-          <Icon name="plus" size={18} strokeWidth={2.2} />
-          Nueva categoría
-        </button>
+        <div className="page-header__actions">
+          <MonthSelector />
+          <button type="button" className="btn-primary" onClick={() => setCreating(true)}>
+            <Icon name="plus" size={18} strokeWidth={2.2} />
+            Nueva categoría
+          </button>
+        </div>
       </header>
 
       <div className="cat-grid">
         {managed.map((c) => {
-          const { count, total } = usage(c.id)
+          const { count, total } = monthlyUsage(c.id)
+          const budget = budgetById.get(c.id)
           return (
             <article key={c.id} className="cat-card">
               <span
@@ -60,8 +77,13 @@ function CategoriesPage() {
               <div className="cat-card__info">
                 <span className="cat-card__name">{c.label}</span>
                 <span className="cat-card__meta tnum">
-                  {count} {count === 1 ? 'movimiento' : 'movimientos'} · {formatCurrency(total)}
+                  {count} {count === 1 ? 'movimiento' : 'movimientos'} este mes · {formatCurrency(total)}
                 </span>
+                {budget && (
+                  <div className="cat-budget">
+                    <BudgetProgress budget={budget} />
+                  </div>
+                )}
               </div>
               <div className="cat-card__actions">
                 <button
