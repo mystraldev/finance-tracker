@@ -47,19 +47,17 @@ function AccountForm({ initial, onSubmit, onCancel }: AccountFormProps) {
     const opening = parseNumber(openingBalance || '0')
     if (!Number.isFinite(opening)) return setError('El saldo inicial no es válido.')
 
-    const payload: Record<string, unknown> = {
+    const rate = type === 'savings' ? parseNumber(interestRate || '0') : NaN
+    const payload: Omit<Account, 'id'> | Partial<Account> & { id: string } = {
       ...(initial?.id ? { id: initial.id } : {}),
       name: name.trim(),
       type,
       icon,
       accent,
       openingBalance: opening,
+      interestRate: type === 'savings' && Number.isFinite(rate) ? rate / 100 : undefined,
     }
-    if (type === 'savings') {
-      const rate = parseNumber(interestRate || '0')
-      payload.interestRate = Number.isFinite(rate) ? rate / 100 : 0
-    }
-    onSubmit(payload as Omit<Account, 'id'> | Partial<Account> & { id: string })
+    onSubmit(payload)
   }
 
   return (

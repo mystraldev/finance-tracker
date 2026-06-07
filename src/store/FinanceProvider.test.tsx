@@ -71,7 +71,7 @@ describe('FinanceProvider store', () => {
     })
     expect(result.current.transactions.length).toBeGreaterThan(reduced)
 
-    const raw = localStorage.getItem('finance-tracker:v1')
+    const raw = localStorage.getItem('finance-tracker:v2')
     expect(raw).not.toBeNull()
     const persisted = JSON.parse(raw ?? '{}') as { transactions: unknown[] }
     expect(Array.isArray(persisted.transactions)).toBe(true)
