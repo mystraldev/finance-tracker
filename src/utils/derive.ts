@@ -1,10 +1,11 @@
 import type { Account, AccountWithBalance, BudgetStatus, Category, CategoryBreakdownItem, CategoryBudget, EnrichedTransaction, FinanceData, SparklineDatum, Transaction } from '../types/finance'
+import { availableTransactionMonths, listTransactions, transactionMonthKey } from '../data/financeRepository'
 import { fractionOf } from './math'
 
 const BUDGET_WARNING_RATIO = 0.8
 
 export function monthKey(date: string): string {
-  return String(date).slice(0, 7)
+  return transactionMonthKey(date)
 }
 
 export function currentMonth(): string {
@@ -54,12 +55,14 @@ export function shortMonthLabel(month: string): string {
 }
 
 export function monthTransactions(transactions: Transaction[], month: string): Transaction[] {
-  return transactions.filter((t) => monthKey(t.date) === month)
+  return listTransactions(
+    { accounts: [], categories: [], transactions },
+    { month },
+  )
 }
 
 export function availableMonths(transactions: Transaction[]): string[] {
-  const set = new Set(transactions.map((t) => monthKey(t.date)))
-  return [...set].sort((a, b) => (a < b ? 1 : -1))
+  return availableTransactionMonths({ accounts: [], categories: [], transactions })
 }
 
 export function incomeExpenses(transactions: Transaction[], month: string): { income: number; expenses: number; saved: number } {
@@ -153,9 +156,7 @@ export function categoryBudgets(transactions: Transaction[], categories: Categor
 
 export function recentTransactions(state: FinanceData, n = 6): EnrichedTransaction[] {
   const cats = categoryMap(state.categories)
-  return [...state.transactions]
-    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
-    .slice(0, n)
+  return listTransactions(state, { sort: 'date-desc', limit: n })
     .map((t) => ({
       ...t,
       category: cats[t.categoryId]?.label ?? 'Sin categoría',

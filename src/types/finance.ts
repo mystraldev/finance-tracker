@@ -48,6 +48,18 @@ export type Transaction = {
   categoryId: string
 }
 
+export type TransactionTypeFilter = 'all' | 'income' | 'expense'
+export type TransactionSort = 'date-asc' | 'date-desc' | 'none'
+
+export type TransactionQuery = {
+  month?: string | 'all'
+  categoryId?: string | 'all'
+  accountId?: string | 'all'
+  type?: TransactionTypeFilter
+  sort?: TransactionSort
+  limit?: number
+}
+
 export type EnrichedTransaction = Transaction & {
   category: string
   icon: string
@@ -82,6 +94,8 @@ export type FinanceAction =
   | { type: 'RESET' }
 
 export interface FinanceContextValue extends FinanceState {
+  getTransactions: (_query?: TransactionQuery) => Transaction[]
+  getAvailableMonths: () => string[]
   addTransaction: (tx: Omit<Transaction, 'id'>) => void
   updateTransaction: (tx: Partial<Transaction> & { id: string }) => void
   deleteTransaction: (_id: string) => void

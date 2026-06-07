@@ -6,17 +6,17 @@ import ConfirmDialog from '../components/ConfirmDialog'
 import MonthSelector from '../components/MonthSelector'
 import BudgetProgress from '../components/BudgetProgress'
 import { useFinance } from '../store/financeContext'
-import { categoryBudgets, monthLabel, monthTransactions } from '../utils/derive'
+import { categoryBudgets, monthLabel } from '../utils/derive'
 import { formatCurrency } from '../utils/format'
 import type { Category } from '../types/finance'
 
 const INCOME_CATEGORY_ID = 'income'
 
 function CategoriesPage() {
-  const { categories, transactions, selectedMonth, addCategory, updateCategory, deleteCategory } =
+  const { categories, transactions, selectedMonth, getTransactions, addCategory, updateCategory, deleteCategory } =
     useFinance()
 
-  const selectedMonthTransactions = monthTransactions(transactions, selectedMonth)
+  const selectedMonthTransactions = getTransactions({ month: selectedMonth })
 
   // Budget status (for the selected month) indexed by category id.
   const budgetById = new Map(

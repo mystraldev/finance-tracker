@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { act, renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
+import { FINANCE_STORAGE_KEY } from '../data/financeRepository'
 import { FinanceProvider } from './FinanceProvider'
 import { useFinance } from './financeContext'
 
@@ -43,6 +44,19 @@ describe('FinanceProvider store', () => {
     expect(added?.amount).toBe(-10)
   })
 
+  it('exposes repository-backed transaction queries', () => {
+    const { result } = setup()
+
+    expect(
+      result.current.getTransactions({
+        month: '2026-06',
+        type: 'income',
+        sort: 'date-desc',
+      }),
+    ).toHaveLength(1)
+    expect(result.current.getAvailableMonths()[0]).toBe('2026-06')
+  })
+
   it('deletes a category', () => {
     const { result } = setup()
     const id = result.current.categories[0].id
@@ -71,7 +85,7 @@ describe('FinanceProvider store', () => {
     })
     expect(result.current.transactions.length).toBeGreaterThan(reduced)
 
-    const raw = localStorage.getItem('finance-tracker:v2')
+    const raw = localStorage.getItem(FINANCE_STORAGE_KEY)
     expect(raw).not.toBeNull()
     const persisted = JSON.parse(raw ?? '{}') as { transactions: unknown[] }
     expect(Array.isArray(persisted.transactions)).toBe(true)

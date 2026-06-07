@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useReducer, type ReactNode } from 'react'
-import { seed } from '../data/finance'
+import { financeRepository } from '../data/financeRepository'
 import { currentMonth } from '../utils/derive'
 import { FinanceContext } from './financeContext'
-import type { Account, Category, FinanceAction, FinanceData, FinanceState, Transaction } from '../types/finance'
-
-const STORAGE_KEY = 'finance-tracker:v2'
+import type { Account, Category, FinanceAction, FinanceState, Transaction, TransactionQuery } from '../types/finance'
 
 function uid(): string {
   if (typeof globalThis.crypto?.randomUUID === 'function') {
@@ -17,30 +15,8 @@ function uid(): string {
   return `id-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 }
 
-function freshSeed(): FinanceData {
-  return {
-    accounts: seed.accounts.map((a) => ({ ...a })),
-    categories: seed.categories.map((c) => ({ ...c })),
-    transactions: seed.transactions.map((t) => ({ ...t })),
-  }
-}
-
-function loadPersisted(): FinanceData | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return null
-    const parsed = JSON.parse(raw) as FinanceData
-    if (!parsed || !Array.isArray(parsed.accounts) || !Array.isArray(parsed.transactions)) {
-      return null
-    }
-    return parsed
-  } catch {
-    return null
-  }
-}
-
 function init(): FinanceState {
-  const data = loadPersisted() ?? freshSeed()
+  const data = financeRepository.load()
   return { ...data, selectedMonth: currentMonth() }
 }
 
@@ -94,7 +70,7 @@ function reducer(state: FinanceState, action: FinanceAction): FinanceState {
     case 'SET_MONTH':
       return { ...state, selectedMonth: action.payload }
     case 'RESET':
-      return { ...freshSeed(), selectedMonth: currentMonth() }
+      return { ...financeRepository.seed(), selectedMonth: currentMonth() }
 
     default:
       return state
@@ -110,19 +86,15 @@ export function FinanceProvider({ children }: FinanceProviderProps) {
   const { accounts, categories, transactions } = state
 
   useEffect(() => {
-    try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({ accounts, categories, transactions }),
-      )
-    } catch {
-      /* storage not available */
-    }
+    financeRepository.save({ accounts, categories, transactions })
   }, [accounts, categories, transactions])
 
   const value = useMemo(
     () => ({
       ...state,
+      getTransactions: (query?: TransactionQuery) =>
+        financeRepository.listTransactions(state, query),
+      getAvailableMonths: () => financeRepository.availableMonths(state),
       addTransaction: (tx: Omit<Transaction, 'id'>) =>
         dispatch({ type: 'ADD_TRANSACTION', payload: { id: uid(), ...tx } }),
       updateTransaction: (tx: Partial<Transaction> & { id: string }) =>
