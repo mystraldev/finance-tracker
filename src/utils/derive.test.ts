@@ -64,8 +64,10 @@ describe('month helpers', () => {
   })
 
   it('monthLabel and shortMonthLabel format in Spanish', () => {
-    expect(monthLabel('2026-06')).toBe('Junio de 2026')
-    expect(shortMonthLabel('2026-06')).toBe('jun')
+    // Tolerant of ICU spelling/casing; monthLabel still capitalises its output.
+    expect(monthLabel('2026-06')).toMatch(/junio.*2026/i)
+    expect(monthLabel('2026-06')[0]).toBe(monthLabel('2026-06')[0].toUpperCase())
+    expect(shortMonthLabel('2026-06')).toMatch(/^jun/i)
   })
 })
 
