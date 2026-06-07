@@ -4,7 +4,7 @@ import { currentMonth } from '../utils/derive'
 import { FinanceContext } from './financeContext'
 import type { Account, Category, FinanceAction, FinanceData, FinanceState, Transaction } from '../types/finance'
 
-const STORAGE_KEY = 'finance-tracker:v1'
+const STORAGE_KEY = 'finance-tracker:v2'
 
 function uid(): string {
   if (typeof globalThis.crypto?.randomUUID === 'function') {

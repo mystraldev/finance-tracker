@@ -81,7 +81,7 @@ function AccountsPage() {
             <span className="account-card__balance tnum">{formatCurrency(a.balance)}</span>
             <span className="account-card__meta">
               {TYPE_LABEL[a.type] ?? a.type}
-              {a.interestRate != null && ` · ${formatPercent(a.interestRate)} TAE`}
+              {a.type === 'savings' && a.interestRate != null && ` · ${formatPercent(a.interestRate)} TAE`}
               {` · ${usageCount(a.id)} mov.`}
             </span>
           </article>

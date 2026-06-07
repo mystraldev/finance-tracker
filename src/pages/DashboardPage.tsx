@@ -63,7 +63,7 @@ function DashboardPage() {
 
       <CategoryBreakdown categories={breakdown} />
 
-      {budgets.length > 0 && <BudgetsCard budgets={priorityBudgets} totalCount={budgets.length} />}
+      <BudgetsCard budgets={priorityBudgets} totalCount={budgets.length} />
     </>
   )
 }

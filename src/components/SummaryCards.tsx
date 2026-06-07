@@ -47,7 +47,7 @@ function SummaryCards({ accounts }: SummaryCardsProps) {
                 <Icon name={positive ? 'up' : 'down'} size={13} strokeWidth={2.4} />
                 {formatPercent(Math.abs(account.monthlyGrowthRate))}
               </span>
-              {account.interestRate != null ? (
+              {account.type === 'savings' && account.interestRate != null ? (
                 <span className="summary-card__note tnum">
                   {formatPercent(account.interestRate)} TAE
                 </span>
