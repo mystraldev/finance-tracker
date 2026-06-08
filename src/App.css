@@ -1342,7 +1342,9 @@ select.field__input {
     flex-direction: column;
   }
   .tx-search {
+    flex: 0 0 auto;
     width: 100%;
+    height: 42px;
   }
   .filters {
     justify-content: flex-start;
@@ -1493,9 +1495,11 @@ select.field__input {
   .filters__select {
     width: 100%;
     min-width: 0;
+    height: 40px;
     padding-inline: 0.75rem;
   }
   .filters__clear {
+    grid-column: 1 / -1;
     justify-self: start;
     padding-left: 0.1rem;
   }
@@ -1503,14 +1507,22 @@ select.field__input {
     padding: 0.35rem 1rem 0.85rem;
   }
   .txrow {
-    grid-template-columns: 2.4rem minmax(0, 1fr) auto;
-    gap: 0.7rem;
-    padding: 0.78rem 0.25rem;
+    grid-template-columns: 2.4rem minmax(0, 1fr) minmax(4.8rem, auto);
+    grid-template-areas:
+      "icon info amount"
+      "icon info actions";
+    column-gap: 0.7rem;
+    row-gap: 0.22rem;
+    padding: 0.7rem 0.25rem;
   }
   .txrow__icon {
+    grid-area: icon;
     width: 2.4rem;
     height: 2.4rem;
     border-radius: 10px;
+  }
+  .txrow__info {
+    grid-area: info;
   }
   .txrow__meta {
     align-items: flex-start;
@@ -1518,14 +1530,23 @@ select.field__input {
     gap: 0.22rem;
   }
   .txrow__amount {
+    grid-area: amount;
+    justify-self: end;
     align-self: start;
     padding-top: 0.1rem;
     font-size: 0.9rem;
   }
   .txrow__actions {
-    grid-column: 2 / -1;
+    grid-area: actions;
+    align-self: start;
+    justify-self: end;
     justify-content: flex-end;
-    padding-top: 0.1rem;
+    gap: 0.1rem;
+  }
+  .txrow__actions .icon-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
   }
   .tx-summary-grid {
     grid-template-columns: 1fr;
