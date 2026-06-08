@@ -91,22 +91,19 @@ function TransactionsPage() {
         </label>
 
         <div className="filters">
-          <div className="filters__group">
-            <Icon name="filter" size={16} />
-            <select
-              className="filters__select"
-              aria-label="Mes"
-              value={month}
-              onChange={(e) => setMonth(e.target.value)}
-            >
-              <option value="all">Todos los meses</option>
-              {months.map((m) => (
-                <option key={m} value={m}>
-                  {monthLabel(m)}
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            className="filters__select"
+            aria-label="Mes"
+            value={month}
+            onChange={(e) => setMonth(e.target.value)}
+          >
+            <option value="all">Todos los meses</option>
+            {months.map((m) => (
+              <option key={m} value={m}>
+                {monthLabel(m)}
+              </option>
+            ))}
+          </select>
           <select className="filters__select" aria-label="Tipo" value={type} onChange={(e) => setType(e.target.value)}>
             <option value="all">Ingresos y gastos</option>
             <option value="gasto">Solo gastos</option>
