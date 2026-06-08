@@ -96,6 +96,14 @@ export function transactionMonthKey(date: string): string {
   return String(date).slice(0, 7)
 }
 
+function normaliseSearch(text: string): string {
+  return text
+    .trim()
+    .toLocaleLowerCase('es-ES')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+}
+
 export function listTransactions(
   data: FinanceData,
   query: TransactionQuery = {},
@@ -106,8 +114,13 @@ export function listTransactions(
     accountId = 'all',
     type = 'all',
     sort = 'none',
+    search = '',
     limit,
   } = query
+
+  const needle = normaliseSearch(search)
+  const categories = new Map(data.categories.map((c) => [c.id, c]))
+  const accounts = new Map(data.accounts.map((a) => [a.id, a]))
 
   const transactions = data.transactions
     .filter((t) => month === 'all' || transactionMonthKey(t.date) === month)
@@ -116,11 +129,24 @@ export function listTransactions(
     .filter((t) =>
       type === 'all' ? true : type === 'income' ? t.amount > 0 : t.amount < 0,
     )
+    .filter((t) => {
+      if (!needle) return true
+      const haystack = [
+        t.description,
+        categories.get(t.categoryId)?.label ?? '',
+        accounts.get(t.accountId)?.name ?? '',
+      ].join(' ')
+      return normaliseSearch(haystack).includes(needle)
+    })
 
   const sorted =
     sort === 'none'
       ? transactions
       : [...transactions].sort((a, b) => {
+          if (sort === 'amount-desc' || sort === 'amount-asc') {
+            const byAmount = Math.abs(b.amount) - Math.abs(a.amount)
+            return sort === 'amount-desc' ? byAmount : -byAmount
+          }
           if (a.date === b.date) return 0
           return sort === 'date-desc'
             ? a.date < b.date ? 1 : -1

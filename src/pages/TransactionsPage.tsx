@@ -9,8 +9,8 @@ import {
   categoryMap,
   monthLabel,
 } from '../utils/derive'
-import { formatSignedCurrency, formatGroupDate } from '../utils/format'
-import type { Transaction } from '../types/finance'
+import { formatCurrency, formatSignedCurrency, formatGroupDate } from '../utils/format'
+import type { Transaction, TransactionSort } from '../types/finance'
 
 function TransactionsPage() {
   const { categories, accounts, getTransactions, getAvailableMonths, updateTransaction, deleteTransaction } =
@@ -24,18 +24,26 @@ function TransactionsPage() {
   const [categoryId, setCategoryId] = useState('all')
   const [accountId, setAccountId] = useState('all')
   const [type, setType] = useState('all')
+  const [search, setSearch] = useState('')
+  const [sort, setSort] = useState<TransactionSort>('date-desc')
   const [editing, setEditing] = useState<Transaction | null>(null)
   const [deleting, setDeleting] = useState<Transaction | null>(null)
 
+  const allTransactions = getTransactions({ sort: 'date-desc' })
   const filtered = getTransactions({
     month,
     categoryId,
     accountId,
     type: type === 'ingreso' ? 'income' : type === 'gasto' ? 'expense' : 'all',
-    sort: 'date-desc',
+    search,
+    sort,
   })
 
-  const net = filtered.reduce((s, t) => s + t.amount, 0)
+  const income = filtered.filter((t) => t.amount > 0).reduce((s, t) => s + t.amount, 0)
+  const expenses = filtered
+    .filter((t) => t.amount < 0)
+    .reduce((s, t) => s + Math.abs(t.amount), 0)
+  const net = income - expenses
 
   const groups: { date: string; items: Transaction[] }[] = []
   filtered.forEach((t) => {
@@ -49,9 +57,16 @@ function TransactionsPage() {
     setCategoryId('all')
     setAccountId('all')
     setType('all')
+    setSearch('')
+    setSort('date-desc')
   }
   const hasFilters =
-    month !== 'all' || categoryId !== 'all' || accountId !== 'all' || type !== 'all'
+    month !== 'all' ||
+    categoryId !== 'all' ||
+    accountId !== 'all' ||
+    type !== 'all' ||
+    search.trim() !== ''
+  const hasTransactions = allTransactions.length > 0
 
   return (
     <>
@@ -63,65 +78,119 @@ function TransactionsPage() {
         <AddTransactionButton />
       </header>
 
-      <section className="filters">
-        <div className="filters__group">
-          <Icon name="filter" size={16} />
-          <select className="filters__select" value={month} onChange={(e) => setMonth(e.target.value)}>
-            <option value="all">Todos los meses</option>
-            {months.map((m) => (
-              <option key={m} value={m}>
-                {monthLabel(m)}
+      <section className="tx-toolbar" aria-label="Filtros de movimientos">
+        <label className="tx-search">
+          <Icon name="search" size={17} />
+          <input
+            type="search"
+            aria-label="Buscar movimientos"
+            placeholder="Buscar movimientos"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </label>
+
+        <div className="filters">
+          <div className="filters__group">
+            <Icon name="filter" size={16} />
+            <select
+              className="filters__select"
+              aria-label="Mes"
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+            >
+              <option value="all">Todos los meses</option>
+              {months.map((m) => (
+                <option key={m} value={m}>
+                  {monthLabel(m)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <select className="filters__select" aria-label="Tipo" value={type} onChange={(e) => setType(e.target.value)}>
+            <option value="all">Ingresos y gastos</option>
+            <option value="gasto">Solo gastos</option>
+            <option value="ingreso">Solo ingresos</option>
+          </select>
+          <select
+            className="filters__select"
+            aria-label="Categoría"
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+          >
+            <option value="all">Todas las categorías</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.label}
               </option>
             ))}
           </select>
+          <select
+            className="filters__select"
+            aria-label="Cuenta"
+            value={accountId}
+            onChange={(e) => setAccountId(e.target.value)}
+          >
+            <option value="all">Todas las cuentas</option>
+            {accounts.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name}
+              </option>
+            ))}
+          </select>
+          <select
+            className="filters__select"
+            aria-label="Orden"
+            value={sort}
+            onChange={(e) => setSort(e.target.value as TransactionSort)}
+          >
+            <option value="date-desc">Más recientes</option>
+            <option value="date-asc">Más antiguos</option>
+            <option value="amount-desc">Importe mayor</option>
+            <option value="amount-asc">Importe menor</option>
+          </select>
+          {hasFilters && (
+            <button type="button" className="filters__clear" onClick={resetFilters}>
+              Limpiar
+            </button>
+          )}
         </div>
-        <select className="filters__select" value={type} onChange={(e) => setType(e.target.value)}>
-          <option value="all">Ingresos y gastos</option>
-          <option value="gasto">Solo gastos</option>
-          <option value="ingreso">Solo ingresos</option>
-        </select>
-        <select
-          className="filters__select"
-          value={categoryId}
-          onChange={(e) => setCategoryId(e.target.value)}
-        >
-          <option value="all">Todas las categorías</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.label}
-            </option>
-          ))}
-        </select>
-        <select
-          className="filters__select"
-          value={accountId}
-          onChange={(e) => setAccountId(e.target.value)}
-        >
-          <option value="all">Todas las cuentas</option>
-          {accounts.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name}
-            </option>
-          ))}
-        </select>
-        {hasFilters && (
-          <button type="button" className="filters__clear" onClick={resetFilters}>
-            Limpiar
-          </button>
-        )}
       </section>
 
-      <div className="tx-summary">
-        <span className="tnum">{filtered.length} movimientos</span>
-        <span className={`tx-summary__net tnum ${net >= 0 ? 'is-in' : 'is-out'}`}>
-          Neto: {formatSignedCurrency(net)}
-        </span>
+      <div className="tx-summary-grid" aria-label="Resumen filtrado">
+        <div className="tx-stat">
+          <span className="tx-stat__label">Movimientos</span>
+          <span className="tx-stat__value tnum">{filtered.length}</span>
+        </div>
+        <div className="tx-stat">
+          <span className="tx-stat__label">Ingresos</span>
+          <span className="tx-stat__value tx-stat__value--in tnum">{formatCurrency(income)}</span>
+        </div>
+        <div className="tx-stat">
+          <span className="tx-stat__label">Gastos</span>
+          <span className="tx-stat__value tnum">{formatCurrency(expenses)}</span>
+        </div>
+        <div className="tx-stat">
+          <span className="tx-stat__label">Neto</span>
+          <span className={`tx-stat__value tnum ${net >= 0 ? 'tx-stat__value--in' : ''}`}>
+            {formatSignedCurrency(net)}
+          </span>
+        </div>
       </div>
 
       {groups.length === 0 ? (
         <div className="card empty">
           <Icon name="transactions" size={28} />
-          <p>No hay movimientos con estos filtros.</p>
+          <p>
+            {hasTransactions
+              ? 'No hay movimientos con estos filtros.'
+              : 'Todavía no hay movimientos.'}
+          </p>
+          {hasFilters && (
+            <button type="button" className="filters__clear" onClick={resetFilters}>
+              Limpiar filtros
+            </button>
+          )}
         </div>
       ) : (
         <div className="card tx-groups">

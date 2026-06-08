@@ -42,6 +42,7 @@ const data: FinanceData = {
     { id: 't4', date: '2026-06-05', amount: -600, description: 'Rent', accountId: 'checking', categoryId: 'home' },
     { id: 't5', date: '2026-06-12', amount: -150, description: 'Groceries', accountId: 'checking', categoryId: 'food' },
     { id: 't6', date: '2026-06-20', amount: -25, description: 'Snacks', accountId: 'savings', categoryId: 'food' },
+    { id: 't7', date: '2026-06-25', amount: -40, description: 'Café', accountId: 'checking', categoryId: 'food' },
   ],
 }
 
@@ -129,13 +130,42 @@ describe('financeRepository transaction queries', () => {
 
   it('sorts and limits transactions', () => {
     expect(listTransactions(data, { sort: 'date-desc', limit: 3 }).map((t) => t.id)).toEqual([
+      't7',
       't6',
       't5',
-      't4',
     ])
     expect(listTransactions(data, { sort: 'date-asc', limit: 2 }).map((t) => t.id)).toEqual([
       't1',
       't2',
+    ])
+  })
+
+  it('searches transactions by description, category label and account name', () => {
+    expect(listTransactions(data, { search: 'groceries' }).map((t) => t.id)).toEqual(['t5'])
+    expect(listTransactions(data, { search: 'HOME' }).map((t) => t.id)).toEqual(['t2', 't4'])
+    expect(listTransactions(data, { search: 'savings' }).map((t) => t.id)).toEqual(['t6'])
+    expect(listTransactions(data, { search: 'cafe' }).map((t) => t.id)).toEqual(['t7'])
+  })
+
+  it('combines search with existing filters', () => {
+    const result = listTransactions(data, {
+      month: '2026-06',
+      type: 'expense',
+      search: 'rent',
+    })
+
+    expect(result.map((t) => t.id)).toEqual(['t4'])
+  })
+
+  it('sorts transactions by absolute amount', () => {
+    expect(listTransactions(data, { sort: 'amount-desc', limit: 3 }).map((t) => t.id)).toEqual([
+      't1',
+      't3',
+      't4',
+    ])
+    expect(listTransactions(data, { sort: 'amount-asc', limit: 2 }).map((t) => t.id)).toEqual([
+      't6',
+      't7',
     ])
   })
 })

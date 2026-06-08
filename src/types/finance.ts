@@ -49,7 +49,7 @@ export type Transaction = {
 }
 
 export type TransactionTypeFilter = 'all' | 'income' | 'expense'
-export type TransactionSort = 'date-asc' | 'date-desc' | 'none'
+export type TransactionSort = 'date-asc' | 'date-desc' | 'amount-asc' | 'amount-desc' | 'none'
 
 export type TransactionQuery = {
   month?: string | 'all'
@@ -57,6 +57,7 @@ export type TransactionQuery = {
   accountId?: string | 'all'
   type?: TransactionTypeFilter
   sort?: TransactionSort
+  search?: string
   limit?: number
 }
 
