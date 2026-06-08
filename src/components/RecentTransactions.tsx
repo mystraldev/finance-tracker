@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import Icon from './Icon'
 import { formatDate, formatSignedCurrency } from '../utils/format'
 import type { EnrichedTransaction } from '../types/finance'
@@ -11,9 +12,9 @@ function RecentTransactions({ transactions }: RecentTransactionsProps) {
     <section className="card transactions">
       <header className="card__header">
         <h3 className="card__title">Movimientos recientes</h3>
-        <button type="button" className="card__action" disabled>
+        <Link to="/movimientos" className="card__action">
           Ver todos
-        </button>
+        </Link>
       </header>
 
       <ul className="tx-list">
