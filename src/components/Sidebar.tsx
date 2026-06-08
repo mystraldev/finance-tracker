@@ -47,7 +47,7 @@ function Sidebar() {
               <span className="nav-item__label">{item.label}</span>
             </NavLink>
           ) : (
-            <button key={item.id} type="button" className="nav-item" disabled>
+            <button key={item.id} type="button" className="nav-item nav-item--soon" disabled>
               <span className="nav-item__icon">
                 <Icon name={item.icon} size={19} />
               </span>
