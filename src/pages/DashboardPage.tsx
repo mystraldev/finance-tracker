@@ -5,6 +5,7 @@ import SavingsRate from '../components/SavingsRate'
 import CategoryBreakdown from '../components/CategoryBreakdown'
 import RecentTransactions from '../components/RecentTransactions'
 import BudgetsCard from '../components/BudgetsCard'
+import ActionCenter from '../components/ActionCenter'
 import { budgetStatusRank } from '../components/budgetStatus'
 import AddTransactionButton from '../components/AddTransactionButton'
 import MonthSelector from '../components/MonthSelector'
@@ -16,7 +17,7 @@ import {
   incomeExpenses,
   categoryBreakdown,
   categoryBudgets,
-  recentTransactions,
+  recentActivities,
   monthLabel,
 } from '../utils/derive'
 
@@ -26,8 +27,8 @@ function DashboardPage() {
 
   const accounts = accountsWithBalance(state, month).map((a) => ({
     ...a,
-    monthlyGrowthRate: monthlyGrowthRate(a, state.transactions, month),
-    history: accountSeries(a, state.transactions, 7, month),
+    monthlyGrowthRate: monthlyGrowthRate(a, state.transactions, month, state.transfers),
+    history: accountSeries(a, state.transactions, 7, month, state.transfers),
   }))
 
   const history = netWorthSeries(state, 7, month)
@@ -37,13 +38,14 @@ function DashboardPage() {
   const priorityBudgets = [...budgets]
     .sort((a, b) => budgetStatusRank[a.status] - budgetStatusRank[b.status] || b.pct - a.pct)
     .slice(0, 5)
-  const recent = recentTransactions(state, 6)
+  const recent = recentActivities(state, 6)
+  const recurring = state.getRecurringOccurrences(month)
 
   return (
     <>
       <header className="page-header">
         <div>
-          <p className="page-header__greeting">Hola, Ferran</p>
+          <p className="page-header__greeting">Hola</p>
           <h1 className="page-header__title">Tu resumen financiero</h1>
         </div>
         <div className="page-header__actions">
@@ -58,8 +60,15 @@ function DashboardPage() {
 
       <div className="grid-two">
         <SavingsRate income={income} expenses={expenses} />
-        <RecentTransactions transactions={recent} />
+        <RecentTransactions activities={recent} accounts={state.accounts} categories={state.categories} />
       </div>
+
+      <ActionCenter
+        recurring={recurring}
+        budgets={priorityBudgets}
+        onConfirmRecurring={state.confirmRecurringOccurrence}
+        onSkipRecurring={state.skipRecurringOccurrence}
+      />
 
       <CategoryBreakdown categories={breakdown} />
 
