@@ -22,7 +22,13 @@ function RecentTransactions({ transactions }: RecentTransactionsProps) {
           const isIncome = tx.amount > 0
           return (
             <li key={tx.id} className="tx">
-              <span className={`tx__icon ${isIncome ? 'tx__icon--in' : ''}`}>
+              <span
+                className={`tx__icon ${isIncome ? 'tx__icon--in' : ''}`}
+                style={{
+                  color: tx.color,
+                  background: `color-mix(in srgb, ${tx.color} 13%, transparent)`,
+                }}
+              >
                 <Icon name={tx.icon} size={18} />
               </span>
               <div className="tx__info">

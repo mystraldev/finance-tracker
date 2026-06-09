@@ -64,6 +64,7 @@ export type TransactionQuery = {
 export type EnrichedTransaction = Transaction & {
   category: string
   icon: string
+  color: string
 }
 
 export type SparklineDatum = {

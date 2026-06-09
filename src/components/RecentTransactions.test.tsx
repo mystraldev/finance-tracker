@@ -14,6 +14,7 @@ const transactions: EnrichedTransaction[] = [
     categoryId: 'income',
     category: 'Ingresos',
     icon: 'salary',
+    color: '#22c55e',
   },
 ]
 
@@ -26,5 +27,20 @@ describe('RecentTransactions', () => {
     )
 
     expect(screen.getByRole('link', { name: 'Ver todos' })).toHaveAttribute('href', '/movimientos')
+  })
+
+  it('uses the category color on recent transaction icons', () => {
+    render(
+      <MemoryRouter>
+        <RecentTransactions transactions={transactions} />
+      </MemoryRouter>,
+    )
+
+    const iconTile = screen.getByText('Nómina').closest('.tx')?.querySelector('.tx__icon')
+
+    expect(iconTile).toHaveStyle({
+      color: '#22c55e',
+      background: 'color-mix(in srgb, #22c55e 13%, transparent)',
+    })
   })
 })
