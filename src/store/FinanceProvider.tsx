@@ -16,8 +16,17 @@ function uid(): string {
 }
 
 function init(): FinanceState {
-  const data = financeRepository.load()
-  return { ...data, selectedMonth: currentMonth() }
+  return createState(financeRepository.load())
+}
+
+function createState(data: FinanceData): FinanceState {
+  return { ...data, selectedMonth: selectInitialMonth(data) }
+}
+
+function selectInitialMonth(data: FinanceData): string {
+  const month = currentMonth()
+  const months = financeRepository.availableMonths(data)
+  return months.includes(month) ? month : months[0] ?? month
 }
 
 function reducer(state: FinanceState, action: FinanceAction): FinanceState {
@@ -76,9 +85,9 @@ function reducer(state: FinanceState, action: FinanceAction): FinanceState {
     case 'SET_MONTH':
       return { ...state, selectedMonth: action.payload }
     case 'IMPORT_DATA':
-      return { ...action.payload, selectedMonth: currentMonth() }
+      return createState(action.payload)
     case 'RESET':
-      return { ...financeRepository.seed(), selectedMonth: currentMonth() }
+      return createState(financeRepository.seed())
 
     default:
       return state
