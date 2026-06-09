@@ -8,6 +8,7 @@ import {
   cloneFinanceData,
   createFinanceBackup,
   createLocalStorageFinanceRepository,
+  listActivities,
   listTransactions,
   parseFinanceBackup,
   parseFinanceData,
@@ -48,6 +49,31 @@ const data: FinanceData = {
     { id: 't6', date: '2026-06-20', amount: -25, description: 'Snacks', accountId: 'savings', categoryId: 'food' },
     { id: 't7', date: '2026-06-25', amount: -40, description: 'Café', accountId: 'checking', categoryId: 'food' },
   ],
+  transfers: [
+    {
+      id: 'tr1',
+      date: '2026-06-15',
+      amount: 300,
+      description: 'Move to savings',
+      fromAccountId: 'checking',
+      toAccountId: 'savings',
+    },
+  ],
+  recurringRules: [
+    {
+      id: 'rule-rent',
+      type: 'expense',
+      description: 'Rent',
+      amount: 600,
+      dayOfMonth: 5,
+      accountId: 'checking',
+      categoryId: 'home',
+      startMonth: '2026-06',
+      active: true,
+      frequency: 'monthly',
+    },
+  ],
+  recurringSkips: [],
   savingsGoals: [
     {
       id: 'goal',
@@ -118,9 +144,22 @@ describe('financeRepository validation', () => {
       ...data,
       savingsGoals: [],
     })
+    expect(parseFinanceData({
+      accounts: data.accounts,
+      categories: data.categories,
+      transactions: data.transactions,
+      savingsGoals: data.savingsGoals,
+    })).toEqual({
+      ...data,
+      transfers: [],
+      recurringRules: [],
+      recurringSkips: [],
+    })
     expect(parseFinanceData({ ...data, categories: undefined })).toBeNull()
     expect(parseFinanceData({ ...data, transactions: [{ ...data.transactions[0], amount: '10' }] })).toBeNull()
     expect(parseFinanceData({ ...data, savingsGoals: [{ ...data.savingsGoals[0], savedAmount: '10' }] })).toBeNull()
+    expect(parseFinanceData({ ...data, transfers: [{ ...data.transfers[0], toAccountId: 'missing' }] })).toBeNull()
+    expect(parseFinanceData({ ...data, transactions: [{ ...data.transactions[0], date: '2026-99-01' }] })).toBeNull()
   })
 
   it('clones finance data without sharing array item references', () => {
@@ -140,6 +179,7 @@ describe('financeRepository validation', () => {
       data,
     })
     expect(parseFinanceBackup(backup)).toEqual(data)
+    expect(parseFinanceBackup({ ...backup, version: 1 })).toEqual(data)
   })
 
   it('rejects malformed backup files', () => {
@@ -155,6 +195,15 @@ describe('financeRepository transaction queries', () => {
   it('extracts month keys and available months', () => {
     expect(transactionMonthKey('2026-06-12')).toBe('2026-06')
     expect(availableTransactionMonths(data)).toEqual(['2026-06', '2026-05'])
+  })
+
+  it('lists unified activities including neutral transfers', () => {
+    expect(listActivities(data, { type: 'transfer' }).map((item) => item.id)).toEqual(['tr1'])
+    expect(listActivities(data, { accountId: 'savings' }).map((item) => item.id)).toEqual([
+      't6',
+      'tr1',
+    ])
+    expect(listActivities(data, { search: 'move' }).map((item) => item.id)).toEqual(['tr1'])
   })
 
   it('filters transactions by month, category, account and type', () => {

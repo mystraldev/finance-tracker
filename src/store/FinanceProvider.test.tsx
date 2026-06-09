@@ -28,6 +28,9 @@ function createFinanceData(transactions: Transaction[]): FinanceData {
     ],
     categories: [{ id: 'income', label: 'Income', color: '#22c55e', icon: 'salary' }],
     transactions,
+    transfers: [],
+    recurringRules: [],
+    recurringSkips: [],
     savingsGoals: [],
   }
 }
@@ -130,6 +133,43 @@ describe('FinanceProvider store', () => {
     expect(result.current.getAvailableMonths()[0]).toBe('2026-06')
   })
 
+  it('creates, updates and deletes a transfer', () => {
+    const { result } = setup()
+    act(() => {
+      result.current.addAccount({
+        name: 'Savings',
+        type: 'savings',
+        icon: 'piggy',
+        accent: 'emerald',
+        openingBalance: 0,
+      })
+    })
+    const toAccountId = result.current.accounts.at(-1)?.id ?? ''
+
+    act(() => {
+      result.current.addTransfer({
+        date: '2026-06-12',
+        amount: 100,
+        description: 'Move money',
+        fromAccountId: result.current.accounts[0].id,
+        toAccountId,
+      })
+    })
+
+    const added = result.current.transfers.at(-1)
+    expect(added).toEqual(expect.objectContaining({ amount: 100, description: 'Move money' }))
+
+    act(() => {
+      result.current.updateTransfer({ id: added?.id ?? '', amount: 125 })
+    })
+    expect(result.current.transfers.find((transfer) => transfer.id === added?.id)?.amount).toBe(125)
+
+    act(() => {
+      result.current.deleteTransfer(added?.id ?? '')
+    })
+    expect(result.current.transfers.some((transfer) => transfer.id === added?.id)).toBe(false)
+  })
+
   it('deletes an unused category', () => {
     const { result } = setup()
     act(() => {
@@ -223,6 +263,46 @@ describe('FinanceProvider store', () => {
     expect(result.current.savingsGoals.some((goal) => goal.id === added?.id)).toBe(false)
   })
 
+  it('confirms and skips recurring occurrences', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-06-09T00:00:00.000Z'))
+    const { result } = setup()
+
+    act(() => {
+      result.current.addRecurringRule({
+        type: 'income',
+        description: 'Retainer',
+        amount: 500,
+        dayOfMonth: 28,
+        accountId: result.current.accounts[0].id,
+        categoryId: 'income',
+        startMonth: '2026-06',
+        active: true,
+        frequency: 'monthly',
+      })
+    })
+
+    const rule = result.current.recurringRules.at(-1)
+    expect(result.current.getRecurringOccurrences('2026-06').at(-1)?.status).toBe('pending')
+
+    act(() => {
+      result.current.skipRecurringOccurrence(rule?.id ?? '', '2026-06')
+    })
+    expect(result.current.getRecurringOccurrences('2026-06').at(-1)?.status).toBe('skipped')
+
+    act(() => {
+      result.current.confirmRecurringOccurrence(rule?.id ?? '', '2026-06')
+    })
+    const occurrence = result.current.getRecurringOccurrences('2026-06').find((item) => item.rule.id === rule?.id)
+    expect(occurrence?.status).toBe('confirmed')
+    expect(result.current.transactions.at(-1)).toEqual(expect.objectContaining({
+      description: 'Retainer',
+      amount: 500,
+      recurrenceMonth: '2026-06',
+      recurringRuleId: rule?.id,
+    }))
+  })
+
   it('keeps accounts referenced by savings goals', () => {
     const { result } = setup()
     act(() => {
@@ -287,6 +367,9 @@ describe('FinanceProvider store', () => {
           categoryId: 'income',
         },
       ],
+      transfers: [],
+      recurringRules: [],
+      recurringSkips: [],
       savingsGoals: [
         {
           id: 'goal-imported',

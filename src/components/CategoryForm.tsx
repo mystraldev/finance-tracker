@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import Icon from './Icon'
 import { selectableIcons } from './iconCatalog'
+import { parseDecimalAmount } from '../utils/validation'
 import type { Category } from '../types/finance'
 
 const PALETTE = [
@@ -19,8 +20,8 @@ type CategoryFormProps = {
 function parseBudget(text: string): number | undefined | null {
   const trimmed = text.trim()
   if (!trimmed) return undefined
-  const value = parseFloat(trimmed.replace(',', '.'))
-  if (!Number.isFinite(value) || value < 0) return null
+  const value = parseDecimalAmount(trimmed)
+  if (value == null) return null
   return value === 0 ? undefined : value
 }
 
