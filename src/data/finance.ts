@@ -1,4 +1,4 @@
-import type { Account, Category, Transaction, FinanceData } from '../types/finance'
+import type { Account, Category, FinanceData, SavingsGoal, Transaction } from '../types/finance'
 
 export const accounts: Account[] = [
   {
@@ -80,4 +80,26 @@ function buildTransactions(): Transaction[] {
 
 export const transactions: Transaction[] = buildTransactions()
 
-export const seed: FinanceData = { accounts, categories, transactions }
+export const savingsGoals: SavingsGoal[] = [
+  {
+    id: 'goal-emergency-fund',
+    name: 'Fondo de emergencia',
+    targetAmount: 6000,
+    savedAmount: 2400,
+    accountId: 'savings',
+    icon: 'health',
+    color: '#10b981',
+  },
+  {
+    id: 'goal-trip',
+    name: 'Viaje',
+    targetAmount: 3000,
+    savedAmount: 850,
+    accountId: 'checking',
+    icon: 'plane',
+    color: '#3b82f6',
+    targetDate: '2026-10-01',
+  },
+]
+
+export const seed: FinanceData = { accounts, categories, transactions, savingsGoals }

@@ -34,6 +34,7 @@ const data: FinanceData = {
     { id: 't2', date: '2026-06-05', amount: -600, description: 'Alquiler', accountId: 'checking', categoryId: 'home' },
     { id: 't3', date: '2026-06-12', amount: -150, description: 'Compra semanal', accountId: 'savings', categoryId: 'food' },
   ],
+  savingsGoals: [],
 }
 
 function createValue(overrides: Partial<FinanceData> = {}): FinanceContextValue {
@@ -52,6 +53,9 @@ function createValue(overrides: Partial<FinanceData> = {}): FinanceContextValue 
     addAccount: vi.fn(),
     updateAccount: vi.fn(),
     deleteAccount: vi.fn(),
+    addSavingsGoal: vi.fn(),
+    updateSavingsGoal: vi.fn(),
+    deleteSavingsGoal: vi.fn(),
     setMonth: vi.fn(),
     importData: vi.fn(),
     reset: vi.fn(),

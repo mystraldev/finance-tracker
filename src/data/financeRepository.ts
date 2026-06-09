@@ -1,5 +1,5 @@
 import { seed } from './finance'
-import type { Account, Category, FinanceData, Transaction, TransactionQuery } from '../types/finance'
+import type { Account, Category, FinanceData, SavingsGoal, Transaction, TransactionQuery } from '../types/finance'
 
 export const FINANCE_STORAGE_KEY = 'finance-tracker:v2'
 export const FINANCE_BACKUP_APP = 'finance-tracker'
@@ -70,11 +70,26 @@ function isTransaction(value: unknown): value is Transaction {
   )
 }
 
+function isSavingsGoal(value: unknown): value is SavingsGoal {
+  if (!isRecord(value)) return false
+  return (
+    isString(value.id) &&
+    isString(value.name) &&
+    isFiniteNumber(value.targetAmount) &&
+    isFiniteNumber(value.savedAmount) &&
+    isString(value.icon) &&
+    isString(value.color) &&
+    (value.accountId === undefined || isString(value.accountId)) &&
+    (value.targetDate === undefined || isString(value.targetDate))
+  )
+}
+
 export function cloneFinanceData(data: FinanceData): FinanceData {
   return {
     accounts: data.accounts.map((a) => ({ ...a })),
     categories: data.categories.map((c) => ({ ...c })),
     transactions: data.transactions.map((t) => ({ ...t })),
+    savingsGoals: data.savingsGoals.map((g) => ({ ...g })),
   }
 }
 
@@ -99,10 +114,15 @@ export function parseFinanceData(value: unknown): FinanceData | null {
   ) {
     return null
   }
+  const savingsGoals = value.savingsGoals
+  if (savingsGoals !== undefined && !Array.isArray(savingsGoals)) {
+    return null
+  }
   if (
     !value.accounts.every(isAccount) ||
     !value.categories.every(isCategory) ||
-    !value.transactions.every(isTransaction)
+    !value.transactions.every(isTransaction) ||
+    (Array.isArray(savingsGoals) && !savingsGoals.every(isSavingsGoal))
   ) {
     return null
   }
@@ -110,6 +130,7 @@ export function parseFinanceData(value: unknown): FinanceData | null {
     accounts: value.accounts,
     categories: value.categories,
     transactions: value.transactions,
+    savingsGoals: Array.isArray(savingsGoals) ? savingsGoals : [],
   })
 }
 

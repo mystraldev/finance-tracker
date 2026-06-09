@@ -56,13 +56,13 @@ export function shortMonthLabel(month: string): string {
 
 export function monthTransactions(transactions: Transaction[], month: string): Transaction[] {
   return listTransactions(
-    { accounts: [], categories: [], transactions },
+    { accounts: [], categories: [], transactions, savingsGoals: [] },
     { month },
   )
 }
 
 export function availableMonths(transactions: Transaction[]): string[] {
-  return availableTransactionMonths({ accounts: [], categories: [], transactions })
+  return availableTransactionMonths({ accounts: [], categories: [], transactions, savingsGoals: [] })
 }
 
 export function incomeExpenses(transactions: Transaction[], month: string): { income: number; expenses: number; saved: number } {
