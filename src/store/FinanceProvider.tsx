@@ -47,6 +47,9 @@ function reducer(state: FinanceState, action: FinanceAction): FinanceState {
         ),
       }
     case 'DELETE_CATEGORY':
+      if (state.transactions.some((t) => t.categoryId === action.payload)) {
+        return state
+      }
       return {
         ...state,
         categories: state.categories.filter((c) => c.id !== action.payload),
@@ -62,6 +65,9 @@ function reducer(state: FinanceState, action: FinanceAction): FinanceState {
         ),
       }
     case 'DELETE_ACCOUNT':
+      if (state.transactions.some((t) => t.accountId === action.payload)) {
+        return state
+      }
       return {
         ...state,
         accounts: state.accounts.filter((a) => a.id !== action.payload),
