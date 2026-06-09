@@ -3,7 +3,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { availableTransactionMonths, listActivities, listTransactions } from '../data/financeRepository'
 import { FinanceContext } from '../store/financeContext'
 import type { FinanceContextValue, FinanceData } from '../types/finance'
-import CategoriesPage from './CategoriesPage'
+import { recurringOccurrences } from '../utils/recurring'
+import RecurringPage from './RecurringPage'
 
 const data: FinanceData = {
   accounts: [
@@ -18,26 +19,29 @@ const data: FinanceData = {
   ],
   categories: [
     { id: 'income', label: 'Ingresos', color: '#22c55e', icon: 'salary' },
-    { id: 'home', label: 'Vivienda', color: '#6366f1', icon: 'home', budget: 700 },
-    { id: 'health', label: 'Salud', color: '#06b6d4', icon: 'health' },
+    { id: 'home', label: 'Vivienda', color: '#6366f1', icon: 'home' },
   ],
-  transactions: [
+  transactions: [],
+  transfers: [],
+  recurringRules: [
     {
-      id: 't1',
-      date: '2026-06-10',
-      amount: -45,
-      description: 'Farmacia',
+      id: 'rent',
+      type: 'expense',
+      description: 'Alquiler',
+      amount: 850,
+      dayOfMonth: 2,
       accountId: 'checking',
-      categoryId: 'health',
+      categoryId: 'home',
+      startMonth: '2026-06',
+      active: true,
+      frequency: 'monthly',
     },
   ],
-  transfers: [],
-  recurringRules: [],
   recurringSkips: [],
   savingsGoals: [],
 }
 
-function createValue(overrides: Partial<FinanceData> = {}): FinanceContextValue {
+function createValue(overrides: Partial<FinanceContextValue> = {}): FinanceContextValue {
   const state = { ...data, ...overrides }
   return {
     ...state,
@@ -45,7 +49,7 @@ function createValue(overrides: Partial<FinanceData> = {}): FinanceContextValue 
     getTransactions: (query) => listTransactions(state, query),
     getActivities: (query) => listActivities(state, query),
     getAvailableMonths: () => availableTransactionMonths(state),
-    getRecurringOccurrences: vi.fn(() => []),
+    getRecurringOccurrences: (month) => recurringOccurrences(state, month),
     addTransaction: vi.fn(),
     updateTransaction: vi.fn(),
     deleteTransaction: vi.fn(),
@@ -69,35 +73,28 @@ function createValue(overrides: Partial<FinanceData> = {}): FinanceContextValue 
     setMonth: vi.fn(),
     importData: vi.fn(),
     reset: vi.fn(),
+    ...overrides,
   }
 }
 
 function renderPage(value = createValue()) {
   render(
     <FinanceContext.Provider value={value}>
-      <CategoriesPage />
+      <RecurringPage />
     </FinanceContext.Provider>,
   )
   return value
 }
 
-describe('CategoriesPage', () => {
-  it('shows a budget CTA for categories without a budget', () => {
-    renderPage()
+describe('RecurringPage', () => {
+  it('shows pending recurring occurrences and confirms them', () => {
+    const value = renderPage()
 
-    expect(screen.getByText('Salud')).toBeInTheDocument()
-    expect(screen.getByText('1 movimiento este mes')).toBeInTheDocument()
-    expect(screen.getByText('45,00 €')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Definir presupuesto' })).toBeInTheDocument()
-  })
+    expect(screen.getAllByText('Alquiler')).toHaveLength(2)
+    expect(screen.getByText('Pendiente')).toBeInTheDocument()
 
-  it('opens the category editor from the budget CTA', () => {
-    renderPage()
+    fireEvent.click(screen.getByRole('button', { name: 'Confirmar' }))
 
-    fireEvent.click(screen.getByRole('button', { name: 'Definir presupuesto' }))
-
-    expect(screen.getByRole('heading', { name: 'Editar categoría' })).toBeInTheDocument()
-    expect(screen.getByDisplayValue('Salud')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('Sin límite')).toBeInTheDocument()
+    expect(value.confirmRecurringOccurrence).toHaveBeenCalledWith('rent', '2026-06')
   })
 })
