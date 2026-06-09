@@ -1,9 +1,10 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { FINANCE_STORAGE_KEY } from '../data/financeRepository'
 import { FinanceProvider } from './FinanceProvider'
 import { useFinance } from './financeContext'
+import type { FinanceData, Transaction } from '../types/finance'
 
 const wrapper = ({ children }: { children: ReactNode }) => (
   <FinanceProvider>{children}</FinanceProvider>
@@ -13,8 +14,37 @@ function setup() {
   return renderHook(() => useFinance(), { wrapper })
 }
 
+function createFinanceData(transactions: Transaction[]): FinanceData {
+  return {
+    accounts: [
+      {
+        id: 'cash',
+        name: 'Cash',
+        type: 'cash',
+        icon: 'wallet',
+        accent: 'indigo',
+        openingBalance: 0,
+      },
+    ],
+    categories: [{ id: 'income', label: 'Income', color: '#22c55e', icon: 'salary' }],
+    transactions,
+  }
+}
+
+function transaction(id: string, date: string): Transaction {
+  return {
+    id,
+    date,
+    amount: 25,
+    description: 'Income',
+    accountId: 'cash',
+    categoryId: 'income',
+  }
+}
+
 describe('FinanceProvider store', () => {
   beforeEach(() => {
+    vi.useRealTimers()
     localStorage.clear()
   })
 
@@ -24,6 +54,48 @@ describe('FinanceProvider store', () => {
     expect(result.current.categories.length).toBeGreaterThan(0)
     expect(result.current.transactions.length).toBeGreaterThan(0)
     expect(result.current.selectedMonth).toMatch(/^\d{4}-\d{2}$/)
+  })
+
+  it('initialises to the current month when it has transactions', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-06-09T00:00:00.000Z'))
+    localStorage.setItem(
+      FINANCE_STORAGE_KEY,
+      JSON.stringify(createFinanceData([
+        transaction('june', '2026-06-09'),
+        transaction('future', '2026-07-01'),
+      ])),
+    )
+
+    const { result } = setup()
+
+    expect(result.current.selectedMonth).toBe('2026-06')
+  })
+
+  it('initialises to the latest available month when the current month is empty', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-07-09T00:00:00.000Z'))
+    localStorage.setItem(
+      FINANCE_STORAGE_KEY,
+      JSON.stringify(createFinanceData([
+        transaction('may', '2026-05-09'),
+        transaction('june', '2026-06-09'),
+      ])),
+    )
+
+    const { result } = setup()
+
+    expect(result.current.selectedMonth).toBe('2026-06')
+  })
+
+  it('keeps the current month when there are no transactions', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-07-09T00:00:00.000Z'))
+    localStorage.setItem(FINANCE_STORAGE_KEY, JSON.stringify(createFinanceData([])))
+
+    const { result } = setup()
+
+    expect(result.current.selectedMonth).toBe('2026-07')
   })
 
   it('adds a transaction with a generated id', () => {
@@ -128,6 +200,8 @@ describe('FinanceProvider store', () => {
   })
 
   it('imports validated finance data and persists it', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-07-09T00:00:00.000Z'))
     const { result } = setup()
     const imported = {
       accounts: [
@@ -159,12 +233,15 @@ describe('FinanceProvider store', () => {
 
     expect(result.current.accounts).toEqual(imported.accounts)
     expect(result.current.transactions).toEqual(imported.transactions)
+    expect(result.current.selectedMonth).toBe('2026-06')
 
     const raw = localStorage.getItem(FINANCE_STORAGE_KEY)
     expect(JSON.parse(raw ?? '{}')).toEqual(imported)
   })
 
   it('resets to the seed and persists to localStorage', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-07-09T00:00:00.000Z'))
     const { result } = setup()
     act(() => {
       result.current.deleteTransaction(result.current.transactions[0].id)
@@ -174,6 +251,7 @@ describe('FinanceProvider store', () => {
       result.current.reset()
     })
     expect(result.current.transactions.length).toBeGreaterThan(reduced)
+    expect(result.current.selectedMonth).toBe('2026-06')
 
     const raw = localStorage.getItem(FINANCE_STORAGE_KEY)
     expect(raw).not.toBeNull()
