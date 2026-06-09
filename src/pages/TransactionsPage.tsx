@@ -7,10 +7,13 @@ import AddTransactionButton from '../components/AddTransactionButton'
 import { useFinance } from '../store/financeContext'
 import {
   categoryMap,
+  monthKey,
   monthLabel,
 } from '../utils/derive'
-import { formatCurrency, formatSignedCurrency, formatGroupDate } from '../utils/format'
+import { formatCurrency, formatDate, formatSignedCurrency } from '../utils/format'
 import type { Transaction, TransactionSort } from '../types/finance'
+
+const PAGE_SIZE = 24
 
 function TransactionsPage() {
   const { categories, accounts, getTransactions, getAvailableMonths, updateTransaction, deleteTransaction } =
@@ -26,6 +29,7 @@ function TransactionsPage() {
   const [type, setType] = useState('all')
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState<TransactionSort>('date-desc')
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [editing, setEditing] = useState<Transaction | null>(null)
   const [deleting, setDeleting] = useState<Transaction | null>(null)
 
@@ -45,12 +49,41 @@ function TransactionsPage() {
     .reduce((s, t) => s + Math.abs(t.amount), 0)
   const net = income - expenses
 
-  const groups: { date: string; items: Transaction[] }[] = []
-  filtered.forEach((t) => {
-    const last = groups[groups.length - 1]
-    if (last && last.date === t.date) last.items.push(t)
-    else groups.push({ date: t.date, items: [t] })
-  })
+  const visibleTransactions = filtered.slice(0, visibleCount)
+  const hasMore = filtered.length > visibleTransactions.length
+  const groups = (() => {
+    const byMonth = new Map<string, Transaction[]>()
+    visibleTransactions.forEach((transaction) => {
+      const key = monthKey(transaction.date)
+      byMonth.set(key, [...(byMonth.get(key) ?? []), transaction])
+    })
+
+    return [...byMonth.entries()]
+      .sort(([a], [b]) => {
+        if (a === b) return 0
+        return sort === 'date-asc' ? (a < b ? -1 : 1) : (a < b ? 1 : -1)
+      })
+      .map(([month, items]) => {
+        const income = items
+          .filter((transaction) => transaction.amount > 0)
+          .reduce((sum, transaction) => sum + transaction.amount, 0)
+        const expenses = items
+          .filter((transaction) => transaction.amount < 0)
+          .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
+        return {
+          month,
+          items,
+          income,
+          expenses,
+          net: income - expenses,
+        }
+      })
+  })()
+
+  const setFilter = <T,>(setter: (value: T) => void, value: T) => {
+    setter(value)
+    setVisibleCount(PAGE_SIZE)
+  }
 
   const resetFilters = () => {
     setMonth('all')
@@ -59,6 +92,7 @@ function TransactionsPage() {
     setType('all')
     setSearch('')
     setSort('date-desc')
+    setVisibleCount(PAGE_SIZE)
   }
   const hasFilters =
     month !== 'all' ||
@@ -86,7 +120,7 @@ function TransactionsPage() {
             aria-label="Buscar movimientos"
             placeholder="Buscar movimientos"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => setFilter(setSearch, e.target.value)}
           />
         </label>
 
@@ -95,7 +129,7 @@ function TransactionsPage() {
             className="filters__select"
             aria-label="Mes"
             value={month}
-            onChange={(e) => setMonth(e.target.value)}
+            onChange={(e) => setFilter(setMonth, e.target.value)}
           >
             <option value="all">Todos los meses</option>
             {months.map((m) => (
@@ -104,7 +138,7 @@ function TransactionsPage() {
               </option>
             ))}
           </select>
-          <select className="filters__select" aria-label="Tipo" value={type} onChange={(e) => setType(e.target.value)}>
+          <select className="filters__select" aria-label="Tipo" value={type} onChange={(e) => setFilter(setType, e.target.value)}>
             <option value="all">Ingresos y gastos</option>
             <option value="gasto">Solo gastos</option>
             <option value="ingreso">Solo ingresos</option>
@@ -113,7 +147,7 @@ function TransactionsPage() {
             className="filters__select"
             aria-label="Categoría"
             value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
+            onChange={(e) => setFilter(setCategoryId, e.target.value)}
           >
             <option value="all">Todas las categorías</option>
             {categories.map((c) => (
@@ -126,7 +160,7 @@ function TransactionsPage() {
             className="filters__select"
             aria-label="Cuenta"
             value={accountId}
-            onChange={(e) => setAccountId(e.target.value)}
+            onChange={(e) => setFilter(setAccountId, e.target.value)}
           >
             <option value="all">Todas las cuentas</option>
             {accounts.map((a) => (
@@ -139,7 +173,7 @@ function TransactionsPage() {
             className="filters__select"
             aria-label="Orden"
             value={sort}
-            onChange={(e) => setSort(e.target.value as TransactionSort)}
+            onChange={(e) => setFilter(setSort, e.target.value as TransactionSort)}
           >
             <option value="date-desc">Más recientes</option>
             <option value="date-asc">Más antiguos</option>
@@ -192,14 +226,35 @@ function TransactionsPage() {
       ) : (
         <div className="card tx-groups">
           {groups.map((g) => (
-            <section key={g.date} className="tx-group">
-              <h3 className="tx-group__date">{formatGroupDate(g.date)}</h3>
+            <section key={g.month} className="tx-group">
+              <header className="tx-group__header">
+                <h3 className="tx-group__date">{monthLabel(g.month)}</h3>
+                <dl className="tx-group__summary" aria-label={`Subtotal de ${monthLabel(g.month)}`}>
+                  <div>
+                    <dt>Ingresos</dt>
+                    <dd className="tnum is-in">{formatCurrency(g.income)}</dd>
+                  </div>
+                  <div>
+                    <dt>Gastos</dt>
+                    <dd className="tnum">{formatCurrency(g.expenses)}</dd>
+                  </div>
+                  <div>
+                    <dt>Neto</dt>
+                    <dd className={`tnum ${g.net >= 0 ? 'is-in' : ''}`}>
+                      {formatSignedCurrency(g.net)}
+                    </dd>
+                  </div>
+                </dl>
+              </header>
               <ul className="txrow-list">
                 {g.items.map((t) => {
                   const cat = cats[t.categoryId]
                   const income = t.amount > 0
                   return (
                     <li key={t.id} className="txrow">
+                      <time className="txrow__date" dateTime={t.date}>
+                        {formatDate(t.date)}
+                      </time>
                       <span
                         className="txrow__icon"
                         style={{ '--c': income ? '#10b981' : cat?.color ?? '#94a3b8' } as Record<string, string>}
@@ -208,15 +263,13 @@ function TransactionsPage() {
                       </span>
                       <div className="txrow__info">
                         <span className="txrow__desc">{t.description}</span>
-                        <span className="txrow__meta">
-                          <span className="pill" style={{ '--c': cat?.color ?? '#94a3b8' } as Record<string, string>}>
-                            {cat?.label ?? 'Sin categoría'}
-                          </span>
-                          <span className="txrow__account">
-                            {accById[t.accountId]?.name ?? 'Cuenta'}
-                          </span>
-                        </span>
                       </div>
+                      <span className="pill txrow__category" style={{ '--c': cat?.color ?? '#94a3b8' } as Record<string, string>}>
+                        {cat?.label ?? 'Sin categoría'}
+                      </span>
+                      <span className="txrow__account">
+                        {accById[t.accountId]?.name ?? 'Cuenta'}
+                      </span>
                       <span className={`txrow__amount tnum ${income ? 'is-in' : ''}`}>
                         {formatSignedCurrency(t.amount)}
                       </span>
@@ -244,6 +297,20 @@ function TransactionsPage() {
               </ul>
             </section>
           ))}
+          <footer className="tx-load">
+            <span className="tx-load__count">
+              Mostrando {visibleTransactions.length} de {filtered.length} movimientos
+            </span>
+            {hasMore && (
+              <button
+                type="button"
+                className="btn-ghost"
+                onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+              >
+                Cargar más
+              </button>
+            )}
+          </footer>
         </div>
       )}
 

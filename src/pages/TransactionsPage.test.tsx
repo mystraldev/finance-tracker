@@ -70,6 +70,20 @@ function renderPage(value = createValue()) {
   )
 }
 
+function manyTransactions(count: number) {
+  return Array.from({ length: count }, (_, index) => {
+    const day = index + 1
+    return {
+      id: `many-${day}`,
+      date: `2026-06-${String(day).padStart(2, '0')}`,
+      amount: day % 2 === 0 ? -10 : 20,
+      description: `Movimiento ${String(day).padStart(2, '0')}`,
+      accountId: 'checking',
+      categoryId: day % 2 === 0 ? 'food' : 'income',
+    }
+  })
+}
+
 describe('TransactionsPage', () => {
   it('filters transactions from the search box and updates the summary', () => {
     renderPage()
@@ -117,5 +131,27 @@ describe('TransactionsPage', () => {
 
     expect(screen.getByText('Todavía no hay movimientos.')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Limpiar filtros' })).not.toBeInTheDocument()
+  })
+
+  it('groups transactions by month with subtotals', () => {
+    renderPage()
+
+    expect(screen.getByRole('heading', { name: /junio.*2026/i })).toBeInTheDocument()
+    expect(screen.queryByText(/martes/i)).not.toBeInTheDocument()
+    expect(screen.getByLabelText(/Subtotal de junio.*2026/i)).toBeInTheDocument()
+  })
+
+  it('loads more transactions on demand', () => {
+    renderPage(createValue({ transactions: manyTransactions(30) }))
+
+    expect(screen.getByText('Movimiento 30')).toBeInTheDocument()
+    expect(screen.queryByText('Movimiento 06')).not.toBeInTheDocument()
+    expect(screen.getByText('Mostrando 24 de 30 movimientos')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cargar más' }))
+
+    expect(screen.getByText('Movimiento 06')).toBeInTheDocument()
+    expect(screen.getByText('Mostrando 30 de 30 movimientos')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Cargar más' })).not.toBeInTheDocument()
   })
 })
