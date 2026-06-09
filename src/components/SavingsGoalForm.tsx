@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent, type KeyboardEvent } from 'react'
 import Icon from './Icon'
 import { selectableIcons } from './iconCatalog'
 import { formatCurrency } from '../utils/format'
@@ -12,6 +12,28 @@ const PALETTE = [
 function parseNumber(text: string): number {
   const value = parseFloat(text.trim().replace(',', '.'))
   return Number.isFinite(value) ? value : NaN
+}
+
+function isTargetDateDraft(value: string): boolean {
+  if (!/^[0-9-]*$/.test(value) || value.length > 10) return false
+  const [year] = value.split('-')
+  return year.length <= 4
+}
+
+function isCompleteTargetDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const date = new Date(`${value}T00:00:00.000Z`)
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
+}
+
+function autoSavedAmount(availableForAccount: number | null, targetText: string): string {
+  if (availableForAccount == null) return ''
+  const target = parseNumber(targetText)
+  const available = Math.max(availableForAccount, 0)
+  const nextSaved = Number.isFinite(target) && target > 0
+    ? Math.min(available, target)
+    : available
+  return nextSaved > 0 ? String(nextSaved) : ''
 }
 
 type SavingsGoalFormProps = {
@@ -36,6 +58,7 @@ function SavingsGoalForm({
   const [savedAmount, setSavedAmount] = useState(
     initial ? String(initial.savedAmount) : '',
   )
+  const [savedTouched, setSavedTouched] = useState(Boolean(initial))
   const [accountId, setAccountId] = useState(initial?.accountId ?? '')
   const [targetDate, setTargetDate] = useState(initial?.targetDate ?? '')
   const [color, setColor] = useState(initial?.color ?? PALETTE[0])
@@ -52,6 +75,30 @@ function SavingsGoalForm({
   )
   const availableForAccount = linkedAccount ? linkedAccount.balance - otherReserved : null
 
+  function availableFor(nextAccountId: string): number | null {
+    const account = accounts.find((item) => item.id === nextAccountId)
+    if (!account) return null
+
+    const reserved = goals
+      .filter((goal) => goal.id !== initial?.id && goal.accountId === nextAccountId)
+      .reduce((sum, goal) => sum + goal.savedAmount, 0)
+    return account.balance - reserved
+  }
+
+  function handleTargetDateKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (!/^\d$/.test(event.key)) return
+
+    const input = event.currentTarget
+    const selectionStart = input.selectionStart ?? 0
+    const selectionEnd = input.selectionEnd ?? selectionStart
+    const year = targetDate.split('-')[0] ?? ''
+    const replacingYearText = selectionStart < 4 && selectionEnd > selectionStart
+
+    if (year.length >= 4 && selectionStart <= 4 && !replacingYearText) {
+      event.preventDefault()
+    }
+  }
+
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
     const target = parseNumber(targetAmount)
@@ -66,6 +113,9 @@ function SavingsGoalForm({
     }
     if (saved > target) {
       return setError('El importe reservado no puede superar el objetivo.')
+    }
+    if (targetDate && !isCompleteTargetDate(targetDate)) {
+      return setError('La fecha objetivo debe tener formato AAAA-MM-DD.')
     }
     if (availableForAccount != null && saved > availableForAccount) {
       return setError(
@@ -119,7 +169,13 @@ function SavingsGoalForm({
               inputMode="decimal"
               placeholder="0,00"
               value={targetAmount}
-              onChange={(event) => setTargetAmount(event.target.value)}
+              onChange={(event) => {
+                const next = event.target.value
+                setTargetAmount(next)
+                if (!savedTouched) {
+                  setSavedAmount(autoSavedAmount(availableForAccount, next))
+                }
+              }}
             />
             <span className="field__suffix">€</span>
           </div>
@@ -134,7 +190,10 @@ function SavingsGoalForm({
               inputMode="decimal"
               placeholder="0,00"
               value={savedAmount}
-              onChange={(event) => setSavedAmount(event.target.value)}
+              onChange={(event) => {
+                setSavedTouched(true)
+                setSavedAmount(event.target.value)
+              }}
             />
             <span className="field__suffix">€</span>
           </div>
@@ -147,7 +206,13 @@ function SavingsGoalForm({
           <select
             className="field__input"
             value={accountId}
-            onChange={(event) => setAccountId(event.target.value)}
+            onChange={(event) => {
+              const next = event.target.value
+              setAccountId(next)
+              if (!savedTouched) {
+                setSavedAmount(autoSavedAmount(availableFor(next), targetAmount))
+              }
+            }}
           >
             <option value="">Sin vincular</option>
             {accounts.map((account) => (
@@ -162,9 +227,16 @@ function SavingsGoalForm({
           <span className="field__label">Fecha objetivo</span>
           <input
             className="field__input"
-            type="date"
+            type="text"
+            inputMode="numeric"
+            placeholder="AAAA-MM-DD"
+            maxLength={10}
             value={targetDate}
-            onChange={(event) => setTargetDate(event.target.value)}
+            onKeyDown={handleTargetDateKeyDown}
+            onChange={(event) => {
+              const next = event.target.value
+              if (isTargetDateDraft(next)) setTargetDate(next)
+            }}
           />
         </label>
       </div>
