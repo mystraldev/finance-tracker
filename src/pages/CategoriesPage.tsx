@@ -76,13 +76,23 @@ function CategoriesPage() {
               </span>
               <div className="cat-card__info">
                 <span className="cat-card__name">{c.label}</span>
-                <span className="cat-card__meta tnum">
-                  {count} {count === 1 ? 'movimiento' : 'movimientos'} este mes · {formatCurrency(total)}
+                <span className="cat-card__meta">
+                  <span>{count} {count === 1 ? 'movimiento' : 'movimientos'} este mes</span>
+                  <span className="tnum">{formatCurrency(total)}</span>
                 </span>
                 {budget && (
                   <div className="cat-budget">
                     <BudgetProgress budget={budget} />
                   </div>
+                )}
+                {!budget && (
+                  <button
+                    type="button"
+                    className="cat-budget-cta"
+                    onClick={() => setEditing(c)}
+                  >
+                    Definir presupuesto
+                  </button>
                 )}
               </div>
               <div className="cat-card__actions">
