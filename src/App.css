@@ -1362,18 +1362,57 @@ select.field__input {
 }
 
 .tx-groups {
-  padding: 0.5rem 1.5rem 1rem;
+  padding: 0;
+  overflow: hidden;
 }
 .tx-group {
-  padding: 0.5rem 0;
+  padding: 0;
+}
+.tx-group + .tx-group {
+  border-top: 1px solid var(--border);
+}
+.tx-group__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem 0.75rem;
+  background: var(--gray-50);
 }
 .tx-group__date {
-  margin: 0.75rem 0 0.25rem;
-  font-size: 0.78rem;
+  margin: 0;
+  font-size: 0.82rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  color: var(--text-soft);
+}
+.tx-group__summary {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 1rem;
+  margin: 0;
+}
+.tx-group__summary div {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+.tx-group__summary dt {
   color: var(--text-faint);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.tx-group__summary dd {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.tx-group__summary dd.is-in {
+  color: var(--success-text);
 }
 
 .txrow-list {
@@ -1383,12 +1422,11 @@ select.field__input {
 }
 .txrow {
   display: grid;
-  grid-template-columns: 2.6rem 1fr auto auto;
+  grid-template-columns: 5.4rem 2.5rem minmax(11rem, 1.3fr) minmax(7rem, 0.8fr) minmax(7rem, 0.8fr) minmax(6.4rem, auto) 4.2rem;
   align-items: center;
-  gap: 0.9rem;
-  padding: 0.65rem 0.5rem;
-  margin: 0 -0.5rem;
-  border-radius: var(--radius-sm);
+  gap: 0.75rem;
+  min-height: 54px;
+  padding: 0.55rem 1.25rem;
   border-bottom: 1px solid var(--border);
   transition: background 0.16s;
 }
@@ -1398,12 +1436,19 @@ select.field__input {
 .txrow:hover {
   background: var(--gray-50);
 }
+.txrow__date {
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
 .txrow__icon {
   display: grid;
   place-items: center;
-  width: 2.6rem;
-  height: 2.6rem;
-  border-radius: 12px;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 10px;
   color: var(--c);
   background: color-mix(in srgb, var(--c) 13%, transparent);
 }
@@ -1416,6 +1461,9 @@ select.field__input {
 .txrow__desc {
   font-weight: 600;
   font-size: 0.92rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .txrow__meta {
   display: flex;
@@ -1432,18 +1480,24 @@ select.field__input {
   background: color-mix(in srgb, var(--c) 14%, transparent);
 }
 .txrow__account {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 0.76rem;
   color: var(--text-faint);
 }
 .txrow__amount {
   font-weight: 700;
   font-size: 0.95rem;
+  text-align: right;
+  white-space: nowrap;
 }
 .txrow__amount.is-in {
   color: var(--success-text);
 }
 .txrow__actions {
   display: flex;
+  justify-content: flex-end;
   gap: 0.2rem;
   opacity: 0;
   transition: opacity 0.16s;
@@ -1470,6 +1524,20 @@ select.field__input {
 .icon-btn--danger:hover {
   background: var(--danger-bg);
   color: var(--danger-text);
+}
+
+.tx-load {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--gray-50);
+}
+.tx-load__count {
+  color: var(--text-faint);
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
 .empty {
@@ -1511,16 +1579,34 @@ select.field__input {
     padding-left: 0.1rem;
   }
   .tx-groups {
-    padding: 0.35rem 1rem 0.85rem;
+    padding: 0;
+  }
+  .tx-group__header {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 0.9rem 1rem 0.65rem;
+  }
+  .tx-group__summary {
+    width: 100%;
+    grid-template-columns: 1fr;
+    gap: 0.28rem;
+  }
+  .tx-group__summary div {
+    justify-content: space-between;
   }
   .txrow {
     grid-template-columns: 2.4rem minmax(0, 1fr) minmax(4.8rem, auto);
     grid-template-areas:
       "icon info amount"
-      "icon info actions";
+      "date meta actions";
     column-gap: 0.7rem;
-    row-gap: 0.22rem;
-    padding: 0.7rem 0.25rem;
+    row-gap: 0.32rem;
+    padding: 0.75rem 1rem;
+  }
+  .txrow__date {
+    grid-area: date;
+    align-self: center;
+    font-size: 0.72rem;
   }
   .txrow__icon {
     grid-area: icon;
@@ -1531,10 +1617,15 @@ select.field__input {
   .txrow__info {
     grid-area: info;
   }
-  .txrow__meta {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 0.22rem;
+  .txrow__desc {
+    white-space: normal;
+  }
+  .txrow__category {
+    grid-area: meta;
+    justify-self: start;
+  }
+  .txrow__account {
+    display: none;
   }
   .txrow__amount {
     grid-area: amount;
@@ -1557,6 +1648,15 @@ select.field__input {
   }
   .tx-summary-grid {
     grid-template-columns: 1fr;
+  }
+  .tx-load {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 0.9rem 1rem;
+  }
+  .tx-load .btn-ghost {
+    justify-content: center;
+    width: 100%;
   }
 }
 
