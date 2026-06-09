@@ -28,6 +28,7 @@ function createFinanceData(transactions: Transaction[]): FinanceData {
     ],
     categories: [{ id: 'income', label: 'Income', color: '#22c55e', icon: 'salary' }],
     transactions,
+    savingsGoals: [],
   }
 }
 
@@ -191,6 +192,67 @@ describe('FinanceProvider store', () => {
     expect(result.current.accounts.some((a) => a.id === id)).toBe(false)
   })
 
+  it('creates, updates and deletes a savings goal', () => {
+    const { result } = setup()
+
+    act(() => {
+      result.current.addSavingsGoal({
+        name: 'Emergency fund',
+        targetAmount: 1000,
+        savedAmount: 100,
+        icon: 'piggy',
+        color: '#10b981',
+        accountId: result.current.accounts[0].id,
+      })
+    })
+
+    const added = result.current.savingsGoals.at(-1)
+    expect(added).toEqual(expect.objectContaining({
+      name: 'Emergency fund',
+      savedAmount: 100,
+    }))
+
+    act(() => {
+      result.current.updateSavingsGoal({ id: added?.id ?? '', savedAmount: 250 })
+    })
+    expect(result.current.savingsGoals.find((goal) => goal.id === added?.id)?.savedAmount).toBe(250)
+
+    act(() => {
+      result.current.deleteSavingsGoal(added?.id ?? '')
+    })
+    expect(result.current.savingsGoals.some((goal) => goal.id === added?.id)).toBe(false)
+  })
+
+  it('keeps accounts referenced by savings goals', () => {
+    const { result } = setup()
+    act(() => {
+      result.current.addAccount({
+        name: 'Goal account',
+        type: 'cash',
+        icon: 'wallet',
+        accent: 'indigo',
+        openingBalance: 100,
+      })
+    })
+    const id = result.current.accounts.at(-1)?.id ?? ''
+
+    act(() => {
+      result.current.addSavingsGoal({
+        name: 'Linked goal',
+        targetAmount: 100,
+        savedAmount: 50,
+        icon: 'piggy',
+        color: '#10b981',
+        accountId: id,
+      })
+    })
+    act(() => {
+      result.current.deleteAccount(id)
+    })
+
+    expect(result.current.accounts.some((account) => account.id === id)).toBe(true)
+  })
+
   it('sets the selected month', () => {
     const { result } = setup()
     act(() => {
@@ -225,6 +287,17 @@ describe('FinanceProvider store', () => {
           categoryId: 'income',
         },
       ],
+      savingsGoals: [
+        {
+          id: 'goal-imported',
+          name: 'Imported goal',
+          targetAmount: 100,
+          savedAmount: 25,
+          icon: 'piggy',
+          color: '#10b981',
+          accountId: 'cash',
+        },
+      ],
     }
 
     act(() => {
@@ -233,6 +306,7 @@ describe('FinanceProvider store', () => {
 
     expect(result.current.accounts).toEqual(imported.accounts)
     expect(result.current.transactions).toEqual(imported.transactions)
+    expect(result.current.savingsGoals).toEqual(imported.savingsGoals)
     expect(result.current.selectedMonth).toBe('2026-06')
 
     const raw = localStorage.getItem(FINANCE_STORAGE_KEY)

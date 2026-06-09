@@ -48,6 +48,17 @@ export type Transaction = {
   categoryId: string
 }
 
+export type SavingsGoal = {
+  id: string
+  name: string
+  targetAmount: number
+  savedAmount: number
+  icon: string
+  color: string
+  accountId?: string
+  targetDate?: string
+}
+
 export type TransactionTypeFilter = 'all' | 'income' | 'expense'
 export type TransactionSort = 'date-asc' | 'date-desc' | 'amount-asc' | 'amount-desc' | 'none'
 
@@ -76,6 +87,7 @@ export type FinanceData = {
   accounts: Account[]
   categories: Category[]
   transactions: Transaction[]
+  savingsGoals: SavingsGoal[]
 }
 
 export type FinanceState = FinanceData & {
@@ -92,6 +104,9 @@ export type FinanceAction =
   | { type: 'ADD_ACCOUNT'; payload: Account }
   | { type: 'UPDATE_ACCOUNT'; payload: Partial<Account> & { id: string } }
   | { type: 'DELETE_ACCOUNT'; payload: string }
+  | { type: 'ADD_SAVINGS_GOAL'; payload: SavingsGoal }
+  | { type: 'UPDATE_SAVINGS_GOAL'; payload: Partial<SavingsGoal> & { id: string } }
+  | { type: 'DELETE_SAVINGS_GOAL'; payload: string }
   | { type: 'SET_MONTH'; payload: string }
   | { type: 'IMPORT_DATA'; payload: FinanceData }
   | { type: 'RESET' }
@@ -108,6 +123,9 @@ export interface FinanceContextValue extends FinanceState {
   addAccount: (acc: Omit<Account, 'id'>) => void
   updateAccount: (acc: Partial<Account> & { id: string }) => void
   deleteAccount: (_id: string) => void
+  addSavingsGoal: (goal: Omit<SavingsGoal, 'id'>) => void
+  updateSavingsGoal: (goal: Partial<SavingsGoal> & { id: string }) => void
+  deleteSavingsGoal: (_id: string) => void
   setMonth: (_m: string) => void
   importData: (_data: FinanceData) => void
   reset: () => void

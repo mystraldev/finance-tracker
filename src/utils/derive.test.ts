@@ -42,7 +42,7 @@ const transactions: Transaction[] = [
   { id: 't6', date: '2026-06-20', amount: -150, description: 'Compra 2', accountId: 'checking', categoryId: 'food' },
 ]
 
-const data: FinanceData = { accounts, categories, transactions }
+const data: FinanceData = { accounts, categories, transactions, savingsGoals: [] }
 
 describe('month helpers', () => {
   it('monthKey extracts yyyy-mm', () => {
@@ -158,6 +158,7 @@ describe('recentTransactions', () => {
     const orphan: FinanceData = {
       accounts,
       categories,
+      savingsGoals: [],
       transactions: [{ id: 'x', date: '2026-06-30', amount: -10, description: 'Misterio', accountId: 'checking', categoryId: 'ghost' }],
     }
     expect(recentTransactions(orphan, 1)[0]).toMatchObject({

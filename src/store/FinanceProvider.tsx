@@ -2,7 +2,7 @@ import { useEffect, useMemo, useReducer, type ReactNode } from 'react'
 import { financeRepository } from '../data/financeRepository'
 import { currentMonth } from '../utils/derive'
 import { FinanceContext } from './financeContext'
-import type { Account, Category, FinanceAction, FinanceData, FinanceState, Transaction, TransactionQuery } from '../types/finance'
+import type { Account, Category, FinanceAction, FinanceData, FinanceState, SavingsGoal, Transaction, TransactionQuery } from '../types/finance'
 
 function uid(): string {
   if (typeof globalThis.crypto?.randomUUID === 'function') {
@@ -74,12 +74,30 @@ function reducer(state: FinanceState, action: FinanceAction): FinanceState {
         ),
       }
     case 'DELETE_ACCOUNT':
-      if (state.transactions.some((t) => t.accountId === action.payload)) {
+      if (
+        state.transactions.some((t) => t.accountId === action.payload) ||
+        state.savingsGoals.some((g) => g.accountId === action.payload)
+      ) {
         return state
       }
       return {
         ...state,
         accounts: state.accounts.filter((a) => a.id !== action.payload),
+      }
+
+    case 'ADD_SAVINGS_GOAL':
+      return { ...state, savingsGoals: [...state.savingsGoals, action.payload] }
+    case 'UPDATE_SAVINGS_GOAL':
+      return {
+        ...state,
+        savingsGoals: state.savingsGoals.map((g) =>
+          g.id === action.payload.id ? { ...g, ...action.payload } : g,
+        ),
+      }
+    case 'DELETE_SAVINGS_GOAL':
+      return {
+        ...state,
+        savingsGoals: state.savingsGoals.filter((g) => g.id !== action.payload),
       }
 
     case 'SET_MONTH':
@@ -100,11 +118,11 @@ type FinanceProviderProps = {
 
 export function FinanceProvider({ children }: FinanceProviderProps) {
   const [state, dispatch] = useReducer(reducer, undefined, init)
-  const { accounts, categories, transactions } = state
+  const { accounts, categories, transactions, savingsGoals } = state
 
   useEffect(() => {
-    financeRepository.save({ accounts, categories, transactions })
-  }, [accounts, categories, transactions])
+    financeRepository.save({ accounts, categories, transactions, savingsGoals })
+  }, [accounts, categories, savingsGoals, transactions])
 
   const value = useMemo(
     () => ({
@@ -127,6 +145,12 @@ export function FinanceProvider({ children }: FinanceProviderProps) {
       updateAccount: (acc: Partial<Account> & { id: string }) =>
         dispatch({ type: 'UPDATE_ACCOUNT', payload: acc }),
       deleteAccount: (id: string) => dispatch({ type: 'DELETE_ACCOUNT', payload: id }),
+      addSavingsGoal: (goal: Omit<SavingsGoal, 'id'>) =>
+        dispatch({ type: 'ADD_SAVINGS_GOAL', payload: { id: uid(), ...goal } }),
+      updateSavingsGoal: (goal: Partial<SavingsGoal> & { id: string }) =>
+        dispatch({ type: 'UPDATE_SAVINGS_GOAL', payload: goal }),
+      deleteSavingsGoal: (id: string) =>
+        dispatch({ type: 'DELETE_SAVINGS_GOAL', payload: id }),
       setMonth: (m: string) => dispatch({ type: 'SET_MONTH', payload: m }),
       importData: (data: FinanceData) => dispatch({ type: 'IMPORT_DATA', payload: data }),
       reset: () => dispatch({ type: 'RESET' }),

@@ -48,6 +48,17 @@ const data: FinanceData = {
     { id: 't6', date: '2026-06-20', amount: -25, description: 'Snacks', accountId: 'savings', categoryId: 'food' },
     { id: 't7', date: '2026-06-25', amount: -40, description: 'Café', accountId: 'checking', categoryId: 'food' },
   ],
+  savingsGoals: [
+    {
+      id: 'goal',
+      name: 'Emergency fund',
+      targetAmount: 6000,
+      savedAmount: 1000,
+      icon: 'piggy',
+      color: '#10b981',
+      accountId: 'savings',
+    },
+  ],
 }
 
 function createMemoryStorage(initial: Record<string, string> = {}) {
@@ -103,8 +114,13 @@ describe('financeRepository storage', () => {
 describe('financeRepository validation', () => {
   it('parses complete finance data and rejects malformed data', () => {
     expect(parseFinanceData(data)).toEqual(data)
+    expect(parseFinanceData({ ...data, savingsGoals: undefined })).toEqual({
+      ...data,
+      savingsGoals: [],
+    })
     expect(parseFinanceData({ ...data, categories: undefined })).toBeNull()
     expect(parseFinanceData({ ...data, transactions: [{ ...data.transactions[0], amount: '10' }] })).toBeNull()
+    expect(parseFinanceData({ ...data, savingsGoals: [{ ...data.savingsGoals[0], savedAmount: '10' }] })).toBeNull()
   })
 
   it('clones finance data without sharing array item references', () => {
