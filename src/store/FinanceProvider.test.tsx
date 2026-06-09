@@ -57,13 +57,66 @@ describe('FinanceProvider store', () => {
     expect(result.current.getAvailableMonths()[0]).toBe('2026-06')
   })
 
-  it('deletes a category', () => {
+  it('deletes an unused category', () => {
     const { result } = setup()
-    const id = result.current.categories[0].id
+    act(() => {
+      result.current.addCategory({
+        label: 'Unused',
+        color: '#6366f1',
+        icon: 'home',
+      })
+    })
+    const id = result.current.categories.at(-1)?.id
+
+    expect(id).toBeTruthy()
+
+    act(() => {
+      result.current.deleteCategory(id ?? '')
+    })
+    expect(result.current.categories.some((c) => c.id === id)).toBe(false)
+  })
+
+  it('keeps categories referenced by transactions', () => {
+    const { result } = setup()
+    const id = result.current.transactions[0].categoryId
+
     act(() => {
       result.current.deleteCategory(id)
     })
-    expect(result.current.categories.some((c) => c.id === id)).toBe(false)
+
+    expect(result.current.categories.some((c) => c.id === id)).toBe(true)
+  })
+
+  it('keeps accounts referenced by transactions', () => {
+    const { result } = setup()
+    const id = result.current.transactions[0].accountId
+
+    act(() => {
+      result.current.deleteAccount(id)
+    })
+
+    expect(result.current.accounts.some((a) => a.id === id)).toBe(true)
+  })
+
+  it('deletes an unused account', () => {
+    const { result } = setup()
+    act(() => {
+      result.current.addAccount({
+        name: 'Unused',
+        type: 'cash',
+        icon: 'wallet',
+        accent: 'indigo',
+        openingBalance: 0,
+      })
+    })
+    const id = result.current.accounts.at(-1)?.id
+
+    expect(id).toBeTruthy()
+
+    act(() => {
+      result.current.deleteAccount(id ?? '')
+    })
+    expect(result.current.accounts.some((a) => a.id === id)).toBe(false)
   })
 
   it('sets the selected month', () => {
