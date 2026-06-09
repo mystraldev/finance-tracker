@@ -53,6 +53,7 @@ function createValue(overrides: Partial<FinanceData> = {}): FinanceContextValue 
     updateAccount: vi.fn(),
     deleteAccount: vi.fn(),
     setMonth: vi.fn(),
+    importData: vi.fn(),
     reset: vi.fn(),
   }
 }

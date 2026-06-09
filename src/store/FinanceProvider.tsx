@@ -2,7 +2,7 @@ import { useEffect, useMemo, useReducer, type ReactNode } from 'react'
 import { financeRepository } from '../data/financeRepository'
 import { currentMonth } from '../utils/derive'
 import { FinanceContext } from './financeContext'
-import type { Account, Category, FinanceAction, FinanceState, Transaction, TransactionQuery } from '../types/finance'
+import type { Account, Category, FinanceAction, FinanceData, FinanceState, Transaction, TransactionQuery } from '../types/finance'
 
 function uid(): string {
   if (typeof globalThis.crypto?.randomUUID === 'function') {
@@ -69,6 +69,8 @@ function reducer(state: FinanceState, action: FinanceAction): FinanceState {
 
     case 'SET_MONTH':
       return { ...state, selectedMonth: action.payload }
+    case 'IMPORT_DATA':
+      return { ...action.payload, selectedMonth: currentMonth() }
     case 'RESET':
       return { ...financeRepository.seed(), selectedMonth: currentMonth() }
 
@@ -111,6 +113,7 @@ export function FinanceProvider({ children }: FinanceProviderProps) {
         dispatch({ type: 'UPDATE_ACCOUNT', payload: acc }),
       deleteAccount: (id: string) => dispatch({ type: 'DELETE_ACCOUNT', payload: id }),
       setMonth: (m: string) => dispatch({ type: 'SET_MONTH', payload: m }),
+      importData: (data: FinanceData) => dispatch({ type: 'IMPORT_DATA', payload: data }),
       reset: () => dispatch({ type: 'RESET' }),
     }),
     [state],

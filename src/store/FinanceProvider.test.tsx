@@ -74,6 +74,43 @@ describe('FinanceProvider store', () => {
     expect(result.current.selectedMonth).toBe('2025-01')
   })
 
+  it('imports validated finance data and persists it', () => {
+    const { result } = setup()
+    const imported = {
+      accounts: [
+        {
+          id: 'cash',
+          name: 'Cash',
+          type: 'cash' as const,
+          icon: 'wallet',
+          accent: 'indigo',
+          openingBalance: 25,
+        },
+      ],
+      categories: [{ id: 'income', label: 'Income', color: '#22c55e', icon: 'salary' }],
+      transactions: [
+        {
+          id: 't-imported',
+          date: '2026-06-09',
+          amount: 25,
+          description: 'Imported',
+          accountId: 'cash',
+          categoryId: 'income',
+        },
+      ],
+    }
+
+    act(() => {
+      result.current.importData(imported)
+    })
+
+    expect(result.current.accounts).toEqual(imported.accounts)
+    expect(result.current.transactions).toEqual(imported.transactions)
+
+    const raw = localStorage.getItem(FINANCE_STORAGE_KEY)
+    expect(JSON.parse(raw ?? '{}')).toEqual(imported)
+  })
+
   it('resets to the seed and persists to localStorage', () => {
     const { result } = setup()
     act(() => {
