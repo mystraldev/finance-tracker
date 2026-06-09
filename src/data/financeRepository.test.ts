@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import type { FinanceData } from '../types/finance'
 import {
+  FINANCE_BACKUP_APP,
+  FINANCE_BACKUP_VERSION,
   FINANCE_STORAGE_KEY,
   availableTransactionMonths,
   cloneFinanceData,
+  createFinanceBackup,
   createLocalStorageFinanceRepository,
   listTransactions,
+  parseFinanceBackup,
   parseFinanceData,
   transactionMonthKey,
 } from './financeRepository'
@@ -108,6 +112,26 @@ describe('financeRepository validation', () => {
     clone.categories[0].label = 'Changed'
 
     expect(data.categories[0].label).toBe('Income')
+  })
+
+  it('creates and parses backup files with metadata', () => {
+    const backup = createFinanceBackup(data, '2026-06-09T10:00:00.000Z')
+
+    expect(backup).toEqual({
+      app: FINANCE_BACKUP_APP,
+      version: FINANCE_BACKUP_VERSION,
+      exportedAt: '2026-06-09T10:00:00.000Z',
+      data,
+    })
+    expect(parseFinanceBackup(backup)).toEqual(data)
+  })
+
+  it('rejects malformed backup files', () => {
+    const backup = createFinanceBackup(data)
+
+    expect(parseFinanceBackup({ ...backup, app: 'other-app' })).toBeNull()
+    expect(parseFinanceBackup({ ...backup, version: 999 })).toBeNull()
+    expect(parseFinanceBackup({ ...backup, data: { ...data, accounts: 'bad' } })).toBeNull()
   })
 })
 

@@ -8,7 +8,7 @@ const navItems = [
   { id: 'categories', label: 'Categorías', icon: 'categories', to: '/categorias' },
   { id: 'accounts', label: 'Cuentas', icon: 'accounts', to: '/cuentas' },
   { id: 'investments', label: 'Inversiones', icon: 'investments' },
-  { id: 'settings', label: 'Ajustes', icon: 'settings' },
+  { id: 'settings', label: 'Ajustes', icon: 'settings', to: '/ajustes' },
 ]
 
 function Sidebar() {

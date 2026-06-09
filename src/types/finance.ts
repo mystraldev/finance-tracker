@@ -92,6 +92,7 @@ export type FinanceAction =
   | { type: 'UPDATE_ACCOUNT'; payload: Partial<Account> & { id: string } }
   | { type: 'DELETE_ACCOUNT'; payload: string }
   | { type: 'SET_MONTH'; payload: string }
+  | { type: 'IMPORT_DATA'; payload: FinanceData }
   | { type: 'RESET' }
 
 export interface FinanceContextValue extends FinanceState {
@@ -107,5 +108,6 @@ export interface FinanceContextValue extends FinanceState {
   updateAccount: (acc: Partial<Account> & { id: string }) => void
   deleteAccount: (_id: string) => void
   setMonth: (_m: string) => void
+  importData: (_data: FinanceData) => void
   reset: () => void
 }

@@ -2,8 +2,17 @@ import { seed } from './finance'
 import type { Account, Category, FinanceData, Transaction, TransactionQuery } from '../types/finance'
 
 export const FINANCE_STORAGE_KEY = 'finance-tracker:v2'
+export const FINANCE_BACKUP_APP = 'finance-tracker'
+export const FINANCE_BACKUP_VERSION = 1
 
 type StorageLike = Pick<Storage, 'getItem' | 'setItem'>
+
+export type FinanceBackup = {
+  app: typeof FINANCE_BACKUP_APP
+  version: typeof FINANCE_BACKUP_VERSION
+  exportedAt: string
+  data: FinanceData
+}
 
 export interface FinanceRepository {
   load(): FinanceData
@@ -69,6 +78,18 @@ export function cloneFinanceData(data: FinanceData): FinanceData {
   }
 }
 
+export function createFinanceBackup(
+  data: FinanceData,
+  exportedAt = new Date().toISOString(),
+): FinanceBackup {
+  return {
+    app: FINANCE_BACKUP_APP,
+    version: FINANCE_BACKUP_VERSION,
+    exportedAt,
+    data: cloneFinanceData(data),
+  }
+}
+
 export function parseFinanceData(value: unknown): FinanceData | null {
   if (!isRecord(value)) return null
   if (
@@ -90,6 +111,18 @@ export function parseFinanceData(value: unknown): FinanceData | null {
     categories: value.categories,
     transactions: value.transactions,
   })
+}
+
+export function parseFinanceBackup(value: unknown): FinanceData | null {
+  if (!isRecord(value)) return null
+  if (
+    value.app !== FINANCE_BACKUP_APP ||
+    value.version !== FINANCE_BACKUP_VERSION ||
+    !isString(value.exportedAt)
+  ) {
+    return null
+  }
+  return parseFinanceData(value.data)
 }
 
 export function transactionMonthKey(date: string): string {
