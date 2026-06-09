@@ -144,10 +144,14 @@ describe('categories', () => {
 })
 
 describe('recentTransactions', () => {
-  it('returns the latest transactions enriched with category label and icon', () => {
+  it('returns the latest transactions enriched with category label, icon and color', () => {
     const recent = recentTransactions(data, 3)
     expect(recent.map((t) => t.id)).toEqual(['t6', 't5', 't4'])
-    expect(recent[0]).toMatchObject({ category: 'Alimentación', icon: 'cart' })
+    expect(recent[0]).toMatchObject({
+      category: 'Alimentación',
+      icon: 'cart',
+      color: '#10b981',
+    })
   })
 
   it('falls back gracefully for an unknown category', () => {
@@ -156,7 +160,11 @@ describe('recentTransactions', () => {
       categories,
       transactions: [{ id: 'x', date: '2026-06-30', amount: -10, description: 'Misterio', accountId: 'checking', categoryId: 'ghost' }],
     }
-    expect(recentTransactions(orphan, 1)[0]).toMatchObject({ category: 'Sin categoría', icon: 'package' })
+    expect(recentTransactions(orphan, 1)[0]).toMatchObject({
+      category: 'Sin categoría',
+      icon: 'package',
+      color: '#64748b',
+    })
   })
 })
 

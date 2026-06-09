@@ -161,5 +161,6 @@ export function recentTransactions(state: FinanceData, n = 6): EnrichedTransacti
       ...t,
       category: cats[t.categoryId]?.label ?? 'Sin categoría',
       icon: cats[t.categoryId]?.icon ?? 'package',
+      color: cats[t.categoryId]?.color ?? '#64748b',
     }))
 }
