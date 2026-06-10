@@ -115,6 +115,20 @@ describe('TransactionsPage', () => {
     expect(screen.getByText('Compra semanal')).toBeInTheDocument()
   })
 
+  it('offers to clear filters when only the sort order changes', () => {
+    renderPage()
+
+    expect(screen.queryByRole('button', { name: 'Limpiar' })).not.toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText('Orden'), { target: { value: 'amount-desc' } })
+
+    const clear = screen.getByRole('button', { name: 'Limpiar' })
+    fireEvent.click(clear)
+
+    expect(screen.getByLabelText('Orden')).toHaveValue('date-desc')
+    expect(screen.queryByRole('button', { name: 'Limpiar' })).not.toBeInTheDocument()
+  })
+
   it('shows a filtered empty state when no result matches', () => {
     renderPage()
 
