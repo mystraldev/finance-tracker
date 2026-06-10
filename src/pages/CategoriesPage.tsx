@@ -13,7 +13,7 @@ import type { Category } from '../types/finance'
 const INCOME_CATEGORY_ID = 'income'
 
 function CategoriesPage() {
-  const { categories, transactions, recurringRules, selectedMonth, getTransactions, addCategory, updateCategory, deleteCategory } =
+  const { categories, transactions, selectedMonth, getTransactions, addCategory, updateCategory, deleteCategory } =
     useFinance()
 
   const selectedMonthTransactions = getTransactions({ month: selectedMonth })
@@ -39,11 +39,9 @@ function CategoriesPage() {
   }
 
   const usageCount = (id: string) => transactions.filter((t) => t.categoryId === id).length
-  const recurringUsageCount = (id: string) =>
-    recurringRules.filter((rule) => rule.type !== 'transfer' && rule.categoryId === id).length
 
   function handleDelete(cat: Category) {
-    if (usageCount(cat.id) > 0 || recurringUsageCount(cat.id) > 0) setBlocked(cat)
+    if (usageCount(cat.id) > 0) setBlocked(cat)
     else setDeleting(cat)
   }
 
@@ -160,8 +158,8 @@ function CategoriesPage() {
       {blocked && (
         <Modal title="No se puede borrar" onClose={() => setBlocked(null)}>
           <p className="confirm__message">
-            La categoría <strong>{blocked.label}</strong> tiene movimientos o reglas recurrentes asociadas.
-            Reasígnalos o bórralos antes de eliminarla.
+            La categoría <strong>{blocked.label}</strong> tiene movimientos asociados.
+            Reasigna o borra esos movimientos antes de eliminarla.
           </p>
           <div className="form__actions">
             <button type="button" className="btn-primary" onClick={() => setBlocked(null)}>

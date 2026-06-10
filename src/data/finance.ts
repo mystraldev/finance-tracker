@@ -1,13 +1,4 @@
-import type {
-  Account,
-  Category,
-  FinanceData,
-  RecurringRule,
-  RecurringSkip,
-  SavingsGoal,
-  Transaction,
-  Transfer,
-} from '../types/finance'
+import type { Account, Category, FinanceData, SavingsGoal, Transaction } from '../types/finance'
 
 export const accounts: Account[] = [
   {
@@ -70,8 +61,6 @@ function buildTransactions(): Transaction[] {
       description: 'Nómina',
       date: `${month}-01`,
       amount: 3200,
-      recurringRuleId: 'rule-payroll',
-      recurrenceMonth: month,
     })
     EXPENSE_TEMPLATE.forEach((e) => {
       const factor = e.fixed ? 1 : VARIATION[i]
@@ -83,8 +72,6 @@ function buildTransactions(): Transaction[] {
         description: e.description,
         date: `${month}-${String(e.day).padStart(2, '0')}`,
         amount: -amount,
-        recurringRuleId: e.categoryId === 'home' ? 'rule-rent' : undefined,
-        recurrenceMonth: e.categoryId === 'home' ? month : undefined,
       })
     })
   })
@@ -92,60 +79,6 @@ function buildTransactions(): Transaction[] {
 }
 
 export const transactions: Transaction[] = buildTransactions()
-
-export const transfers: Transfer[] = [
-  {
-    id: 'seed-2026-06-savings-transfer',
-    fromAccountId: 'checking',
-    toAccountId: 'savings',
-    description: 'Aportación a ahorro',
-    date: '2026-06-04',
-    amount: 500,
-    recurringRuleId: 'rule-savings-transfer',
-    recurrenceMonth: '2026-06',
-  },
-]
-
-export const recurringRules: RecurringRule[] = [
-  {
-    id: 'rule-payroll',
-    type: 'income',
-    description: 'Nómina',
-    amount: 3200,
-    dayOfMonth: 1,
-    accountId: 'checking',
-    categoryId: 'income',
-    startMonth: '2026-01',
-    active: true,
-    frequency: 'monthly',
-  },
-  {
-    id: 'rule-rent',
-    type: 'expense',
-    description: 'Alquiler',
-    amount: 850,
-    dayOfMonth: 2,
-    accountId: 'checking',
-    categoryId: 'home',
-    startMonth: '2026-01',
-    active: true,
-    frequency: 'monthly',
-  },
-  {
-    id: 'rule-savings-transfer',
-    type: 'transfer',
-    description: 'Aportación a ahorro',
-    amount: 500,
-    dayOfMonth: 4,
-    fromAccountId: 'checking',
-    toAccountId: 'savings',
-    startMonth: '2026-06',
-    active: true,
-    frequency: 'monthly',
-  },
-]
-
-export const recurringSkips: RecurringSkip[] = []
 
 export const savingsGoals: SavingsGoal[] = [
   {
@@ -169,12 +102,4 @@ export const savingsGoals: SavingsGoal[] = [
   },
 ]
 
-export const seed: FinanceData = {
-  accounts,
-  categories,
-  transactions,
-  transfers,
-  recurringRules,
-  recurringSkips,
-  savingsGoals,
-}
+export const seed: FinanceData = { accounts, categories, transactions, savingsGoals }

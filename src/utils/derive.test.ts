@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Account, Category, FinanceData, Transaction, Transfer } from '../types/finance'
+import type { Account, Category, FinanceData, Transaction } from '../types/finance'
 import {
   accountBalanceAsOf,
   accountSeries,
@@ -18,7 +18,6 @@ import {
   monthsBack,
   netWorthAsOf,
   netWorthSeries,
-  recentActivities,
   recentTransactions,
   shortMonthLabel,
 } from './derive'
@@ -43,26 +42,7 @@ const transactions: Transaction[] = [
   { id: 't6', date: '2026-06-20', amount: -150, description: 'Compra 2', accountId: 'checking', categoryId: 'food' },
 ]
 
-const data: FinanceData = {
-  accounts,
-  categories,
-  transactions,
-  transfers: [],
-  recurringRules: [],
-  recurringSkips: [],
-  savingsGoals: [],
-}
-
-const transfers: Transfer[] = [
-  {
-    id: 'tr1',
-    date: '2026-06-30',
-    amount: 300,
-    description: 'Ahorro',
-    fromAccountId: 'checking',
-    toAccountId: 'savings',
-  },
-]
+const data: FinanceData = { accounts, categories, transactions, savingsGoals: [] }
 
 describe('month helpers', () => {
   it('monthKey extracts yyyy-mm', () => {
@@ -122,13 +102,6 @@ describe('balances and net worth', () => {
     expect(withBalance.map((a) => a.balance)).toEqual([3600, 5000])
   })
 
-  it('applies transfers to account balances without changing total net worth', () => {
-    const withTransfers = { ...data, transfers }
-
-    expect(accountsWithBalance(withTransfers).map((a) => a.balance)).toEqual([3300, 5300])
-    expect(netWorthAsOf(withTransfers)).toBe(8600)
-  })
-
   it('netWorthAsOf totals all accounts', () => {
     expect(netWorthAsOf(data)).toBe(8600)
     expect(netWorthAsOf(data, '2026-05')).toBe(7500)
@@ -185,9 +158,6 @@ describe('recentTransactions', () => {
     const orphan: FinanceData = {
       accounts,
       categories,
-      transfers: [],
-      recurringRules: [],
-      recurringSkips: [],
       savingsGoals: [],
       transactions: [{ id: 'x', date: '2026-06-30', amount: -10, description: 'Misterio', accountId: 'checking', categoryId: 'ghost' }],
     }
@@ -196,11 +166,6 @@ describe('recentTransactions', () => {
       icon: 'package',
       color: '#64748b',
     })
-  })
-
-  it('returns recent activities with transfers included', () => {
-    const recent = recentActivities({ ...data, transfers }, 1)
-    expect(recent[0]).toMatchObject({ kind: 'transfer', id: 'tr1' })
   })
 })
 

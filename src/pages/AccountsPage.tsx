@@ -19,8 +19,6 @@ function AccountsPage() {
   const state = useFinance()
   const {
     transactions,
-    transfers,
-    recurringRules,
     savingsGoals,
     addAccount,
     updateAccount,
@@ -45,23 +43,10 @@ function AccountsPage() {
   const totalTarget = savingsGoals.reduce((sum, goal) => sum + goal.targetAmount, 0)
 
   const usageCount = (id: string) => transactions.filter((t) => t.accountId === id).length
-  const transferUsageCount = (id: string) =>
-    transfers.filter((transfer) => transfer.fromAccountId === id || transfer.toAccountId === id).length
-  const recurringUsageCount = (id: string) =>
-    recurringRules.filter((rule) =>
-      rule.type === 'transfer'
-        ? rule.fromAccountId === id || rule.toAccountId === id
-        : rule.accountId === id,
-    ).length
   const goalUsageCount = (id: string) => savingsGoals.filter((goal) => goal.accountId === id).length
 
   function handleDelete(acc: Account) {
-    if (
-      usageCount(acc.id) > 0 ||
-      transferUsageCount(acc.id) > 0 ||
-      recurringUsageCount(acc.id) > 0 ||
-      goalUsageCount(acc.id) > 0
-    ) setBlocked(acc)
+    if (usageCount(acc.id) > 0 || goalUsageCount(acc.id) > 0) setBlocked(acc)
     else setDeleting(acc)
   }
 
@@ -228,8 +213,6 @@ function AccountsPage() {
               {TYPE_LABEL[a.type] ?? a.type}
               {a.type === 'savings' && a.interestRate != null && ` · ${formatPercent(a.interestRate)} TAE`}
               {` · ${usageCount(a.id)} mov.`}
-              {transferUsageCount(a.id) > 0 && ` · ${transferUsageCount(a.id)} trasp.`}
-              {recurringUsageCount(a.id) > 0 && ` · ${recurringUsageCount(a.id)} rec.`}
               {goalUsageCount(a.id) > 0 && ` · ${goalUsageCount(a.id)} obj.`}
             </span>
           </article>
@@ -276,7 +259,7 @@ function AccountsPage() {
       {blocked && (
         <Modal title="No se puede borrar" onClose={() => setBlocked(null)}>
           <p className="confirm__message">
-            La cuenta <strong>{blocked.name}</strong> tiene movimientos, traspasos, reglas u objetivos asociados.
+            La cuenta <strong>{blocked.name}</strong> tiene movimientos u objetivos asociados.
             Reasígnalos o bórralos antes de eliminarla.
           </p>
           <div className="form__actions">

@@ -26,32 +26,14 @@ function backupFileName() {
 }
 
 function SettingsPage() {
-  const {
-    accounts,
-    categories,
-    transactions,
-    transfers,
-    recurringRules,
-    recurringSkips,
-    savingsGoals,
-    importData,
-    reset,
-  } = useFinance()
+  const { accounts, categories, transactions, savingsGoals, importData, reset } = useFinance()
   const { mode, theme, systemTheme, setMode } = useTheme()
   const [status, setStatus] = useState<Status | null>(null)
   const [confirmingReset, setConfirmingReset] = useState(false)
   const inputRef = useRef<HTMLInputElement | null>(null)
 
   function handleExport() {
-    const backup = createFinanceBackup({
-      accounts,
-      categories,
-      transactions,
-      transfers,
-      recurringRules,
-      recurringSkips,
-      savingsGoals,
-    })
+    const backup = createFinanceBackup({ accounts, categories, transactions, savingsGoals })
     const blob = new Blob([JSON.stringify(backup, null, 2)], {
       type: 'application/json',
     })
@@ -122,8 +104,7 @@ function SettingsPage() {
               <h2 className="card__title">Datos locales</h2>
               <p className="settings-card__copy">
                 {accounts.length} cuentas · {categories.length} categorías · {transactions.length}{' '}
-                movimientos · {transfers.length} traspasos · {recurringRules.length} reglas ·{' '}
-                {savingsGoals.length} objetivos
+                movimientos · {savingsGoals.length} objetivos
               </p>
             </div>
           </div>

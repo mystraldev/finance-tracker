@@ -1,7 +1,6 @@
-import type { Account, AccountWithBalance, BudgetPaceStatus, BudgetStatus, Category, CategoryBreakdownItem, CategoryBudget, EnrichedTransaction, FinanceActivity, FinanceData, SparklineDatum, Transaction, Transfer } from '../types/finance'
-import { availableTransactionMonths, listActivities, listTransactions, transactionMonthKey } from '../data/financeRepository'
+import type { Account, AccountWithBalance, BudgetStatus, Category, CategoryBreakdownItem, CategoryBudget, EnrichedTransaction, FinanceData, SparklineDatum, Transaction } from '../types/finance'
+import { availableTransactionMonths, listTransactions, transactionMonthKey } from '../data/financeRepository'
 import { fractionOf } from './math'
-import { monthProgress } from './validation'
 
 const BUDGET_WARNING_RATIO = 0.8
 
@@ -57,13 +56,13 @@ export function shortMonthLabel(month: string): string {
 
 export function monthTransactions(transactions: Transaction[], month: string): Transaction[] {
   return listTransactions(
-    { accounts: [], categories: [], transactions, transfers: [], recurringRules: [], recurringSkips: [], savingsGoals: [] },
+    { accounts: [], categories: [], transactions, savingsGoals: [] },
     { month },
   )
 }
 
 export function availableMonths(transactions: Transaction[]): string[] {
-  return availableTransactionMonths({ accounts: [], categories: [], transactions, transfers: [], recurringRules: [], recurringSkips: [], savingsGoals: [] })
+  return availableTransactionMonths({ accounts: [], categories: [], transactions, savingsGoals: [] })
 }
 
 export function incomeExpenses(transactions: Transaction[], month: string): { income: number; expenses: number; saved: number } {
@@ -75,48 +74,31 @@ export function incomeExpenses(transactions: Transaction[], month: string): { in
   return { income, expenses, saved: income - expenses }
 }
 
-export function accountBalanceAsOf(
-  account: Account,
-  transactions: Transaction[],
-  month: string | null = null,
-  transfers: Transfer[] = [],
-): number {
-  const transactionSum = transactions
+export function accountBalanceAsOf(account: Account, transactions: Transaction[], month: string | null = null): number {
+  const sum = transactions
     .filter((t) => t.accountId === account.id && (!month || monthKey(t.date) <= month))
     .reduce((s, t) => s + t.amount, 0)
-  const transferSum = transfers
-    .filter((t) => !month || monthKey(t.date) <= month)
-    .reduce((sum, transfer) => {
-      if (transfer.toAccountId === account.id) return sum + transfer.amount
-      if (transfer.fromAccountId === account.id) return sum - transfer.amount
-      return sum
-    }, 0)
-  return account.openingBalance + transactionSum + transferSum
+  return account.openingBalance + sum
 }
 
 export function accountsWithBalance(state: FinanceData, month: string | null = null): AccountWithBalance[] {
   return state.accounts.map((a) => ({
     ...a,
-    balance: accountBalanceAsOf(a, state.transactions, month, state.transfers),
+    balance: accountBalanceAsOf(a, state.transactions, month),
   }))
 }
 
 export function netWorthAsOf(state: FinanceData, month: string | null = null): number {
   return state.accounts.reduce(
-    (sum, a) => sum + accountBalanceAsOf(a, state.transactions, month, state.transfers),
+    (sum, a) => sum + accountBalanceAsOf(a, state.transactions, month),
     0,
   )
 }
 
-export function monthlyGrowthRate(
-  account: Account,
-  transactions: Transaction[],
-  month: string,
-  transfers: Transfer[] = [],
-): number {
+export function monthlyGrowthRate(account: Account, transactions: Transaction[], month: string): number {
   const [prev] = monthsBack(month, 2)
-  const cur = accountBalanceAsOf(account, transactions, month, transfers)
-  const before = accountBalanceAsOf(account, transactions, prev, transfers)
+  const cur = accountBalanceAsOf(account, transactions, month)
+  const before = accountBalanceAsOf(account, transactions, prev)
   return fractionOf(cur - before, before)
 }
 
@@ -127,15 +109,9 @@ export function netWorthSeries(state: FinanceData, n: number, endMonth: string):
   }))
 }
 
-export function accountSeries(
-  account: Account,
-  transactions: Transaction[],
-  n: number,
-  endMonth: string,
-  transfers: Transfer[] = [],
-): number[] {
+export function accountSeries(account: Account, transactions: Transaction[], n: number, endMonth: string): number[] {
   return monthsBack(endMonth, n).map((m) =>
-    accountBalanceAsOf(account, transactions, m, transfers),
+    accountBalanceAsOf(account, transactions, m),
   )
 }
 
@@ -166,15 +142,6 @@ export function categoryBudgets(transactions: Transaction[], categories: Categor
       spentByCat.set(t.categoryId, (spentByCat.get(t.categoryId) || 0) + Math.abs(t.amount))
     })
 
-  const { elapsedRatio, daysRemaining } = monthProgress(month)
-  const previousMonth = addMonths(month, -1)
-  const previousSpentByCat = new Map<string, number>()
-  monthTransactions(transactions, previousMonth)
-    .filter((t) => t.amount < 0)
-    .forEach((t) => {
-      previousSpentByCat.set(t.categoryId, (previousSpentByCat.get(t.categoryId) || 0) + Math.abs(t.amount))
-    })
-
   return categories
     .filter((c): c is Category & { budget: number } => typeof c.budget === 'number' && c.budget > 0)
     .map((c) => {
@@ -182,28 +149,7 @@ export function categoryBudgets(transactions: Transaction[], categories: Categor
       const pct = fractionOf(spent, c.budget)
       const status: BudgetStatus =
         spent > c.budget ? 'over' : pct >= BUDGET_WARNING_RATIO ? 'warning' : 'ok'
-      const projectedSpend = elapsedRatio > 0 ? spent / elapsedRatio : spent
-      const paceStatus: BudgetPaceStatus = spent > c.budget
-        ? 'over'
-        : projectedSpend > c.budget
-          ? 'at-risk'
-          : 'on-track'
-      const remaining = c.budget - spent
-      const previousSpent = previousSpentByCat.get(c.id) || 0
-      return {
-        ...c,
-        budget: c.budget,
-        spent,
-        remaining,
-        pct,
-        status,
-        paceStatus,
-        expectedPct: elapsedRatio,
-        projectedSpend,
-        dailyRemaining: remaining > 0 && daysRemaining > 0 ? remaining / daysRemaining : 0,
-        previousSpent,
-        previousDelta: spent - previousSpent,
-      }
+      return { ...c, budget: c.budget, spent, remaining: c.budget - spent, pct, status }
     })
     .sort((a, b) => b.pct - a.pct)
 }
@@ -217,8 +163,4 @@ export function recentTransactions(state: FinanceData, n = 6): EnrichedTransacti
       icon: cats[t.categoryId]?.icon ?? 'package',
       color: cats[t.categoryId]?.color ?? '#64748b',
     }))
-}
-
-export function recentActivities(state: FinanceData, n = 6): FinanceActivity[] {
-  return listActivities(state, { sort: 'date-desc', limit: n })
 }

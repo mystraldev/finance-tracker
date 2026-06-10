@@ -2,7 +2,6 @@ import { useState } from 'react'
 import Icon from '../components/Icon'
 import Modal from '../components/Modal'
 import TransactionForm from '../components/TransactionForm'
-import TransferForm from '../components/TransferForm'
 import ConfirmDialog from '../components/ConfirmDialog'
 import AddTransactionButton from '../components/AddTransactionButton'
 import { useFinance } from '../store/financeContext'
@@ -12,21 +11,12 @@ import {
   monthLabel,
 } from '../utils/derive'
 import { formatCurrency, formatDate, formatSignedCurrency } from '../utils/format'
-import type { FinanceActivity, Transaction, TransactionSort, Transfer } from '../types/finance'
+import type { Transaction, TransactionSort } from '../types/finance'
 
 const PAGE_SIZE = 24
 
 function TransactionsPage() {
-  const {
-    categories,
-    accounts,
-    getActivities,
-    getAvailableMonths,
-    updateTransaction,
-    deleteTransaction,
-    updateTransfer,
-    deleteTransfer,
-  } =
+  const { categories, accounts, getTransactions, getAvailableMonths, updateTransaction, deleteTransaction } =
     useFinance()
 
   const cats = categoryMap(categories)
@@ -40,42 +30,32 @@ function TransactionsPage() {
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState<TransactionSort>('date-desc')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
-  const [editingTransfer, setEditingTransfer] = useState<Transfer | null>(null)
-  const [deleting, setDeleting] = useState<FinanceActivity | null>(null)
+  const [editing, setEditing] = useState<Transaction | null>(null)
+  const [deleting, setDeleting] = useState<Transaction | null>(null)
 
-  const allActivities = getActivities({ sort: 'date-desc' })
-  const filtered = getActivities({
+  const allTransactions = getTransactions({ sort: 'date-desc' })
+  const filtered = getTransactions({
     month,
     categoryId,
     accountId,
-    type:
-      type === 'ingreso'
-        ? 'income'
-        : type === 'gasto'
-          ? 'expense'
-          : type === 'traspaso'
-            ? 'transfer'
-            : 'all',
+    type: type === 'ingreso' ? 'income' : type === 'gasto' ? 'expense' : 'all',
     search,
     sort,
   })
 
-  const transactionActivities = filtered.filter((activity) => activity.kind === 'transaction')
-  const income = transactionActivities.filter((t) => t.amount > 0).reduce((s, t) => s + t.amount, 0)
+  const income = filtered.filter((t) => t.amount > 0).reduce((s, t) => s + t.amount, 0)
   const expenses = filtered
-    .filter((t) => t.kind === 'transaction' && t.amount < 0)
+    .filter((t) => t.amount < 0)
     .reduce((s, t) => s + Math.abs(t.amount), 0)
   const net = income - expenses
-  const transferCount = filtered.filter((activity) => activity.kind === 'transfer').length
 
-  const visibleActivities = filtered.slice(0, visibleCount)
-  const hasMore = filtered.length > visibleActivities.length
+  const visibleTransactions = filtered.slice(0, visibleCount)
+  const hasMore = filtered.length > visibleTransactions.length
   const groups = (() => {
-    const byMonth = new Map<string, FinanceActivity[]>()
-    visibleActivities.forEach((activity) => {
-      const key = monthKey(activity.date)
-      byMonth.set(key, [...(byMonth.get(key) ?? []), activity])
+    const byMonth = new Map<string, Transaction[]>()
+    visibleTransactions.forEach((transaction) => {
+      const key = monthKey(transaction.date)
+      byMonth.set(key, [...(byMonth.get(key) ?? []), transaction])
     })
 
     return [...byMonth.entries()]
@@ -85,10 +65,10 @@ function TransactionsPage() {
       })
       .map(([month, items]) => {
         const income = items
-          .filter((activity) => activity.kind === 'transaction' && activity.amount > 0)
+          .filter((transaction) => transaction.amount > 0)
           .reduce((sum, transaction) => sum + transaction.amount, 0)
         const expenses = items
-          .filter((activity) => activity.kind === 'transaction' && activity.amount < 0)
+          .filter((transaction) => transaction.amount < 0)
           .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
         return {
           month,
@@ -96,7 +76,6 @@ function TransactionsPage() {
           income,
           expenses,
           net: income - expenses,
-          transferCount: items.filter((activity) => activity.kind === 'transfer').length,
         }
       })
   })()
@@ -121,7 +100,7 @@ function TransactionsPage() {
     accountId !== 'all' ||
     type !== 'all' ||
     search.trim() !== ''
-  const hasTransactions = allActivities.length > 0
+  const hasTransactions = allTransactions.length > 0
 
   return (
     <>
@@ -163,7 +142,6 @@ function TransactionsPage() {
             <option value="all">Ingresos y gastos</option>
             <option value="gasto">Solo gastos</option>
             <option value="ingreso">Solo ingresos</option>
-            <option value="traspaso">Solo traspasos</option>
           </select>
           <select
             className="filters__select"
@@ -212,7 +190,7 @@ function TransactionsPage() {
 
       <div className="tx-summary-grid" aria-label="Resumen filtrado">
         <div className="tx-stat">
-          <span className="tx-stat__label">Actividades</span>
+          <span className="tx-stat__label">Movimientos</span>
           <span className="tx-stat__value tnum">{filtered.length}</span>
         </div>
         <div className="tx-stat">
@@ -222,10 +200,6 @@ function TransactionsPage() {
         <div className="tx-stat">
           <span className="tx-stat__label">Gastos</span>
           <span className="tx-stat__value tnum">{formatCurrency(expenses)}</span>
-        </div>
-        <div className="tx-stat">
-          <span className="tx-stat__label">Traspasos</span>
-          <span className="tx-stat__value tnum">{transferCount}</span>
         </div>
         <div className="tx-stat">
           <span className="tx-stat__label">Neto</span>
@@ -265,10 +239,6 @@ function TransactionsPage() {
                     <dd className="tnum">{formatCurrency(g.expenses)}</dd>
                   </div>
                   <div>
-                    <dt>Traspasos</dt>
-                    <dd className="tnum">{g.transferCount}</dd>
-                  </div>
-                  <div>
                     <dt>Neto</dt>
                     <dd className={`tnum ${g.net >= 0 ? 'is-in' : ''}`}>
                       {formatSignedCurrency(g.net)}
@@ -278,11 +248,8 @@ function TransactionsPage() {
               </header>
               <ul className="txrow-list">
                 {g.items.map((t) => {
-                  const transfer = t.kind === 'transfer'
-                  const cat = transfer ? null : cats[t.categoryId]
-                  const income = !transfer && t.amount > 0
-                  const from = transfer ? accById[t.fromAccountId]?.name ?? 'Cuenta origen' : ''
-                  const to = transfer ? accById[t.toAccountId]?.name ?? 'Cuenta destino' : ''
+                  const cat = cats[t.categoryId]
+                  const income = t.amount > 0
                   return (
                     <li key={t.id} className="txrow">
                       <time className="txrow__date" dateTime={t.date}>
@@ -290,31 +257,28 @@ function TransactionsPage() {
                       </time>
                       <span
                         className="txrow__icon"
-                        style={{ '--c': transfer ? '#6366f1' : income ? '#10b981' : cat?.color ?? '#94a3b8' } as Record<string, string>}
+                        style={{ '--c': income ? '#10b981' : cat?.color ?? '#94a3b8' } as Record<string, string>}
                       >
-                        <Icon name={transfer ? 'transfer' : cat?.icon ?? 'package'} size={18} />
+                        <Icon name={cat?.icon ?? 'package'} size={18} />
                       </span>
                       <div className="txrow__info">
                         <span className="txrow__desc">{t.description}</span>
                       </div>
                       <span className="pill txrow__category" style={{ '--c': cat?.color ?? '#94a3b8' } as Record<string, string>}>
-                        {transfer ? 'Traspaso' : cat?.label ?? 'Sin categoría'}
+                        {cat?.label ?? 'Sin categoría'}
                       </span>
                       <span className="txrow__account">
-                        {transfer ? `${from} → ${to}` : accById[t.accountId]?.name ?? 'Cuenta'}
+                        {accById[t.accountId]?.name ?? 'Cuenta'}
                       </span>
-                      <span className={`txrow__amount tnum ${income ? 'is-in' : ''} ${transfer ? 'is-transfer' : ''}`}>
-                        {transfer ? formatCurrency(t.amount) : formatSignedCurrency(t.amount)}
+                      <span className={`txrow__amount tnum ${income ? 'is-in' : ''}`}>
+                        {formatSignedCurrency(t.amount)}
                       </span>
                       <div className="txrow__actions">
                         <button
                           type="button"
                           className="icon-btn"
                           aria-label="Editar"
-                          onClick={() => {
-                            if (transfer) setEditingTransfer(t as Transfer)
-                            else setEditingTransaction(t as Transaction)
-                          }}
+                          onClick={() => setEditing(t)}
                         >
                           <Icon name="edit" size={16} />
                         </button>
@@ -335,7 +299,7 @@ function TransactionsPage() {
           ))}
           <footer className="tx-load">
             <span className="tx-load__count">
-              Mostrando {visibleActivities.length} de {filtered.length} actividades
+              Mostrando {visibleTransactions.length} de {filtered.length} movimientos
             </span>
             {hasMore && (
               <button
@@ -350,31 +314,17 @@ function TransactionsPage() {
         </div>
       )}
 
-      {editingTransaction && (
-        <Modal title="Editar movimiento" onClose={() => setEditingTransaction(null)}>
+      {editing && (
+        <Modal title="Editar movimiento" onClose={() => setEditing(null)}>
           <TransactionForm
             accounts={accounts}
             categories={categories}
-            initial={editingTransaction}
+            initial={editing}
             onSubmit={(tx) => {
               updateTransaction(tx as Partial<Transaction> & { id: string })
-              setEditingTransaction(null)
+              setEditing(null)
             }}
-            onCancel={() => setEditingTransaction(null)}
-          />
-        </Modal>
-      )}
-
-      {editingTransfer && (
-        <Modal title="Editar traspaso" onClose={() => setEditingTransfer(null)}>
-          <TransferForm
-            accounts={accounts}
-            initial={editingTransfer}
-            onSubmit={(transfer) => {
-              updateTransfer(transfer as Partial<Transfer> & { id: string })
-              setEditingTransfer(null)
-            }}
-            onCancel={() => setEditingTransfer(null)}
+            onCancel={() => setEditing(null)}
           />
         </Modal>
       )}
@@ -384,8 +334,7 @@ function TransactionsPage() {
           title="Borrar movimiento"
           message={`¿Seguro que quieres borrar "${deleting.description}"? Esta acción no se puede deshacer.`}
           onConfirm={() => {
-            if (deleting.kind === 'transfer') deleteTransfer(deleting.id)
-            else deleteTransaction(deleting.id)
+            deleteTransaction(deleting.id)
             setDeleting(null)
           }}
           onCancel={() => setDeleting(null)}

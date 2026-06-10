@@ -1,5 +1,5 @@
 import { formatBudgetRemaining } from '../utils/budget'
-import { formatCurrency, formatPercent, formatSignedCurrency } from '../utils/format'
+import { formatCurrency, formatPercent } from '../utils/format'
 import { budgetStatusLabel } from './budgetStatus'
 import type { CategoryBudget } from '../types/finance'
 
@@ -7,22 +7,13 @@ type BudgetProgressProps = {
   budget: CategoryBudget
   showBadge?: boolean
   showPercent?: boolean
-  showInsights?: boolean
 }
 
 function BudgetProgress({
   budget,
   showBadge = true,
   showPercent = false,
-  showInsights = true,
 }: BudgetProgressProps) {
-  const paceLabel =
-    budget.paceStatus === 'over'
-      ? 'Superado'
-      : budget.paceStatus === 'at-risk'
-        ? 'En riesgo'
-        : 'Buen ritmo'
-
   return (
     <div className="budget-meter">
       <div
@@ -59,17 +50,6 @@ function BudgetProgress({
       <div className={`budget-meter__remaining budget-meter__remaining--${budget.status} tnum`}>
         {formatBudgetRemaining(budget.remaining)}
       </div>
-
-      {showInsights && (
-        <div className="budget-meter__insights">
-          <span>{paceLabel}</span>
-          <span className="tnum">Proy. {formatCurrency(budget.projectedSpend)}</span>
-          <span className="tnum">{formatCurrency(budget.dailyRemaining)}/día</span>
-          {budget.previousSpent > 0 && (
-            <span className="tnum">vs mes ant. {formatSignedCurrency(budget.previousDelta)}</span>
-          )}
-        </div>
-      )}
     </div>
   )
 }

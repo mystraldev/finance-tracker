@@ -2,13 +2,17 @@ import { useMemo, useState, type FormEvent, type KeyboardEvent } from 'react'
 import Icon from './Icon'
 import { selectableIcons } from './iconCatalog'
 import { formatCurrency } from '../utils/format'
-import { parseDecimalAmount } from '../utils/validation'
 import type { AccountWithBalance, SavingsGoal } from '../types/finance'
 
 const PALETTE = [
   '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f59e0b', '#10b981',
   '#14b8a6', '#06b6d4', '#3b82f6', '#64748b',
 ]
+
+function parseNumber(text: string): number {
+  const value = parseFloat(text.trim().replace(',', '.'))
+  return Number.isFinite(value) ? value : NaN
+}
 
 function isTargetDateDraft(value: string): boolean {
   if (!/^[0-9-]*$/.test(value) || value.length > 10) return false
@@ -24,9 +28,9 @@ function isCompleteTargetDate(value: string): boolean {
 
 function autoSavedAmount(availableForAccount: number | null, targetText: string): string {
   if (availableForAccount == null) return ''
-  const target = parseDecimalAmount(targetText)
+  const target = parseNumber(targetText)
   const available = Math.max(availableForAccount, 0)
-  const nextSaved = target != null && target > 0
+  const nextSaved = Number.isFinite(target) && target > 0
     ? Math.min(available, target)
     : available
   return nextSaved > 0 ? String(nextSaved) : ''
@@ -97,14 +101,14 @@ function SavingsGoalForm({
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    const target = parseDecimalAmount(targetAmount)
-    const saved = parseDecimalAmount(savedAmount || '0')
+    const target = parseNumber(targetAmount)
+    const saved = parseNumber(savedAmount || '0')
 
     if (!name.trim()) return setError('Ponle un nombre al objetivo.')
-    if (target == null || target <= 0) {
+    if (!Number.isFinite(target) || target <= 0) {
       return setError('El importe objetivo debe ser mayor que cero.')
     }
-    if (saved == null || saved < 0) {
+    if (!Number.isFinite(saved) || saved < 0) {
       return setError('El importe reservado no es válido.')
     }
     if (saved > target) {
