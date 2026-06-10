@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { availableTransactionMonths, listActivities, listTransactions } from '../data/financeRepository'
+import { availableTransactionMonths, listTransactions } from '../data/financeRepository'
 import { FinanceContext } from '../store/financeContext'
 import type { FinanceContextValue, FinanceData } from '../types/finance'
 import CategoriesPage from './CategoriesPage'
@@ -31,9 +31,6 @@ const data: FinanceData = {
       categoryId: 'health',
     },
   ],
-  transfers: [],
-  recurringRules: [],
-  recurringSkips: [],
   savingsGoals: [],
 }
 
@@ -43,15 +40,10 @@ function createValue(overrides: Partial<FinanceData> = {}): FinanceContextValue 
     ...state,
     selectedMonth: '2026-06',
     getTransactions: (query) => listTransactions(state, query),
-    getActivities: (query) => listActivities(state, query),
     getAvailableMonths: () => availableTransactionMonths(state),
-    getRecurringOccurrences: vi.fn(() => []),
     addTransaction: vi.fn(),
     updateTransaction: vi.fn(),
     deleteTransaction: vi.fn(),
-    addTransfer: vi.fn(),
-    updateTransfer: vi.fn(),
-    deleteTransfer: vi.fn(),
     addCategory: vi.fn(),
     updateCategory: vi.fn(),
     deleteCategory: vi.fn(),
@@ -61,11 +53,6 @@ function createValue(overrides: Partial<FinanceData> = {}): FinanceContextValue 
     addSavingsGoal: vi.fn(),
     updateSavingsGoal: vi.fn(),
     deleteSavingsGoal: vi.fn(),
-    addRecurringRule: vi.fn(),
-    updateRecurringRule: vi.fn(),
-    deleteRecurringRule: vi.fn(),
-    confirmRecurringOccurrence: vi.fn(),
-    skipRecurringOccurrence: vi.fn(),
     setMonth: vi.fn(),
     importData: vi.fn(),
     reset: vi.fn(),

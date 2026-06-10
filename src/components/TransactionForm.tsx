@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from 'react'
 import Icon from './Icon'
-import { parseDecimalAmount } from '../utils/validation'
 import type { Account, Category, Transaction } from '../types/finance'
 
 const INCOME_CATEGORY_ID = 'income'
@@ -12,27 +11,24 @@ function todayISO(): string {
   ).padStart(2, '0')}`
 }
 
+function parseAmount(text: string): number {
+  const value = parseFloat(String(text).replace(',', '.'))
+  return Number.isFinite(value) ? value : NaN
+}
+
 type TransactionFormProps = {
   accounts: Account[]
   categories: Category[]
   initial?: Transaction
-  initialType?: 'gasto' | 'ingreso'
   onSubmit: (tx: Omit<Transaction, 'id'> | Partial<Transaction> & { id: string }) => void
   onCancel: () => void
 }
 
-function TransactionForm({
-  accounts,
-  categories,
-  initial,
-  initialType,
-  onSubmit,
-  onCancel,
-}: TransactionFormProps) {
+function TransactionForm({ accounts, categories, initial, onSubmit, onCancel }: TransactionFormProps) {
   const expenseCategories = categories.filter((c) => c.id !== INCOME_CATEGORY_ID)
   const isEditingIncome = initial ? initial.amount > 0 : false
 
-  const [type, setType] = useState(initial ? (isEditingIncome ? 'ingreso' : 'gasto') : (initialType ?? 'gasto'))
+  const [type, setType] = useState(isEditingIncome ? 'ingreso' : 'gasto')
   const [amount, setAmount] = useState(initial ? String(Math.abs(initial.amount)) : '')
   const [description, setDescription] = useState(initial?.description ?? '')
   const [categoryId, setCategoryId] = useState(
@@ -46,8 +42,8 @@ function TransactionForm({
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    const value = parseDecimalAmount(amount)
-    if (value == null || value <= 0) {
+    const value = parseAmount(amount)
+    if (!Number.isFinite(value) || value <= 0) {
       return setError('Introduce un importe válido mayor que 0.')
     }
     if (!description.trim()) {

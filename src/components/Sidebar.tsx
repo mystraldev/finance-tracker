@@ -7,7 +7,7 @@ const navItems = [
   { id: 'transactions', label: 'Movimientos', icon: 'transactions', to: '/movimientos' },
   { id: 'categories', label: 'Categorías', icon: 'categories', to: '/categorias' },
   { id: 'accounts', label: 'Cuentas', icon: 'accounts', to: '/cuentas' },
-  { id: 'recurring', label: 'Recurrentes', icon: 'recurring', to: '/recurrentes' },
+  { id: 'investments', label: 'Inversiones', icon: 'investments' },
   { id: 'settings', label: 'Ajustes', icon: 'settings', to: '/ajustes' },
 ]
 
@@ -46,7 +46,15 @@ function Sidebar() {
               </span>
               <span className="nav-item__label">{item.label}</span>
             </NavLink>
-          ) : null,
+          ) : (
+            <button key={item.id} type="button" className="nav-item nav-item--soon" disabled>
+              <span className="nav-item__icon">
+                <Icon name={item.icon} size={19} />
+              </span>
+              <span className="nav-item__label">{item.label}</span>
+              <span className="nav-item__soon">pronto</span>
+            </button>
+          ),
         )}
       </nav>
 
@@ -70,8 +78,8 @@ function Sidebar() {
         <div className="user-chip">
           <span className="user-chip__avatar">F</span>
           <div className="user-chip__info">
-            <span className="user-chip__name">Local</span>
-            <span className="user-chip__plan">Datos en este dispositivo</span>
+            <span className="user-chip__name">Ferran</span>
+            <span className="user-chip__plan">Plan personal</span>
           </div>
         </div>
       </div>
