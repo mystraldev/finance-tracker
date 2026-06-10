@@ -55,6 +55,9 @@ function TransactionForm({ accounts, categories, initial, onSubmit, onCancel }: 
     if (type === 'gasto' && !categoryId) {
       return setError('Selecciona una categoría.')
     }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return setError('Selecciona una fecha.')
+    }
 
     const signed = type === 'gasto' ? -Math.abs(value) : Math.abs(value)
     onSubmit({
