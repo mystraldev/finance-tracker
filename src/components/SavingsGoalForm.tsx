@@ -2,17 +2,13 @@ import { useMemo, useState, type FormEvent, type KeyboardEvent } from 'react'
 import Icon from './Icon'
 import { selectableIcons } from './iconCatalog'
 import { formatCurrency } from '../utils/format'
+import { parseDecimal } from '../utils/number'
 import type { AccountWithBalance, SavingsGoal } from '../types/finance'
 
 const PALETTE = [
   '#0a6ce0', '#8d66d9', '#ec4899', '#f43f5e', '#f59e0b', '#1ea35b',
   '#14b8a6', '#06b6d4', '#3b82f6', '#64748b',
 ]
-
-function parseNumber(text: string): number {
-  const value = parseFloat(text.trim().replace(',', '.'))
-  return Number.isFinite(value) ? value : NaN
-}
 
 function isTargetDateDraft(value: string): boolean {
   if (!/^[0-9-]*$/.test(value) || value.length > 10) return false
@@ -28,7 +24,7 @@ function isCompleteTargetDate(value: string): boolean {
 
 function autoSavedAmount(availableForAccount: number | null, targetText: string): string {
   if (availableForAccount == null) return ''
-  const target = parseNumber(targetText)
+  const target = parseDecimal(targetText)
   const available = Math.max(availableForAccount, 0)
   const nextSaved = Number.isFinite(target) && target > 0
     ? Math.min(available, target)
@@ -101,8 +97,8 @@ function SavingsGoalForm({
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    const target = parseNumber(targetAmount)
-    const saved = parseNumber(savedAmount || '0')
+    const target = parseDecimal(targetAmount)
+    const saved = parseDecimal(savedAmount || '0')
 
     if (!name.trim()) return setError('Ponle un nombre al objetivo.')
     if (!Number.isFinite(target) || target <= 0) {
