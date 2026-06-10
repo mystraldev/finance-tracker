@@ -99,7 +99,9 @@ export function monthlyGrowthRate(account: Account, transactions: Transaction[],
   const [prev] = monthsBack(month, 2)
   const cur = accountBalanceAsOf(account, transactions, month)
   const before = accountBalanceAsOf(account, transactions, prev)
-  return fractionOf(cur - before, before)
+  // Divide by |before| so the sign always reflects the direction of change,
+  // even when the previous balance was negative.
+  return fractionOf(cur - before, Math.abs(before))
 }
 
 export function netWorthSeries(state: FinanceData, n: number, endMonth: string): SparklineDatum[] {
