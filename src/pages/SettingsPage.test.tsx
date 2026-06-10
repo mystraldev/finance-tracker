@@ -93,7 +93,7 @@ function createJsonFile(contents: unknown) {
 }
 
 describe('SettingsPage', () => {
-  it('imports a valid backup file', async () => {
+  it('imports a valid backup file after confirmation', async () => {
     const finance = createFinanceValue()
     renderPage({ finance })
 
@@ -101,8 +101,28 @@ describe('SettingsPage', () => {
       target: { files: [createJsonFile(createFinanceBackup(data))] },
     })
 
-    expect(await screen.findByText('Datos importados correctamente.')).toBeInTheDocument()
+    expect(await screen.findByText('Importar backup')).toBeInTheDocument()
+    expect(finance.importData).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Importar' }))
+
+    expect(screen.getByText('Datos importados correctamente.')).toBeInTheDocument()
     expect(finance.importData).toHaveBeenCalledWith(data)
+  })
+
+  it('keeps current data when the import is cancelled', async () => {
+    const finance = createFinanceValue()
+    renderPage({ finance })
+
+    fireEvent.change(screen.getByLabelText('Seleccionar backup JSON'), {
+      target: { files: [createJsonFile(createFinanceBackup(data))] },
+    })
+
+    expect(await screen.findByText('Importar backup')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+
+    expect(finance.importData).not.toHaveBeenCalled()
+    expect(screen.queryByText('Importar backup')).not.toBeInTheDocument()
   })
 
   it('rejects invalid backup files', async () => {
