@@ -8,6 +8,7 @@ import {
 import { useFinance } from '../store/financeContext'
 import { useTheme } from '../store/themeContext'
 import type { ThemeMode } from '../store/theme'
+import type { FinanceData } from '../types/finance'
 
 const THEME_OPTIONS: Array<{ mode: ThemeMode; label: string; icon: string }> = [
   { mode: 'system', label: 'Sistema', icon: 'system' },
@@ -30,6 +31,7 @@ function SettingsPage() {
   const { mode, theme, systemTheme, setMode } = useTheme()
   const [status, setStatus] = useState<Status | null>(null)
   const [confirmingReset, setConfirmingReset] = useState(false)
+  const [pendingImport, setPendingImport] = useState<FinanceData | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
 
   function handleExport() {
@@ -56,13 +58,19 @@ function SettingsPage() {
         return
       }
 
-      importData(parsed)
-      setStatus({ type: 'success', message: 'Datos importados correctamente.' })
+      setPendingImport(parsed)
     } catch {
       setStatus({ type: 'error', message: 'No se ha podido leer el archivo JSON.' })
     } finally {
       if (inputRef.current) inputRef.current.value = ''
     }
+  }
+
+  function handleConfirmImport() {
+    if (!pendingImport) return
+    importData(pendingImport)
+    setPendingImport(null)
+    setStatus({ type: 'success', message: 'Datos importados correctamente.' })
   }
 
   function handleReset() {
@@ -175,6 +183,16 @@ function SettingsPage() {
           </button>
         </article>
       </section>
+
+      {pendingImport && (
+        <ConfirmDialog
+          title="Importar backup"
+          message={`Se reemplazarán tus datos actuales por los del backup: ${pendingImport.accounts.length} cuentas, ${pendingImport.categories.length} categorías, ${pendingImport.transactions.length} movimientos y ${pendingImport.savingsGoals.length} objetivos.`}
+          confirmLabel="Importar"
+          onConfirm={handleConfirmImport}
+          onCancel={() => setPendingImport(null)}
+        />
+      )}
 
       {confirmingReset && (
         <ConfirmDialog
