@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import Icon from './Icon'
+import { parseDecimal } from '../utils/number'
 import type { Account } from '../types/finance'
 
 const TYPES = [
@@ -15,11 +16,6 @@ const ACCENTS = [
 ] as const
 
 const ACCOUNT_ICONS = ['wallet', 'piggy', 'trending', 'card', 'accounts'] as const
-
-function parseNumber(text: string): number {
-  const v = parseFloat(String(text).replace(',', '.'))
-  return Number.isFinite(v) ? v : NaN
-}
 
 type AccountFormProps = {
   initial?: Account
@@ -44,10 +40,10 @@ function AccountForm({ initial, onSubmit, onCancel }: AccountFormProps) {
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!name.trim()) return setError('Ponle un nombre a la cuenta.')
-    const opening = parseNumber(openingBalance || '0')
+    const opening = parseDecimal(openingBalance || '0')
     if (!Number.isFinite(opening)) return setError('El saldo inicial no es válido.')
 
-    const rate = type === 'savings' ? parseNumber(interestRate || '0') : NaN
+    const rate = type === 'savings' ? parseDecimal(interestRate || '0') : NaN
     const payload: Omit<Account, 'id'> | Partial<Account> & { id: string } = {
       ...(initial?.id ? { id: initial.id } : {}),
       name: name.trim(),

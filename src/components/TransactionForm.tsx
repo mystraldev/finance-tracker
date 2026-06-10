@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import Icon from './Icon'
+import { parseDecimal } from '../utils/number'
 import type { Account, Category, Transaction } from '../types/finance'
 
 const INCOME_CATEGORY_ID = 'income'
@@ -9,11 +10,6 @@ function todayISO(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
     d.getDate(),
   ).padStart(2, '0')}`
-}
-
-function parseAmount(text: string): number {
-  const value = parseFloat(String(text).replace(',', '.'))
-  return Number.isFinite(value) ? value : NaN
 }
 
 type TransactionFormProps = {
@@ -42,7 +38,7 @@ function TransactionForm({ accounts, categories, initial, onSubmit, onCancel }: 
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    const value = parseAmount(amount)
+    const value = parseDecimal(amount)
     if (!Number.isFinite(value) || value <= 0) {
       return setError('Introduce un importe válido mayor que 0.')
     }
