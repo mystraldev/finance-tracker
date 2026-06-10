@@ -5,7 +5,7 @@ import { formatCurrency } from '../utils/format'
 import type { AccountWithBalance, SavingsGoal } from '../types/finance'
 
 const PALETTE = [
-  '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f59e0b', '#10b981',
+  '#0a6ce0', '#8d66d9', '#ec4899', '#f43f5e', '#f59e0b', '#1ea35b',
   '#14b8a6', '#06b6d4', '#3b82f6', '#64748b',
 ]
 

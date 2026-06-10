@@ -10,9 +10,9 @@ const tagByType: Record<string, string> = {
 }
 
 const accentColor: Record<string, string> = {
-  indigo: '#6366f1',
-  emerald: '#10b981',
-  violet: '#8b5cf6',
+  indigo: '#0a6ce0',
+  emerald: '#1ea35b',
+  violet: '#8d66d9',
 }
 
 type SummaryCardsProps = {

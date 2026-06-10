@@ -4,7 +4,7 @@ import { selectableIcons } from './iconCatalog'
 import type { Category } from '../types/finance'
 
 const PALETTE = [
-  '#6366f1', '#8b5cf6', '#a855f7', '#ec4899', '#f43f5e', '#ef4444',
+  '#0a6ce0', '#8d66d9', '#a855f7', '#ec4899', '#f43f5e', '#ef4444',
   '#f59e0b', '#eab308', '#10b981', '#14b8a6', '#06b6d4', '#3b82f6',
   '#64748b', '#94a3b8',
 ]

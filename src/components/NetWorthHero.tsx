@@ -41,7 +41,7 @@ function NetWorthHero({ accounts, history, month }: NetWorthHeroProps) {
           <Sparkline
             id="networth"
             data={history.map((h) => h.value)}
-            color="#a5b4fc"
+            color="#7fb4ff"
             width={200}
             height={64}
             strokeWidth={2.5}

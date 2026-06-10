@@ -5,7 +5,7 @@ const CIRCUMFERENCE = Math.PI * RADIUS
 
 const tiers = {
   good: { label: '¡Excelente ritmo!', from: '#10b981', to: '#34d399' },
-  mid: { label: 'Vas bien', from: '#6366f1', to: '#818cf8' },
+  mid: { label: 'Vas bien', from: '#0a6ce0', to: '#3f8cff' },
   low: { label: 'Mejorable', from: '#f59e0b', to: '#fbbf24' },
 }
 
