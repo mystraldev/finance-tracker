@@ -54,23 +54,28 @@ describe('SavingsGoalForm', () => {
     })
   })
 
-  it('keeps the target date year to four digits', () => {
+  it('submits the selected target date', () => {
+    const onSubmit = vi.fn()
     render(
       <SavingsGoalForm
         accounts={accounts}
         goals={goals}
-        onSubmit={() => {}}
+        onSubmit={onSubmit}
         onCancel={() => {}}
       />,
     )
 
-    const input = screen.getByLabelText('Fecha objetivo')
+    fireEvent.change(screen.getByLabelText('Nombre'), { target: { value: 'Viaje' } })
+    fireEvent.change(screen.getByLabelText('Objetivo'), { target: { value: '3000' } })
+    fireEvent.change(screen.getByLabelText('Fecha objetivo'), {
+      target: { value: '2026-09-01' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Crear objetivo' }))
 
-    fireEvent.change(input, { target: { value: '2026' } })
-    expect(input).toHaveValue('2026')
-
-    fireEvent.change(input, { target: { value: '20266' } })
-    expect(input).toHaveValue('2026')
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
+      name: 'Viaje',
+      targetDate: '2026-09-01',
+    }))
   })
 
   it('submits the auto-filled saved amount', async () => {

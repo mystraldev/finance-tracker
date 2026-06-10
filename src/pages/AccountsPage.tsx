@@ -6,7 +6,7 @@ import SavingsGoalForm from '../components/SavingsGoalForm'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { useFinance } from '../store/financeContext'
 import { accountsWithBalance, netWorthAsOf } from '../utils/derive'
-import { formatCurrency, formatPercent } from '../utils/format'
+import { formatCurrency, formatFullDate, formatPercent } from '../utils/format'
 import type { Account, SavingsGoal } from '../types/finance'
 
 const TYPE_LABEL: Record<string, string> = {
@@ -129,7 +129,7 @@ function AccountsPage() {
                       <h3 className="goal-card__title">{goal.name}</h3>
                       <p className="goal-card__meta">
                         {account?.name ?? 'Sin cuenta vinculada'}
-                        {goal.targetDate && ` · antes de ${goal.targetDate}`}
+                        {goal.targetDate && ` · antes del ${formatFullDate(goal.targetDate)}`}
                       </p>
                     </div>
                     <span className={`goal-card__badge ${complete ? 'is-complete' : ''}`}>

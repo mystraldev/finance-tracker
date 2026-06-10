@@ -24,6 +24,13 @@ const dateFormatter = new Intl.DateTimeFormat('es-ES', {
   timeZone: 'UTC',
 })
 
+const fullDateFormatter = new Intl.DateTimeFormat('es-ES', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'UTC',
+})
+
 const groupDateFormatter = new Intl.DateTimeFormat('es-ES', {
   weekday: 'long',
   day: 'numeric',
@@ -50,6 +57,10 @@ export function formatSignedCurrency(value: number): string {
 
 export function formatDate(isoDate: string): string {
   return dateFormatter.format(new Date(isoDate))
+}
+
+export function formatFullDate(isoDate: string): string {
+  return fullDateFormatter.format(new Date(isoDate))
 }
 
 export function formatGroupDate(isoDate: string): string {
