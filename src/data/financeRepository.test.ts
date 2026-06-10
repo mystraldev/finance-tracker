@@ -3,6 +3,7 @@ import type { FinanceData } from '../types/finance'
 import {
   FINANCE_BACKUP_APP,
   FINANCE_BACKUP_VERSION,
+  FINANCE_RECOVERY_SUFFIX,
   FINANCE_STORAGE_KEY,
   availableTransactionMonths,
   cloneFinanceData,
@@ -89,6 +90,32 @@ describe('financeRepository storage', () => {
     const repository = createLocalStorageFinanceRepository({ storage, seedData: data })
 
     expect(repository.load()).toEqual(data)
+  })
+
+  it('stashes schema-invalid payloads under the recovery key before seeding', () => {
+    const invalid = JSON.stringify({ accounts: [], transactions: [] })
+    const storage = createMemoryStorage({ [FINANCE_STORAGE_KEY]: invalid })
+    const repository = createLocalStorageFinanceRepository({ storage, seedData: data })
+
+    expect(repository.load()).toEqual(data)
+    expect(storage.value(`${FINANCE_STORAGE_KEY}${FINANCE_RECOVERY_SUFFIX}`)).toBe(invalid)
+  })
+
+  it('stashes unparseable JSON under the recovery key before seeding', () => {
+    const storage = createMemoryStorage({ [FINANCE_STORAGE_KEY]: 'not-json{' })
+    const repository = createLocalStorageFinanceRepository({ storage, seedData: data })
+
+    expect(repository.load()).toEqual(data)
+    expect(storage.value(`${FINANCE_STORAGE_KEY}${FINANCE_RECOVERY_SUFFIX}`)).toBe('not-json{')
+  })
+
+  it('does not write a recovery entry when storage is empty or valid', () => {
+    const storage = createMemoryStorage({ [FINANCE_STORAGE_KEY]: JSON.stringify(data) })
+    const repository = createLocalStorageFinanceRepository({ storage })
+
+    repository.load()
+
+    expect(storage.value(`${FINANCE_STORAGE_KEY}${FINANCE_RECOVERY_SUFFIX}`)).toBeUndefined()
   })
 
   it('saves cloned finance data to storage', () => {

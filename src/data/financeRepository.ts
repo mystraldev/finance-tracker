@@ -2,6 +2,7 @@ import { seed } from './finance'
 import type { Account, Category, FinanceData, SavingsGoal, Transaction, TransactionQuery } from '../types/finance'
 
 export const FINANCE_STORAGE_KEY = 'finance-tracker:v2'
+export const FINANCE_RECOVERY_SUFFIX = ':recovery'
 export const FINANCE_BACKUP_APP = 'finance-tracker'
 export const FINANCE_BACKUP_VERSION = 1
 
@@ -240,13 +241,28 @@ export function createLocalStorageFinanceRepository({
       const target = resolveStorage(storage)
       if (!target) return getSeed()
 
+      let raw: string | null
       try {
-        const raw = target.getItem(key)
-        if (!raw) return getSeed()
-        return parseFinanceData(JSON.parse(raw)) ?? getSeed()
+        raw = target.getItem(key)
       } catch {
         return getSeed()
       }
+      if (!raw) return getSeed()
+
+      try {
+        const parsed = parseFinanceData(JSON.parse(raw))
+        if (parsed) return parsed
+      } catch {
+        /* unparseable payload, stashed below */
+      }
+
+      // Stash the unreadable payload so a later save doesn't destroy it.
+      try {
+        target.setItem(`${key}${FINANCE_RECOVERY_SUFFIX}`, raw)
+      } catch {
+        /* storage not available */
+      }
+      return getSeed()
     },
 
     save(data) {
