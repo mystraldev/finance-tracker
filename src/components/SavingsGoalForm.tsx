@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent, type KeyboardEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import Icon from './Icon'
 import { selectableIcons } from './iconCatalog'
 import { formatCurrency } from '../utils/format'
@@ -9,12 +9,6 @@ const PALETTE = [
   '#0a6ce0', '#8d66d9', '#ec4899', '#f43f5e', '#f59e0b', '#1ea35b',
   '#14b8a6', '#06b6d4', '#3b82f6', '#64748b',
 ]
-
-function isTargetDateDraft(value: string): boolean {
-  if (!/^[0-9-]*$/.test(value) || value.length > 10) return false
-  const [year] = value.split('-')
-  return year.length <= 4
-}
 
 function isCompleteTargetDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
@@ -81,20 +75,6 @@ function SavingsGoalForm({
     return account.balance - reserved
   }
 
-  function handleTargetDateKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (!/^\d$/.test(event.key)) return
-
-    const input = event.currentTarget
-    const selectionStart = input.selectionStart ?? 0
-    const selectionEnd = input.selectionEnd ?? selectionStart
-    const year = targetDate.split('-')[0] ?? ''
-    const replacingYearText = selectionStart < 4 && selectionEnd > selectionStart
-
-    if (year.length >= 4 && selectionStart <= 4 && !replacingYearText) {
-      event.preventDefault()
-    }
-  }
-
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
     const target = parseDecimal(targetAmount)
@@ -111,7 +91,7 @@ function SavingsGoalForm({
       return setError('El importe reservado no puede superar el objetivo.')
     }
     if (targetDate && !isCompleteTargetDate(targetDate)) {
-      return setError('La fecha objetivo debe tener formato AAAA-MM-DD.')
+      return setError('La fecha objetivo no es válida.')
     }
     if (availableForAccount != null && saved > availableForAccount) {
       return setError(
@@ -223,16 +203,9 @@ function SavingsGoalForm({
           <span className="field__label">Fecha objetivo</span>
           <input
             className="field__input"
-            type="text"
-            inputMode="numeric"
-            placeholder="AAAA-MM-DD"
-            maxLength={10}
+            type="date"
             value={targetDate}
-            onKeyDown={handleTargetDateKeyDown}
-            onChange={(event) => {
-              const next = event.target.value
-              if (isTargetDateDraft(next)) setTargetDate(next)
-            }}
+            onChange={(event) => setTargetDate(event.target.value)}
           />
         </label>
       </div>
