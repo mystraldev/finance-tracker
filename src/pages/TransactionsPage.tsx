@@ -99,6 +99,7 @@ function TransactionsPage() {
     categoryId !== 'all' ||
     accountId !== 'all' ||
     type !== 'all' ||
+    sort !== 'date-desc' ||
     search.trim() !== ''
   const hasTransactions = allTransactions.length > 0
 
