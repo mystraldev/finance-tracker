@@ -1,0 +1,220 @@
+/* Cross-page workflow additions: transfers, recurring rules and dashboard actions. */
+
+.segmented--activity {
+  margin-bottom: 1rem;
+}
+
+.segmented__btn.is-transfer {
+  color: var(--indigo-strong);
+  background: rgba(99, 102, 241, 0.12);
+}
+
+.tx-summary-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.txrow__amount.is-transfer {
+  color: var(--indigo-strong);
+}
+
+.tx-group__summary {
+  grid-template-columns: repeat(4, auto);
+}
+
+.action-center {
+  margin-bottom: 1.5rem;
+}
+
+.action-center__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.action-panel {
+  min-width: 0;
+}
+
+.action-panel__title {
+  margin: 0 0 0.75rem;
+  color: var(--text-soft);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.action-list,
+.recurring-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.action-item,
+.recurring-row {
+  display: grid;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.action-item {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 0.65rem;
+  background: var(--gray-50);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.action-item__icon,
+.recurring-row__icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  color: var(--c, var(--indigo-strong));
+  background: color-mix(in srgb, var(--c, var(--indigo)) 13%, transparent);
+}
+
+.action-item__copy,
+.recurring-row__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.16rem;
+  min-width: 0;
+}
+
+.action-item__copy strong,
+.recurring-row__copy strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 0.9rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.action-item__copy span,
+.recurring-row__copy span,
+.recurring-card__meta {
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.action-item__actions,
+.recurring-row__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.budget-meter__insights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  color: var(--text-faint);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.budget-meter__insights span {
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: var(--gray-50);
+}
+
+.recurring-panel {
+  margin-bottom: 1.25rem;
+}
+
+.recurring-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.recurring-row {
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  min-height: 58px;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.recurring-row:last-child {
+  border-bottom: none;
+}
+
+.recurring-status {
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.recurring-status--pending {
+  color: var(--warning-text);
+  background: var(--warning-bg);
+}
+
+.recurring-status--confirmed {
+  color: var(--success-text);
+  background: var(--success-bg);
+}
+
+.recurring-status--skipped {
+  color: var(--text-soft);
+  background: var(--gray-100);
+}
+
+.recurring-rules {
+  margin-top: 1.25rem;
+}
+
+.recurring-card {
+  display: flex;
+  gap: 0.9rem;
+  min-height: 132px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.check-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-soft);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .tx-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .action-center__grid,
+  .recurring-row {
+    grid-template-columns: 1fr;
+  }
+
+  .recurring-row__actions {
+    justify-content: stretch;
+  }
+
+  .recurring-row__actions .btn-primary,
+  .recurring-row__actions .btn-ghost {
+    flex: 1;
+    justify-content: center;
+  }
+}

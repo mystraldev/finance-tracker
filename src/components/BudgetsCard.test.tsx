@@ -16,6 +16,12 @@ const budgets: CategoryBudget[] = [
     remaining: -50,
     pct: 1.2,
     status: 'over',
+    paceStatus: 'over',
+    expectedPct: 1,
+    projectedSpend: 300,
+    dailyRemaining: 0,
+    previousSpent: 240,
+    previousDelta: 60,
   },
 ]
 
@@ -30,7 +36,7 @@ describe('BudgetsCard', () => {
     expect(screen.getByText('Presupuestos')).toBeInTheDocument()
     expect(screen.getByText('1 prioritarias de 3')).toBeInTheDocument()
     expect(screen.getByText('Alimentación')).toBeInTheDocument()
-    expect(screen.getByText('Superado')).toBeInTheDocument()
+    expect(screen.getAllByText('Superado')).toHaveLength(2)
   })
 
   it('renders an empty state with a categories link', () => {

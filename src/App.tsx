@@ -6,6 +6,7 @@ import TransactionsPage from './pages/TransactionsPage'
 import CategoriesPage from './pages/CategoriesPage'
 import AccountsPage from './pages/AccountsPage'
 import SettingsPage from './pages/SettingsPage'
+import RecurringPage from './pages/RecurringPage'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/movimientos" element={<TransactionsPage />} />
           <Route path="/categorias" element={<CategoriesPage />} />
           <Route path="/cuentas" element={<AccountsPage />} />
+          <Route path="/recurrentes" element={<RecurringPage />} />
           <Route path="/ajustes" element={<SettingsPage />} />
           <Route path="*" element={<DashboardPage />} />
         </Route>

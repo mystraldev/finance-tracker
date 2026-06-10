@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { availableTransactionMonths, listTransactions } from '../data/financeRepository'
+import { availableTransactionMonths, listActivities, listTransactions } from '../data/financeRepository'
 import { FinanceContext } from '../store/financeContext'
 import type { FinanceContextValue, FinanceData } from '../types/finance'
 import TransactionsPage from './TransactionsPage'
@@ -34,6 +34,9 @@ const data: FinanceData = {
     { id: 't2', date: '2026-06-05', amount: -600, description: 'Alquiler', accountId: 'checking', categoryId: 'home' },
     { id: 't3', date: '2026-06-12', amount: -150, description: 'Compra semanal', accountId: 'savings', categoryId: 'food' },
   ],
+  transfers: [],
+  recurringRules: [],
+  recurringSkips: [],
   savingsGoals: [],
 }
 
@@ -43,10 +46,15 @@ function createValue(overrides: Partial<FinanceData> = {}): FinanceContextValue 
     ...state,
     selectedMonth: '2026-06',
     getTransactions: (query) => listTransactions(state, query),
+    getActivities: (query) => listActivities(state, query),
     getAvailableMonths: () => availableTransactionMonths(state),
+    getRecurringOccurrences: vi.fn(() => []),
     addTransaction: vi.fn(),
     updateTransaction: vi.fn(),
     deleteTransaction: vi.fn(),
+    addTransfer: vi.fn(),
+    updateTransfer: vi.fn(),
+    deleteTransfer: vi.fn(),
     addCategory: vi.fn(),
     updateCategory: vi.fn(),
     deleteCategory: vi.fn(),
@@ -56,6 +64,11 @@ function createValue(overrides: Partial<FinanceData> = {}): FinanceContextValue 
     addSavingsGoal: vi.fn(),
     updateSavingsGoal: vi.fn(),
     deleteSavingsGoal: vi.fn(),
+    addRecurringRule: vi.fn(),
+    updateRecurringRule: vi.fn(),
+    deleteRecurringRule: vi.fn(),
+    confirmRecurringOccurrence: vi.fn(),
+    skipRecurringOccurrence: vi.fn(),
     setMonth: vi.fn(),
     importData: vi.fn(),
     reset: vi.fn(),
@@ -74,6 +87,7 @@ function manyTransactions(count: number) {
   return Array.from({ length: count }, (_, index) => {
     const day = index + 1
     return {
+      kind: 'transaction' as const,
       id: `many-${day}`,
       date: `2026-06-${String(day).padStart(2, '0')}`,
       amount: day % 2 === 0 ? -10 : 20,
@@ -97,7 +111,7 @@ describe('TransactionsPage', () => {
     expect(screen.queryByText('Compra semanal')).not.toBeInTheDocument()
 
     const summary = within(screen.getByLabelText('Resumen filtrado'))
-    expect(summary.getByText('Movimientos')).toBeInTheDocument()
+    expect(summary.getByText('Actividades')).toBeInTheDocument()
     expect(summary.getByText('1')).toBeInTheDocument()
     expect(summary.getByText('600,00 €')).toBeInTheDocument()
   })
@@ -146,12 +160,12 @@ describe('TransactionsPage', () => {
 
     expect(screen.getByText('Movimiento 30')).toBeInTheDocument()
     expect(screen.queryByText('Movimiento 06')).not.toBeInTheDocument()
-    expect(screen.getByText('Mostrando 24 de 30 movimientos')).toBeInTheDocument()
+    expect(screen.getByText('Mostrando 24 de 30 actividades')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Cargar más' }))
 
     expect(screen.getByText('Movimiento 06')).toBeInTheDocument()
-    expect(screen.getByText('Mostrando 30 de 30 movimientos')).toBeInTheDocument()
+    expect(screen.getByText('Mostrando 30 de 30 actividades')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Cargar más' })).not.toBeInTheDocument()
   })
 })
