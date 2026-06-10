@@ -114,6 +114,15 @@ describe('balances and net worth', () => {
     const empty: Account = { id: 'new', name: 'Nueva', type: 'cash', icon: 'wallet', accent: 'indigo', openingBalance: 0 }
     expect(monthlyGrowthRate(empty, transactions, '2026-06')).toBe(0)
   })
+
+  it('monthlyGrowthRate keeps the sign of the change when the previous balance is negative', () => {
+    const overdrawn: Account = { id: 'over', name: 'Descubierto', type: 'cash', icon: 'wallet', accent: 'indigo', openingBalance: -1000 }
+    const recovery = [
+      { id: 'r1', date: '2026-06-10', amount: 500, description: 'Ingreso', accountId: 'over', categoryId: 'income' },
+    ]
+    // Balance goes from -1000 to -500: an improvement must be positive.
+    expect(monthlyGrowthRate(overdrawn, recovery, '2026-06')).toBeCloseTo(0.5, 5)
+  })
 })
 
 describe('sparkline series', () => {

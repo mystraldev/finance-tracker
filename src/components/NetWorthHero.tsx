@@ -13,15 +13,18 @@ function NetWorthHero({ accounts, history, month }: NetWorthHeroProps) {
   const total = accounts.reduce((sum, a) => sum + a.balance, 0)
 
   const prev = history.length > 1 ? history.at(-2)!.value : total
-  const change = prev > 0 ? (total - prev) / prev : 0
+  const change = prev !== 0 ? (total - prev) / Math.abs(prev) : 0
   const positive = change >= 0
 
+  // Composition only shows positive contributions; negative balances would
+  // produce negative widths and push the rest beyond 100%.
+  const positiveTotal = accounts.reduce((sum, a) => sum + Math.max(a.balance, 0), 0)
   const segments = accounts.map((a) => ({
     id: a.id,
     name: a.name,
     accent: a.accent,
     balance: a.balance,
-    pct: fractionOf(a.balance, total),
+    pct: fractionOf(Math.max(a.balance, 0), positiveTotal),
   }))
 
   return (
