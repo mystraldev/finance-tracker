@@ -9,9 +9,9 @@ const TYPES = [
 ] as const
 
 const ACCENTS = [
-  { value: 'indigo', color: '#6366f1' },
-  { value: 'emerald', color: '#10b981' },
-  { value: 'violet', color: '#8b5cf6' },
+  { value: 'indigo', color: '#0a6ce0' },
+  { value: 'emerald', color: '#1ea35b' },
+  { value: 'violet', color: '#8d66d9' },
 ] as const
 
 const ACCOUNT_ICONS = ['wallet', 'piggy', 'trending', 'card', 'accounts'] as const
@@ -32,7 +32,7 @@ function AccountForm({ initial, onSubmit, onCancel }: AccountFormProps) {
   const [type, setType] = useState(initial?.type ?? 'cash')
   const [icon, setIcon] = useState(initial?.icon ?? 'wallet')
   const [accent, setAccent] = useState(initial?.accent ?? 'indigo')
-  const accentColor = ACCENTS.find((a) => a.value === accent)?.color ?? '#6366f1'
+  const accentColor = ACCENTS.find((a) => a.value === accent)?.color ?? '#0a6ce0'
   const [openingBalance, setOpeningBalance] = useState(
     initial ? String(initial.openingBalance) : '',
   )

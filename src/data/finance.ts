@@ -30,7 +30,7 @@ export const accounts: Account[] = [
 
 export const categories: Category[] = [
   { id: 'income', label: 'Ingresos', color: '#22c55e', icon: 'salary' },
-  { id: 'home', label: 'Vivienda', color: '#6366f1', icon: 'home', budget: 1100 },
+  { id: 'home', label: 'Vivienda', color: '#0a6ce0', icon: 'home', budget: 1100 },
   { id: 'food', label: 'Alimentación', color: '#10b981', icon: 'cart', budget: 400 },
   { id: 'transport', label: 'Transporte', color: '#f59e0b', icon: 'car', budget: 200 },
   { id: 'leisure', label: 'Ocio', color: '#ec4899', icon: 'leisure', budget: 400 },
@@ -88,7 +88,7 @@ export const savingsGoals: SavingsGoal[] = [
     savedAmount: 2400,
     accountId: 'savings',
     icon: 'health',
-    color: '#10b981',
+    color: '#1ea35b',
   },
   {
     id: 'goal-trip',
