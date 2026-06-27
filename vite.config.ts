@@ -6,7 +6,8 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
+    setupFiles: ['./test/unit/setup.ts'],
+    include: ['src/**/*.{test,spec}.{ts,tsx}', 'test/unit/**/*.{test,spec}.{ts,tsx}'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'text-summary', 'html'],
@@ -18,6 +19,7 @@ export default defineConfig({
         'src/vite-env.d.ts',
         'src/main.tsx',
         'src/data/**',
+        'test/**',
       ],
       thresholds: {
         // Global baseline — locks current coverage so it can't regress.

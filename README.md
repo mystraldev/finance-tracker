@@ -12,8 +12,8 @@ Aplicación web para el seguimiento de finanzas personales. Construida con React
 | State | `useReducer` + Context |
 | Test | Vitest |
 | Lint | ESLint 10 (flat config) + typescript-eslint |
-| Paquete | pnpm 11.5.1 |
-| Docker | node:22-alpine (multi-stage) |
+| Paquete | pnpm 11.6.0 |
+| Docker | node:24-alpine (multi-stage) |
 | Deploy | Vercel |
 
 ## State management
@@ -69,7 +69,7 @@ docker run -p 3000:3000 finance-tracker
 ## Tests
 
 Vitest con entorno `jsdom` y Testing Library. La configuración vive en `vite.config.ts`
-(`test` block) con `src/test/setup.ts` (jest-dom + cleanup). Cobertura vía `@vitest/coverage-v8`.
+(`test` block) con `test/unit/setup.ts` (jest-dom + cleanup). Cobertura vía `@vitest/coverage-v8`.
 
 ```bash
 pnpm run test            # ejecuta la suite
