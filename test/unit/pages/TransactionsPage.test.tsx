@@ -168,4 +168,35 @@ describe('TransactionsPage', () => {
     expect(screen.getByText('Mostrando 30 de 30 movimientos')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Cargar más' })).not.toBeInTheDocument()
   })
+
+  it('filters by expense type', () => {
+    renderPage()
+    fireEvent.change(screen.getByLabelText('Tipo'), { target: { value: 'gasto' } })
+    expect(screen.queryByText('Nómina')).not.toBeInTheDocument()
+    expect(screen.getByText('Alquiler')).toBeInTheDocument()
+    expect(screen.getByText('Compra semanal')).toBeInTheDocument()
+  })
+
+  it('filters by category', () => {
+    renderPage()
+    fireEvent.change(screen.getByLabelText('Categoría'), { target: { value: 'home' } })
+    expect(screen.queryByText('Nómina')).not.toBeInTheDocument()
+    expect(screen.getByText('Alquiler')).toBeInTheDocument()
+  })
+
+  it('opens the edit transaction modal', () => {
+    renderPage()
+    const editButtons = screen.getAllByLabelText('Editar')
+    fireEvent.click(editButtons[0])
+    expect(screen.getByText('Editar movimiento')).toBeInTheDocument()
+  })
+
+  it('opens the delete confirmation dialog', () => {
+    const value = renderPage()
+    const deleteButtons = screen.getAllByLabelText('Borrar')
+    fireEvent.click(deleteButtons[0])
+    expect(screen.getByText('Borrar movimiento')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Cancelar'))
+    expect(screen.queryByText('Borrar movimiento')).not.toBeInTheDocument()
+  })
 })

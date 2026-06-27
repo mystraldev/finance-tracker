@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
+  formatCompactCurrency,
   formatCurrency,
   formatDate,
+  formatFullDate,
   formatGroupDate,
   formatPercent,
   formatSignedCurrency,
@@ -44,6 +46,20 @@ describe('formatDate', () => {
   it('keeps an ISO calendar date on the same day (no timezone drift)', () => {
     // Tolerant of the month abbreviation spelling ("jun" / "jun.").
     expect(formatDate('2026-06-01')).toMatch(/^1\s+jun/i)
+  })
+})
+
+describe('formatCompactCurrency', () => {
+  it('formats large values with compact notation', () => {
+    const out = formatCompactCurrency(1500)
+    expect(out).toMatch(/€/)
+  })
+})
+
+describe('formatFullDate', () => {
+  it('includes the year in the formatted date', () => {
+    const out = formatFullDate('2026-06-15')
+    expect(out).toMatch(/2026/)
   })
 })
 

@@ -52,4 +52,42 @@ describe('CategoryForm', () => {
     render(<CategoryForm onSubmit={vi.fn()} onCancel={vi.fn()} />)
     expect(screen.getByText(/Icono/i)).toBeInTheDocument()
   })
+
+  it('shows validation error when budget is invalid', async () => {
+    const onSubmit = vi.fn()
+    const { container } = render(<CategoryForm onSubmit={onSubmit} onCancel={vi.fn()} />)
+    const input = container.querySelector('input[type="text"]')!
+    fireEvent.change(input, { target: { value: 'Test' } })
+    const budgetInput = screen.getByPlaceholderText('Sin límite')
+    fireEvent.change(budgetInput, { target: { value: 'abc' } })
+    fireEvent.submit(container.querySelector('form')!)
+    await waitFor(() => {
+      expect(screen.getByText('El presupuesto no es válido.')).toBeInTheDocument()
+    })
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it('submits with budget as undefined when budget is zero', async () => {
+    const onSubmit = vi.fn()
+    const { container } = render(<CategoryForm onSubmit={onSubmit} onCancel={vi.fn()} />)
+    const input = container.querySelector('input[type="text"]')!
+    fireEvent.change(input, { target: { value: 'Test' } })
+    const budgetInput = screen.getByPlaceholderText('Sin límite')
+    fireEvent.change(budgetInput, { target: { value: '0' } })
+    fireEvent.submit(container.querySelector('form')!)
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ budget: undefined }))
+    })
+  })
+
+  it('pre-fills budget when editing a category with a budget', () => {
+    render(
+      <CategoryForm
+        initial={{ id: 'cat-1', label: 'Comida', color: '#ff0000', icon: 'cart', budget: 200 }}
+        onSubmit={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+    )
+    expect(screen.getByPlaceholderText('Sin límite')).toHaveValue('200')
+  })
 })

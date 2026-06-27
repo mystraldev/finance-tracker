@@ -36,4 +36,16 @@ describe('Sidebar', () => {
     renderSidebar()
     expect(screen.getByText('Tema')).toBeInTheDocument()
   })
+
+  it('shows the correct theme label in default mode', () => {
+    renderSidebar()
+    const toggle = screen.getByLabelText(/Tema actual:/)
+    expect(toggle).toBeInTheDocument()
+  })
+
+  it('renders the investments nav item as disabled', () => {
+    renderSidebar()
+    const disabledBtn = screen.getByText('Inversiones').closest('button')
+    expect(disabledBtn).toBeDisabled()
+  })
 })

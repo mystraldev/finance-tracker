@@ -116,4 +116,89 @@ describe('AccountsPage', () => {
     expect(screen.getByText(/Esta cuenta solo tiene 1000,00\s€ disponible para reservar\./)).toBeInTheDocument()
     expect(value.addSavingsGoal).not.toHaveBeenCalled()
   })
+
+  it('renders account cards in the grid', () => {
+    renderPage()
+    expect(screen.getByText('Cuenta corriente')).toBeInTheDocument()
+    const accountCards = screen.getAllByText('Ahorro')
+    expect(accountCards.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('opens the edit account modal', () => {
+    renderPage()
+    const editButtons = screen.getAllByLabelText('Editar')
+    fireEvent.click(editButtons[0])
+    expect(screen.getByText('Editar cuenta')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Cuenta corriente')).toBeInTheDocument()
+  })
+
+  it('blocks deletion of an account with transactions', () => {
+    const dataWithTxs: FinanceData = {
+      ...data,
+      savingsGoals: [],
+      transactions: [
+        { id: 'tx-1', date: '2026-06-01', amount: -50, description: 'Gasto', accountId: 'checking', categoryId: 'income' },
+      ],
+    }
+    renderPage(createValue(dataWithTxs))
+
+    const deleteButtons = screen.getAllByLabelText('Borrar')
+    fireEvent.click(deleteButtons[0])
+    expect(screen.getByText('No se puede borrar')).toBeInTheDocument()
+    expect(screen.getByText(/tiene movimientos u objetivos asociados/)).toBeInTheDocument()
+  })
+
+  it('shows a delete confirmation for an unused account', () => {
+    const value = renderPage(createValue({ ...data, savingsGoals: [] }))
+
+    const deleteButtons = screen.getAllByLabelText('Borrar')
+    fireEvent.click(deleteButtons[1])
+
+    expect(screen.getByText('Borrar cuenta')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Cancelar'))
+    expect(screen.queryByText('Borrar cuenta')).not.toBeInTheDocument()
+  })
+
+  it('opens the edit savings goal modal', () => {
+    renderPage()
+    const editGoalButton = screen.getByLabelText('Editar objetivo Fondo de emergencia')
+    fireEvent.click(editGoalButton)
+    expect(screen.getByText('Editar objetivo')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Fondo de emergencia')).toBeInTheDocument()
+  })
+
+  it('shows a delete confirmation for a savings goal', () => {
+    const value = renderPage()
+    const deleteGoalButton = screen.getByLabelText('Borrar objetivo Fondo de emergencia')
+    fireEvent.click(deleteGoalButton)
+    expect(screen.getByText('Borrar objetivo')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByText('Cancelar'))
+    expect(screen.queryByText('Borrar objetivo')).not.toBeInTheDocument()
+  })
+
+  it('shows a completed goal badge', () => {
+    const dataWithComplete: FinanceData = {
+      ...data,
+      savingsGoals: [
+        {
+          id: 'done',
+          name: 'Meta cumplida',
+          targetAmount: 500,
+          savedAmount: 500,
+          icon: 'piggy',
+          color: '#10b981',
+          accountId: 'savings',
+        },
+      ],
+    }
+    renderPage(createValue(dataWithComplete))
+    const badges = screen.getAllByText('Completado')
+    expect(badges.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('shows empty state when there are no savings goals', () => {
+    renderPage(createValue({ accounts: data.accounts, categories: data.categories, transactions: [], savingsGoals: [] }))
+    expect(screen.getByText('Todavía no hay objetivos.')).toBeInTheDocument()
+  })
 })

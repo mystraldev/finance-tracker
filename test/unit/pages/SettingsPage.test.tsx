@@ -156,4 +156,30 @@ describe('SettingsPage', () => {
     expect(finance.reset).toHaveBeenCalled()
     expect(screen.getByText('Datos restaurados al estado demo.')).toBeInTheDocument()
   })
+
+  it('rejects import when JSON file is invalid', async () => {
+    const finance = createFinanceValue()
+    renderPage({ finance })
+
+    const file = new File(['{ invalid json }'], 'backup.json', { type: 'application/json' })
+    fireEvent.change(screen.getByLabelText('Seleccionar backup JSON'), {
+      target: { files: [file] },
+    })
+
+    expect(await screen.findByText('No se ha podido leer el archivo JSON.')).toBeInTheDocument()
+    expect(finance.importData).not.toHaveBeenCalled()
+  })
+
+  it('shows the current theme label based on mode', () => {
+    renderPage()
+    expect(screen.getByText(/Tema actual:/)).toBeInTheDocument()
+  })
+
+  it('shows data summary in the local data card', () => {
+    renderPage()
+    expect(screen.getByText(/1 cuentas/)).toBeInTheDocument()
+    expect(screen.getByText(/1 categorías/)).toBeInTheDocument()
+    expect(screen.getByText(/1 movimientos/)).toBeInTheDocument()
+    expect(screen.getByText(/0 objetivos/)).toBeInTheDocument()
+  })
 })

@@ -53,4 +53,34 @@ describe('NetWorthHero', () => {
 
     expect(container.querySelector('.hero__delta')?.className).toContain('is-up')
   })
+
+  it('shows a down delta when net worth decreased', () => {
+    const { container } = render(
+      <NetWorthHero
+        accounts={[account('declining', 500)]}
+        history={[
+          { label: 'may', value: 1500 },
+          { label: 'jun', value: 500 },
+        ]}
+        month="Junio de 2026"
+      />,
+    )
+
+    expect(container.querySelector('.hero__delta')?.className).toContain('is-down')
+  })
+
+  it('handles zero previous net worth without crashing', () => {
+    const { container } = render(
+      <NetWorthHero
+        accounts={[account('starting', 1000)]}
+        history={[
+          { label: 'may', value: 0 },
+          { label: 'jun', value: 1000 },
+        ]}
+        month="Junio de 2026"
+      />,
+    )
+
+    expect(container.querySelector('.hero__amount')).toBeInTheDocument()
+  })
 })

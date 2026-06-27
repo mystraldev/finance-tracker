@@ -65,4 +65,102 @@ describe('TransactionForm', () => {
       expect.objectContaining({ date: '2026-06-10', amount: -12.5 }),
     )
   })
+
+  it('rejects submission with an empty amount', () => {
+    render(
+      <TransactionForm
+        accounts={accounts}
+        categories={categories}
+        onSubmit={vi.fn()}
+        onCancel={() => {}}
+      />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: /Añadir movimiento/i }))
+    expect(screen.getByText('Introduce un importe válido mayor que 0.')).toBeInTheDocument()
+  })
+
+  it('rejects submission without a description', () => {
+    render(
+      <TransactionForm
+        accounts={accounts}
+        categories={categories}
+        onSubmit={vi.fn()}
+        onCancel={() => {}}
+      />,
+    )
+    fireEvent.change(screen.getByPlaceholderText('0,00'), { target: { value: '50' } })
+    fireEvent.click(screen.getByRole('button', { name: /Añadir movimiento/i }))
+    expect(screen.getByText('Añade una descripción.')).toBeInTheDocument()
+  })
+
+  it('submits an income transaction with positive amount', () => {
+    const onSubmit = vi.fn()
+    render(
+      <TransactionForm
+        accounts={accounts}
+        categories={categories}
+        onSubmit={onSubmit}
+        onCancel={() => {}}
+      />,
+    )
+
+    fireEvent.click(screen.getByText('Ingreso'))
+    fireEvent.change(screen.getByPlaceholderText('0,00'), { target: { value: '2500' } })
+    fireEvent.change(screen.getByPlaceholderText('Ej. Compra semanal'), { target: { value: 'Nómina' } })
+    fireEvent.click(screen.getByRole('button', { name: /Añadir movimiento/i }))
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 2500, categoryId: 'income' }),
+    )
+  })
+
+  it('rejects submission without an account', () => {
+    render(
+      <TransactionForm
+        accounts={[]}
+        categories={categories}
+        onSubmit={vi.fn()}
+        onCancel={() => {}}
+      />,
+    )
+    fireEvent.change(screen.getByPlaceholderText('0,00'), { target: { value: '50' } })
+    fireEvent.change(screen.getByPlaceholderText('Ej. Compra semanal'), { target: { value: 'Test' } })
+    fireEvent.click(screen.getByRole('button', { name: /Añadir movimiento/i }))
+    expect(screen.getByText('Selecciona una cuenta.')).toBeInTheDocument()
+  })
+
+  it('hides the category field when income is selected', () => {
+    render(
+      <TransactionForm
+        accounts={accounts}
+        categories={categories}
+        onSubmit={vi.fn()}
+        onCancel={() => {}}
+      />,
+    )
+    expect(screen.getByText('Categoría')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Ingreso'))
+    expect(screen.queryByText('Categoría')).not.toBeInTheDocument()
+  })
+
+  it('pre-fills fields when editing a transaction', () => {
+    render(
+      <TransactionForm
+        accounts={accounts}
+        categories={categories}
+        initial={{
+          id: 'tx-1',
+          date: '2026-06-15',
+          amount: -75,
+          description: 'Gasolina',
+          accountId: 'checking',
+          categoryId: 'food',
+        }}
+        onSubmit={vi.fn()}
+        onCancel={() => {}}
+      />,
+    )
+    expect(screen.getByPlaceholderText('Ej. Compra semanal')).toHaveValue('Gasolina')
+    expect(screen.getByRole('button', { name: /Guardar cambios/i })).toBeInTheDocument()
+  })
 })

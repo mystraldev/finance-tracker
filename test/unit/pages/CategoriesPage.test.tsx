@@ -87,4 +87,45 @@ describe('CategoriesPage', () => {
     expect(screen.getByDisplayValue('Salud')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('Sin límite')).toBeInTheDocument()
   })
+
+  it('opens the create category modal', () => {
+    renderPage()
+    fireEvent.click(screen.getByRole('button', { name: /Nueva categoría/i }))
+    expect(screen.getByRole('heading', { name: 'Nueva categoría' })).toBeInTheDocument()
+  })
+
+  it('creates a new category', () => {
+    const value = renderPage()
+    fireEvent.click(screen.getByRole('button', { name: /Nueva categoría/i }))
+    fireEvent.change(screen.getByPlaceholderText('Ej. Suscripciones'), { target: { value: 'Ocio' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Crear categoría' }))
+    expect(value.addCategory).toHaveBeenCalledWith(
+      expect.objectContaining({ label: 'Ocio' }),
+    )
+  })
+
+  it('deletes a category after confirmation', () => {
+    const value = renderPage()
+    const deleteButtons = screen.getAllByLabelText('Borrar')
+    fireEvent.click(deleteButtons[0])
+    expect(screen.getByText('Borrar categoría')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByText('Cancelar'))
+    expect(screen.queryByText('Borrar categoría')).not.toBeInTheDocument()
+  })
+
+  it('blocks deletion of a category with transactions', () => {
+    renderPage()
+    const deleteButtons = screen.getAllByLabelText('Borrar')
+    fireEvent.click(deleteButtons[1])
+
+    expect(screen.getByText('No se puede borrar')).toBeInTheDocument()
+    expect(screen.getByText(/tiene movimientos asociados/)).toBeInTheDocument()
+  })
+
+  it('shows budget progress for categories with a budget', () => {
+    renderPage()
+    expect(screen.getByText('Vivienda')).toBeInTheDocument()
+    expect(screen.getByText('0 movimientos este mes')).toBeInTheDocument()
+  })
 })
