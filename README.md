@@ -1,41 +1,103 @@
 # Finance Tracker
 
-Aplicación web para el seguimiento de finanzas personales.
+Aplicación web para el seguimiento de finanzas personales. Construida con React, TypeScript, Vite y pnpm.
+
+## Tech stack
+
+| Capa | Tecnología |
+|------|-----------|
+| UI | React 19, React Router 7 |
+| Lenguaje | TypeScript 6 (strict mode) |
+| Build | Vite 8 |
+| State | `useReducer` + Context |
+| Test | Vitest |
+| Lint | ESLint 10 (flat config) + typescript-eslint |
+| Paquete | pnpm 11.6.0 |
+| Docker | node:24-alpine (multi-stage) |
+| Deploy | Vercel |
+
+## State management
+
+Sin librería externa — `useReducer` + React Context con persistencia automática en localStorage.
+
+- `FinanceProvider.tsx` contiene el reducer y el efecto de persistencia.
+- `financeContext.ts` expone el contexto y el hook `useFinance()`.
+- Las páginas llaman a `useFinance()` para leer estado y disparar acciones.
+
+### Rutas
+
+| Path | Página | Descripción |
+|------|--------|-------------|
+| `/` | DashboardPage | Resumen: patrimonio, cuentas, ahorro, gastos |
+| `/movimientos` | TransactionsPage | CRUD de movimientos con filtros |
+| `/categorias` | CategoriesPage | CRUD de categorías |
+| `/cuentas` | AccountsPage | CRUD de cuentas |
+
+### Tipos principales
+
+| Tipo | Descripción |
+|------|-------------|
+| `Account` | Cuenta con `type: 'cash'\|'savings'\|'investment'` y `openingBalance` |
+| `Category` | Categoría de gasto/ingreso con `color` e `icon` |
+| `Transaction` | Movimiento con `amount` (signado), `accountId`, `categoryId` |
+| `FinanceAction` | 10 tipos de acción discriminada para el reducer |
+| `FinanceContextValue` | Interface completa del contexto (estado + métodos) |
 
 ## Desarrollo
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm run dev       # http://localhost:5173
+pnpm run build     # Producción → dist/
+pnpm run lint      # ESLint (0 warnings goal)
+pnpm run test      # Vitest
+pnpm exec tsc --noEmit --project tsconfig.app.json
+pnpm exec tsc --noEmit                         # + tsconfig.node.json (configs)
 ```
 
-## Comandos
+## Docker
 
-- `npm run dev`: inicia el servidor de desarrollo.
-- `npm run build`: genera la versión de producción.
-- `npm run lint`: ejecuta ESLint.
+```bash
+# Desarrollo (hot-reload)
+docker compose up
+
+# Producción (servido con serve en :3000)
+docker build --target production -t finance-tracker .
+docker run -p 3000:3000 finance-tracker
+```
+
+## Tests
+
+Vitest con entorno `jsdom` y Testing Library. La configuración vive en `vite.config.ts`
+(`test` block) con `test/unit/setup.ts` (jest-dom + cleanup). Cobertura vía `@vitest/coverage-v8`.
+
+```bash
+pnpm run test            # ejecuta la suite
+pnpm run test:watch      # modo watch
+pnpm run test:coverage   # con informe de cobertura (aplica thresholds)
+```
+
+Cobertura actual: lógica pura (`src/utils`) ~98 %; umbral global mínimo para evitar regresiones.
+
+```
+src/utils/derive.test.ts        → selectores (saldos, patrimonio, desglose, series…)
+src/utils/format.test.ts        → currency / percent / signed / fechas
+src/utils/math.test.ts          → fractionOf
+src/store/theme.test.ts         → resolveTheme / isThemeMode
+src/store/FinanceProvider.test.tsx → acciones del reducer (add/delete/setMonth/reset)
+src/components/*.test.tsx        → Sparkline, Modal, ConfirmDialog, SavingsRate
+```
 
 ## Deployment
 
-El proyecto está configurado para desplegarse en **Vercel** mediante `vercel.json`.
+Vercel con configuración en `vercel.json`. El framework se detecta automáticamente como Vite.
 
-### Rama `main` — producción
+| Entorno | Rama | URL |
+|---------|------|-----|
+| **Producción** | `main` | [finance-tracker-ruby-mu.vercel.app](https://finance-tracker-ruby-mu.vercel.app) |
+| **Staging** (preview permanente) | `dev` | [finance-tracker-git-dev-joseppascualbadia-8623s-projects.vercel.app](https://finance-tracker-git-dev-joseppascualbadia-8623s-projects.vercel.app) |
+| Preview por PR | automática | generada automáticamente |
 
-La rama `main` se despliega automáticamente en el entorno de producción al hacer merge.
+## Tracker de incidencias
 
-### Rama `dev` — preview permanente
-
-La rama `dev` se despliega como preview de staging. Para activarla:
-
-1. En el dashboard de Vercel, ve a **Project Settings > Git > Preview Branches**.
-2. Añade `dev` a la lista de ramas con preview permanente.
-
-### PRs — preview automática
-
-Cada Pull Request genera un preview URL única automáticamente (Vercel lo activa por defecto).
-
-### Setup inicial (una vez)
-
-1. Ve a [vercel.com](https://vercel.com) e importa el repositorio `hatsydev/finance-tracker`.
-2. Vercel detectará automáticamente el framework **Vite** y usará la configuración de `vercel.json`.
-3. Tras el primer deploy, configura las ramas de preview (paso anterior) si es necesario.
+Usamos [GitHub Issues](https://github.com/mystraldev/finance-tracker/issues) para la gestión de tareas y bugs.
