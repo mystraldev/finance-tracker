@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 
 test.describe('Transactions', () => {
   test.beforeEach(async ({ page }) => {
@@ -24,7 +24,7 @@ test.describe('Transactions', () => {
   test('filters by type', async ({ page }) => {
     const typeSelect = page.getByLabel('Tipo')
     await typeSelect.selectOption('gasto')
-    await expect(page.getByText('Nómina')).not.toBeVisible()
+    await expect(page.getByText('Nómina')).toBeHidden()
   })
 
   test('search filters the list', async ({ page }) => {

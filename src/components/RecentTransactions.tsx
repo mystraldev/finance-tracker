@@ -1,18 +1,20 @@
-import { Link } from 'react-router-dom'
-import Icon from './Icon'
-import { formatDate, formatSignedCurrency } from '../utils/format'
 import type { EnrichedTransaction } from '../types/finance'
 
-type RecentTransactionsProps = {
+import { Link } from 'react-router-dom'
+
+import { formatDate, formatSignedCurrency } from '../utils/format'
+import Icon from './Icon'
+
+type RecentTransactionsProperties = {
   transactions: EnrichedTransaction[]
 }
 
-function RecentTransactions({ transactions }: RecentTransactionsProps) {
+function RecentTransactions({ transactions }: RecentTransactionsProperties) {
   return (
     <section className="card transactions">
       <header className="card__header">
         <h3 className="card__title">Movimientos recientes</h3>
-        <Link to="/movimientos" className="card__action">
+        <Link className="card__action" to="/movimientos">
           Ver todos
         </Link>
       </header>
@@ -21,7 +23,7 @@ function RecentTransactions({ transactions }: RecentTransactionsProps) {
         {transactions.map((tx) => {
           const isIncome = tx.amount > 0
           return (
-            <li key={tx.id} className="tx">
+            <li className="tx" key={tx.id}>
               <span
                 className={`tx__icon ${isIncome ? 'tx__icon--in' : ''}`}
                 style={{

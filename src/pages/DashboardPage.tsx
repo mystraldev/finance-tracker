@@ -1,26 +1,26 @@
-import { useFinance } from '../store/financeContext'
-import SummaryCards from '../components/SummaryCards'
-import NetWorthHero from '../components/NetWorthHero'
-import SavingsRate from '../components/SavingsRate'
-import CategoryBreakdown from '../components/CategoryBreakdown'
-import RecentTransactions from '../components/RecentTransactions'
+import AddTransactionButton from '../components/AddTransactionButton'
 import BudgetsCard from '../components/BudgetsCard'
 import { budgetStatusRank } from '../components/budgetStatus'
-import AddTransactionButton from '../components/AddTransactionButton'
+import CategoryBreakdown from '../components/CategoryBreakdown'
 import MonthSelector from '../components/MonthSelector'
+import NetWorthHero from '../components/NetWorthHero'
+import RecentTransactions from '../components/RecentTransactions'
+import SavingsRate from '../components/SavingsRate'
+import SummaryCards from '../components/SummaryCards'
+import { useFinance } from '../store/financeContext'
 import {
-  accountsWithBalance,
-  monthlyGrowthRate,
   accountSeries,
-  netWorthSeries,
-  incomeExpenses,
+  accountsWithBalance,
   categoryBreakdown,
   categoryBudgets,
-  recentTransactions,
+  incomeExpenses,
   monthLabel,
+  monthlyGrowthRate,
+  netWorthSeries,
+  recentTransactions,
 } from '../utils/derive'
 
-function DashboardPage() {
+export default function DashboardPage() {
   const state = useFinance()
   const month = state.selectedMonth
 
@@ -34,8 +34,8 @@ function DashboardPage() {
   const { income, expenses } = incomeExpenses(state.transactions, month)
   const breakdown = categoryBreakdown(state.transactions, state.categories, month)
   const budgets = categoryBudgets(state.transactions, state.categories, month)
-  const priorityBudgets = [...budgets]
-    .sort((a, b) => budgetStatusRank[a.status] - budgetStatusRank[b.status] || b.pct - a.pct)
+  const priorityBudgets = budgets
+    .toSorted((a, b) => budgetStatusRank[a.status] - budgetStatusRank[b.status] || b.pct - a.pct)
     .slice(0, 5)
   const recent = recentTransactions(state, 6)
 
@@ -57,7 +57,7 @@ function DashboardPage() {
       <SummaryCards accounts={accounts} />
 
       <div className="grid-two">
-        <SavingsRate income={income} expenses={expenses} />
+        <SavingsRate expenses={expenses} income={income} />
         <RecentTransactions transactions={recent} />
       </div>
 
@@ -67,5 +67,3 @@ function DashboardPage() {
     </>
   )
 }
-
-export default DashboardPage

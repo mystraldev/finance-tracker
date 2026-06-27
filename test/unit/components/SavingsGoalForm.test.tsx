@@ -1,7 +1,9 @@
+import type { AccountWithBalance, SavingsGoal } from '../../../src/types/finance'
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
+
 import SavingsGoalForm from '../../../src/components/SavingsGoalForm'
-import type { AccountWithBalance, SavingsGoal } from '../../../src/types/finance'
 
 const accounts: AccountWithBalance[] = [
   {
@@ -10,8 +12,8 @@ const accounts: AccountWithBalance[] = [
     type: 'savings',
     icon: 'piggy',
     accent: 'emerald',
-    openingBalance: 12500,
-    balance: 12500,
+    openingBalance: 12_500,
+    balance: 12_500,
   },
 ]
 
@@ -23,8 +25,8 @@ describe('SavingsGoalForm', () => {
       <SavingsGoalForm
         accounts={accounts}
         goals={goals}
-        onSubmit={() => {}}
         onCancel={() => {}}
+        onSubmit={() => {}}
       />,
     )
 
@@ -41,8 +43,8 @@ describe('SavingsGoalForm', () => {
       <SavingsGoalForm
         accounts={accounts}
         goals={goals}
-        onSubmit={() => {}}
         onCancel={() => {}}
+        onSubmit={() => {}}
       />,
     )
 
@@ -60,8 +62,8 @@ describe('SavingsGoalForm', () => {
       <SavingsGoalForm
         accounts={accounts}
         goals={goals}
-        onSubmit={onSubmit}
         onCancel={() => {}}
+        onSubmit={onSubmit}
       />,
     )
 
@@ -84,8 +86,8 @@ describe('SavingsGoalForm', () => {
       <SavingsGoalForm
         accounts={accounts}
         goals={goals}
-        onSubmit={onSubmit}
         onCancel={() => {}}
+        onSubmit={onSubmit}
       />,
     )
 
@@ -101,8 +103,8 @@ describe('SavingsGoalForm', () => {
 
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
       name: 'Entrada',
-      targetAmount: 15000,
-      savedAmount: 12500,
+      targetAmount: 15_000,
+      savedAmount: 12_500,
       accountId: 'savings',
     }))
   })

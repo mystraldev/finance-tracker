@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
-import Icon from './Icon'
+
 import { useTheme } from '../store/themeContext'
+import Icon from './Icon'
 
 const navItems = [
   { id: 'dashboard', label: 'Resumen', icon: 'dashboard', to: '/' },
@@ -11,17 +12,30 @@ const navItems = [
   { id: 'settings', label: 'Ajustes', icon: 'settings', to: '/ajustes' },
 ]
 
-function Sidebar() {
+export default function Sidebar() {
   const { mode, theme, cycleMode } = useTheme()
-  const nextLabel =
-    mode === 'system' ? 'Forzar claro' : mode === 'light' ? 'Forzar oscuro' : 'Usar sistema'
-  const themeLabel =
-    mode === 'system'
-      ? `Sistema (${theme === 'dark' ? 'oscuro' : 'claro'})`
-      : mode === 'dark'
-        ? 'Oscuro'
-        : 'Claro'
-  const themeIcon = mode === 'system' ? 'system' : mode === 'dark' ? 'moon' : 'sun'
+
+  function getNextLabel(): string {
+    if (mode === 'system') return 'Forzar claro'
+    if (mode === 'light') return 'Forzar oscuro'
+    return 'Usar sistema'
+  }
+
+  function getThemeLabel(): string {
+    if (mode === 'system') return `Sistema (${theme === 'dark' ? 'oscuro' : 'claro'})`
+    if (mode === 'dark') return 'Oscuro'
+    return 'Claro'
+  }
+
+  function getThemeIcon(): string {
+    if (mode === 'system') return 'system'
+    if (mode === 'dark') return 'moon'
+    return 'sun'
+  }
+
+  const nextLabel = getNextLabel()
+  const themeLabel = getThemeLabel()
+  const themeIcon = getThemeIcon()
 
   return (
     <aside className="sidebar">
@@ -34,12 +48,12 @@ function Sidebar() {
         {navItems.map((item) =>
           item.to ? (
             <NavLink
-              key={item.id}
-              to={item.to}
-              end={item.to === '/'}
               className={({ isActive }) =>
                 `nav-item${isActive ? ' nav-item--active' : ''}`
               }
+              end={item.to === '/'}
+              key={item.id}
+              to={item.to}
             >
               <span className="nav-item__icon">
                 <Icon name={item.icon} size={19} />
@@ -47,7 +61,7 @@ function Sidebar() {
               <span className="nav-item__label">{item.label}</span>
             </NavLink>
           ) : (
-            <button key={item.id} type="button" className="nav-item nav-item--soon" disabled>
+            <button className="nav-item nav-item--soon" disabled key={item.id} type="button">
               <span className="nav-item__icon">
                 <Icon name={item.icon} size={19} />
               </span>
@@ -60,11 +74,11 @@ function Sidebar() {
 
       <div className="sidebar__footer">
         <button
-          type="button"
+          aria-label={`Tema actual: ${themeLabel}. ${nextLabel}`}
           className="theme-toggle"
           onClick={cycleMode}
-          aria-label={`Tema actual: ${themeLabel}. ${nextLabel}`}
           title={nextLabel}
+          type="button"
         >
           <span className="theme-toggle__icon">
             <Icon name={themeIcon} size={17} />
@@ -86,5 +100,3 @@ function Sidebar() {
     </aside>
   )
 }
-
-export default Sidebar

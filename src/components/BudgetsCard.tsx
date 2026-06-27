@@ -1,26 +1,31 @@
-import { Link } from 'react-router-dom'
-import BudgetProgress from './BudgetProgress'
-import Icon from './Icon'
-import { budgetStatusLabel } from './budgetStatus'
 import type { CategoryBudget } from '../types/finance'
 
-type BudgetsCardProps = {
+import { Link } from 'react-router-dom'
+
+import BudgetProgress from './BudgetProgress'
+import { budgetStatusLabel } from './budgetStatus'
+import Icon from './Icon'
+
+type BudgetsCardProperties = {
   budgets: CategoryBudget[]
   totalCount?: number
 }
 
-function BudgetsCard({ budgets, totalCount = budgets.length }: BudgetsCardProps) {
+function BudgetsCard({ budgets, totalCount = budgets.length }: BudgetsCardProperties) {
+  let subtitle: string
+  if (totalCount === 0) {
+    subtitle = 'Sin configurar'
+  } else if (totalCount > budgets.length) {
+    subtitle = `${budgets.length} prioritarias de ${totalCount}`
+  } else {
+    subtitle = `${totalCount} ${totalCount === 1 ? 'categoría' : 'categorías'}`
+  }
+
   return (
     <section className="card budgets">
       <header className="card__header">
         <h3 className="card__title">Presupuestos</h3>
-        <span className="card__subtitle">
-          {totalCount === 0
-            ? 'Sin configurar'
-            : totalCount > budgets.length
-              ? `${budgets.length} prioritarias de ${totalCount}`
-              : `${totalCount} ${totalCount === 1 ? 'categoría' : 'categorías'}`}
-        </span>
+        <span className="card__subtitle">{subtitle}</span>
       </header>
 
       {budgets.length === 0 ? (
@@ -39,7 +44,7 @@ function BudgetsCard({ budgets, totalCount = budgets.length }: BudgetsCardProps)
       ) : (
         <ul className="budget-list">
           {budgets.map((b) => (
-            <li key={b.id} className="budget-row">
+            <li className="budget-row" key={b.id}>
               <span
                 className="budget-row__icon"
                 style={{

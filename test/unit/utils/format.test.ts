@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+
 import {
   formatCompactCurrency,
   formatCurrency,
@@ -13,13 +14,13 @@ import {
 // inserts (U+00A0 / U+202F) and use tolerant matchers, so the suite checks the
 // es-ES contract (decimal comma, symbol, grouping happens) without being brittle
 // about ICU spacing, the grouping-separator variant, or month/weekday spelling.
-const norm = (s: string) => s.replace(/\s/g, ' ')
+const norm = (s: string) => s.replaceAll(/\s/g, ' ')
 
 describe('formatCurrency', () => {
   it('formats euros with es-ES conventions', () => {
     expect(norm(formatCurrency(1234.5))).toMatch(/^1234,50 €$/)
     // The `.` tolerates whatever thousands separator ICU emits.
-    expect(norm(formatCurrency(12345.6))).toMatch(/^12.345,60 €$/)
+    expect(norm(formatCurrency(12_345.6))).toMatch(/^12.345,60 €$/)
     expect(norm(formatCurrency(-50))).toMatch(/^-50,00 €$/)
     expect(norm(formatCurrency(0))).toMatch(/^0,00 €$/)
   })

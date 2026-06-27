@@ -1,12 +1,13 @@
-import { createContext, useContext } from 'react'
 import type { FinanceContextValue } from '../types/finance'
 
-export const FinanceContext = createContext<FinanceContextValue | null>(null)
+import { createContext, useContext } from 'react'
+
+export const FinanceContext = createContext<FinanceContextValue | undefined>(undefined)
 
 export function useFinance(): FinanceContextValue {
-  const ctx = useContext(FinanceContext)
-  if (!ctx) {
+  const context = useContext(FinanceContext)
+  if (!context) {
     throw new Error('useFinance debe usarse dentro de <FinanceProvider>')
   }
-  return ctx
+  return context
 }

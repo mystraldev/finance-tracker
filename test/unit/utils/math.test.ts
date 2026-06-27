@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+
 import { fractionOf } from '../../../src/utils/math'
 
 describe('fractionOf', () => {

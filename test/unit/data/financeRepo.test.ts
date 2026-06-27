@@ -1,19 +1,21 @@
-import { describe, expect, it } from 'vitest'
 import type { FinanceData } from '../../../src/types/finance'
+
+import { describe, expect, it } from 'vitest'
+
 import {
+  availableTransactionMonths,
+  cloneFinanceData,
+  createFinanceBackup,
+  createLocalStorageFinanceRepo,
   FINANCE_BACKUP_APP,
   FINANCE_BACKUP_VERSION,
   FINANCE_RECOVERY_SUFFIX,
   FINANCE_STORAGE_KEY,
-  availableTransactionMonths,
-  cloneFinanceData,
-  createFinanceBackup,
-  createLocalStorageFinanceRepository,
   listTransactions,
   parseFinanceBackup,
   parseFinanceData,
   transactionMonthKey,
-} from '../../../src/data/financeRepository'
+} from '../../../src/data/financeRepo'
 
 const data: FinanceData = {
   accounts: [
@@ -73,64 +75,64 @@ function createMemoryStorage(initial: Record<string, string> = {}) {
   }
 }
 
-describe('financeRepository storage', () => {
+describe('financeRepo storage', () => {
   it('loads persisted finance data from storage', () => {
     const storage = createMemoryStorage({
       [FINANCE_STORAGE_KEY]: JSON.stringify(data),
     })
-    const repository = createLocalStorageFinanceRepository({ storage })
+    const repo = createLocalStorageFinanceRepo({ storage })
 
-    expect(repository.load()).toEqual(data)
+    expect(repo.load()).toEqual(data)
   })
 
   it('falls back to seed data when storage is empty or invalid', () => {
     const storage = createMemoryStorage({
       [FINANCE_STORAGE_KEY]: JSON.stringify({ accounts: [], transactions: [] }),
     })
-    const repository = createLocalStorageFinanceRepository({ storage, seedData: data })
+    const repo = createLocalStorageFinanceRepo({ storage, seedData: data })
 
-    expect(repository.load()).toEqual(data)
+    expect(repo.load()).toEqual(data)
   })
 
   it('stashes schema-invalid payloads under the recovery key before seeding', () => {
     const invalid = JSON.stringify({ accounts: [], transactions: [] })
     const storage = createMemoryStorage({ [FINANCE_STORAGE_KEY]: invalid })
-    const repository = createLocalStorageFinanceRepository({ storage, seedData: data })
+    const repo = createLocalStorageFinanceRepo({ storage, seedData: data })
 
-    expect(repository.load()).toEqual(data)
+    expect(repo.load()).toEqual(data)
     expect(storage.value(`${FINANCE_STORAGE_KEY}${FINANCE_RECOVERY_SUFFIX}`)).toBe(invalid)
   })
 
   it('stashes unparseable JSON under the recovery key before seeding', () => {
     const storage = createMemoryStorage({ [FINANCE_STORAGE_KEY]: 'not-json{' })
-    const repository = createLocalStorageFinanceRepository({ storage, seedData: data })
+    const repo = createLocalStorageFinanceRepo({ storage, seedData: data })
 
-    expect(repository.load()).toEqual(data)
+    expect(repo.load()).toEqual(data)
     expect(storage.value(`${FINANCE_STORAGE_KEY}${FINANCE_RECOVERY_SUFFIX}`)).toBe('not-json{')
   })
 
   it('does not write a recovery entry when storage is empty or valid', () => {
     const storage = createMemoryStorage({ [FINANCE_STORAGE_KEY]: JSON.stringify(data) })
-    const repository = createLocalStorageFinanceRepository({ storage })
+    const repo = createLocalStorageFinanceRepo({ storage })
 
-    repository.load()
+    repo.load()
 
     expect(storage.value(`${FINANCE_STORAGE_KEY}${FINANCE_RECOVERY_SUFFIX}`)).toBeUndefined()
   })
 
   it('saves cloned finance data to storage', () => {
     const storage = createMemoryStorage()
-    const repository = createLocalStorageFinanceRepository({ storage })
+    const repo = createLocalStorageFinanceRepo({ storage })
 
-    repository.save(data)
+    repo.save(data)
 
     expect(JSON.parse(storage.value(FINANCE_STORAGE_KEY) ?? '{}')).toEqual(data)
   })
 
   it('returns fresh clones for seed and loaded data', () => {
-    const repository = createLocalStorageFinanceRepository({ seedData: data })
-    const first = repository.seed()
-    const second = repository.seed()
+    const repo = createLocalStorageFinanceRepo({ seedData: data })
+    const first = repo.seed()
+    const second = repo.seed()
 
     first.accounts[0].name = 'Changed'
 
@@ -138,16 +140,16 @@ describe('financeRepository storage', () => {
   })
 })
 
-describe('financeRepository validation', () => {
+describe('financeRepo validation', () => {
   it('parses complete finance data and rejects malformed data', () => {
     expect(parseFinanceData(data)).toEqual(data)
     expect(parseFinanceData({ ...data, savingsGoals: undefined })).toEqual({
       ...data,
       savingsGoals: [],
     })
-    expect(parseFinanceData({ ...data, categories: undefined })).toBeNull()
-    expect(parseFinanceData({ ...data, transactions: [{ ...data.transactions[0], amount: '10' }] })).toBeNull()
-    expect(parseFinanceData({ ...data, savingsGoals: [{ ...data.savingsGoals[0], savedAmount: '10' }] })).toBeNull()
+    expect(parseFinanceData({ ...data, categories: undefined })).toBeUndefined()
+    expect(parseFinanceData({ ...data, transactions: [{ ...data.transactions[0], amount: '10' }] })).toBeUndefined()
+    expect(parseFinanceData({ ...data, savingsGoals: [{ ...data.savingsGoals[0], savedAmount: '10' }] })).toBeUndefined()
   })
 
   it('clones finance data without sharing array item references', () => {
@@ -172,13 +174,13 @@ describe('financeRepository validation', () => {
   it('rejects malformed backup files', () => {
     const backup = createFinanceBackup(data)
 
-    expect(parseFinanceBackup({ ...backup, app: 'other-app' })).toBeNull()
-    expect(parseFinanceBackup({ ...backup, version: 999 })).toBeNull()
-    expect(parseFinanceBackup({ ...backup, data: { ...data, accounts: 'bad' } })).toBeNull()
+    expect(parseFinanceBackup({ ...backup, app: 'other-app' })).toBeUndefined()
+    expect(parseFinanceBackup({ ...backup, version: 999 })).toBeUndefined()
+    expect(parseFinanceBackup({ ...backup, data: { ...data, accounts: 'bad' } })).toBeUndefined()
   })
 })
 
-describe('financeRepository transaction queries', () => {
+describe('financeRepo transaction queries', () => {
   it('extracts month keys and available months', () => {
     expect(transactionMonthKey('2026-06-12')).toBe('2026-06')
     expect(availableTransactionMonths(data)).toEqual(['2026-06', '2026-05'])

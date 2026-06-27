@@ -1,7 +1,9 @@
+import type { AccountWithBalance } from '../../../src/types/finance'
+
 import { render } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
+
 import NetWorthHero from '../../../src/components/NetWorthHero'
-import type { AccountWithBalance } from '../../../src/types/finance'
 
 type HeroAccount = AccountWithBalance & { monthlyGrowthRate: number; history: number[] }
 
@@ -34,7 +36,8 @@ describe('NetWorthHero', () => {
     )
 
     const widths = [...container.querySelectorAll<HTMLElement>('.hero__segment')].map(
-      (el) => parseFloat(el.style.width),
+      // eslint-disable-next-line unicorn/prefer-number-coercion -- style.width returns "100%", need parseFloat semantics
+      (element) => parseFloat(element.style.width),
     )
     expect(widths).toEqual([100, 0])
   })

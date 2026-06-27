@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
-import { MemoryRouter, Routes, Route } from 'react-router-dom'
-import { ThemeProvider } from '../../../src/store/ThemeProvider'
+
 import Layout from '../../../src/components/Layout'
+import { ThemeProvider } from '../../../src/store/ThemeProvider'
 
 function renderLayout() {
   return render(
@@ -10,7 +11,7 @@ function renderLayout() {
       <MemoryRouter initialEntries={['/']}>
         <Routes>
           <Route element={<Layout />}>
-            <Route path="/" element={<p>child</p>} />
+            <Route element={<p>child</p>} path="/" />
           </Route>
         </Routes>
       </MemoryRouter>

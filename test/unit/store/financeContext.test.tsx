@@ -1,8 +1,9 @@
-import { describe, expect, it, vi } from 'vitest'
-import { renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import { FinanceContext } from '../../../src/store/financeContext'
-import { useFinance } from '../../../src/store/financeContext'
+
+import { renderHook } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
+
+import { FinanceContext, useFinance  } from '../../../src/store/financeContext'
 
 const value = {
   accounts: [],

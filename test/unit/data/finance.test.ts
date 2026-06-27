@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+
 import { seed } from '../../../src/data/finance'
 
 describe('seed data', () => {

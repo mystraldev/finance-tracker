@@ -1,17 +1,20 @@
-import { useEffect, type ReactNode } from 'react'
+import type {ReactNode} from 'react';
+
+import {  useEffect } from 'react'
 import { createPortal } from 'react-dom'
+
 import Icon from './Icon'
 
-type ModalProps = {
+type ModalProperties = {
   title: string
   onClose: () => void
   children: ReactNode
 }
 
-function Modal({ title, onClose, children }: ModalProps) {
+function Modal({ title, onClose, children }: ModalProperties) {
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+    const onKey = (event_: KeyboardEvent) => {
+      if (event_.key === 'Escape') onClose()
     }
     document.addEventListener('keydown', onKey)
     document.body.style.overflow = 'hidden'
@@ -21,22 +24,25 @@ function Modal({ title, onClose, children }: ModalProps) {
     }
   }, [onClose])
 
+  function handleOverlayMouseDown(event_: React.MouseEvent<HTMLDivElement>) {
+    if (event_.target === event_.currentTarget) onClose()
+  }
+
   return createPortal(
-    <div className="modal-overlay" onMouseDown={onClose}>
+    <div className="modal-overlay" onMouseDown={handleOverlayMouseDown} role="presentation">
       <div
+        aria-label={title}
+        aria-modal="true"
         className="modal"
         role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        onMouseDown={(e) => e.stopPropagation()}
       >
         <header className="modal__header">
           <h2 className="modal__title">{title}</h2>
           <button
-            type="button"
+            aria-label="Cerrar"
             className="modal__close"
             onClick={onClose}
-            aria-label="Cerrar"
+            type="button"
           >
             <Icon name="close" size={18} />
           </button>

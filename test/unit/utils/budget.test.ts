@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
+
 import { formatBudgetRemaining } from '../../../src/utils/budget'
 
-const norm = (s: string) => s.replace(/\s/g, ' ')
+const norm = (s: string) => s.replaceAll(/\s/g, ' ')
 
 describe('formatBudgetRemaining', () => {
   it('describes remaining budget', () => {

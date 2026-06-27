@@ -1,7 +1,9 @@
-import { describe, expect, it } from 'vitest'
-import { render, screen } from '@testing-library/react'
-import CategoryBreakdown from '../../../src/components/CategoryBreakdown'
 import type { CategoryBreakdownItem } from '../../../src/types/finance'
+
+import { render, screen } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
+
+import CategoryBreakdown from '../../../src/components/CategoryBreakdown'
 
 const categories: CategoryBreakdownItem[] = [
   { id: 'home', label: 'Vivienda', color: '#0a6ce0', icon: 'home', amount: 850 },
@@ -25,8 +27,8 @@ describe('CategoryBreakdown', () => {
 
   it('renders the SVG donut chart', () => {
     const { container } = render(<CategoryBreakdown categories={categories} />)
-    expect(container.querySelector('svg')).toBeInTheDocument()
-    const circles = container.querySelectorAll('svg circle')
+    expect(container.querySelector(':scope svg')).toBeInTheDocument()
+    const circles = container.querySelectorAll(':scope svg circle')
     expect(circles.length).toBeGreaterThan(categories.length)
   })
 

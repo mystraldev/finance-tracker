@@ -1,15 +1,17 @@
-import { describe, expect, it, vi } from 'vitest'
+import type { FinanceContextValue } from '../../../src/types/finance'
+
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { FinanceContext } from '../../../src/store/financeContext'
+import { describe, expect, it, vi } from 'vitest'
+
 import DashboardPage from '../../../src/pages/DashboardPage'
-import type { FinanceContextValue } from '../../../src/types/finance'
+import { FinanceContext } from '../../../src/store/financeContext'
 
 const value: FinanceContextValue = {
   accounts: [
     { id: 'checking', name: 'Cuenta corriente', type: 'cash' as const, icon: 'wallet', accent: 'indigo', openingBalance: 1500 },
-    { id: 'savings', name: 'Cuenta remunerada', type: 'savings' as const, icon: 'piggy', accent: 'emerald', openingBalance: 12500, interestRate: 0.0275 },
-    { id: 'investments', name: 'Inversiones', type: 'investment' as const, icon: 'trending', accent: 'violet', openingBalance: 18340.18 },
+    { id: 'savings', name: 'Cuenta remunerada', type: 'savings' as const, icon: 'piggy', accent: 'emerald', openingBalance: 12_500, interestRate: 0.0275 },
+    { id: 'investments', name: 'Inversiones', type: 'investment' as const, icon: 'trending', accent: 'violet', openingBalance: 18_340.18 },
   ],
   categories: [
     { id: 'income', label: 'Ingresos', color: '#22c55e', icon: 'salary' },

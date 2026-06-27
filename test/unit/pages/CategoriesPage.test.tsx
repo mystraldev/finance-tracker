@@ -1,9 +1,11 @@
+import type { FinanceContextValue, FinanceData } from '../../../src/types/finance'
+
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { availableTransactionMonths, listTransactions } from '../../../src/data/financeRepository'
-import { FinanceContext } from '../../../src/store/financeContext'
-import type { FinanceContextValue, FinanceData } from '../../../src/types/finance'
+
+import { availableTransactionMonths, listTransactions } from '../../../src/data/financeRepo'
 import CategoriesPage from '../../../src/pages/CategoriesPage'
+import { FinanceContext } from '../../../src/store/financeContext'
 
 const data: FinanceData = {
   accounts: [
@@ -105,7 +107,7 @@ describe('CategoriesPage', () => {
   })
 
   it('deletes a category after confirmation', () => {
-    const value = renderPage()
+    const _value = renderPage()
     const deleteButtons = screen.getAllByLabelText('Borrar')
     fireEvent.click(deleteButtons[0])
     expect(screen.getByText('Borrar categoría')).toBeInTheDocument()

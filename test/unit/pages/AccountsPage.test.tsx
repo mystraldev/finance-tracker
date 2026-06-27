@@ -1,9 +1,11 @@
+import type { FinanceContextValue, FinanceData } from '../../../src/types/finance'
+
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { availableTransactionMonths, listTransactions } from '../../../src/data/financeRepository'
-import { FinanceContext } from '../../../src/store/financeContext'
-import type { FinanceContextValue, FinanceData } from '../../../src/types/finance'
+
+import { availableTransactionMonths, listTransactions } from '../../../src/data/financeRepo'
 import AccountsPage from '../../../src/pages/AccountsPage'
+import { FinanceContext } from '../../../src/store/financeContext'
 
 const data: FinanceData = {
   accounts: [
@@ -149,7 +151,7 @@ describe('AccountsPage', () => {
   })
 
   it('shows a delete confirmation for an unused account', () => {
-    const value = renderPage(createValue({ ...data, savingsGoals: [] }))
+    const _value = renderPage(createValue({ ...data, savingsGoals: [] }))
 
     const deleteButtons = screen.getAllByLabelText('Borrar')
     fireEvent.click(deleteButtons[1])
@@ -168,7 +170,7 @@ describe('AccountsPage', () => {
   })
 
   it('shows a delete confirmation for a savings goal', () => {
-    const value = renderPage()
+    const _value = renderPage()
     const deleteGoalButton = screen.getByLabelText('Borrar objetivo Fondo de emergencia')
     fireEvent.click(deleteGoalButton)
     expect(screen.getByText('Borrar objetivo')).toBeInTheDocument()

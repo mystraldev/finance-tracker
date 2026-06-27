@@ -1,5 +1,7 @@
-import { describe, expect, it } from 'vitest'
 import type { Account, Category, FinanceData, Transaction } from '../../../src/types/finance'
+
+import { describe, expect, it } from 'vitest'
+
 import {
   accountBalanceAsOf,
   accountSeries,
@@ -13,9 +15,9 @@ import {
   incomeExpenses,
   monthKey,
   monthLabel,
-  monthTransactions,
   monthlyGrowthRate,
   monthsBack,
+  monthTransactions,
   netWorthAsOf,
   netWorthSeries,
   recentTransactions,

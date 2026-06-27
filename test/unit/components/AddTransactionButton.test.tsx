@@ -1,8 +1,10 @@
+import type { FinanceContextValue } from '../../../src/types/finance'
+
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { FinanceContext } from '../../../src/store/financeContext'
-import type { FinanceContextValue } from '../../../src/types/finance'
+
 import AddTransactionButton from '../../../src/components/AddTransactionButton'
+import { FinanceContext } from '../../../src/store/financeContext'
 
 function createValue(): FinanceContextValue {
   return {
@@ -75,8 +77,8 @@ describe('AddTransactionButton', () => {
 
     fireEvent.change(screen.getByPlaceholderText('0,00'), { target: { value: '100' } })
     fireEvent.change(screen.getByPlaceholderText('Ej. Compra semanal'), { target: { value: 'Test' } })
-    const submitBtn = screen.getByRole('dialog').querySelector('button[type="submit"]')!
-    fireEvent.click(submitBtn)
+    const submitButton = screen.getByRole('dialog').querySelector('button[type="submit"]')!
+    fireEvent.click(submitButton)
 
     expect(value.addTransaction).toHaveBeenCalledWith(
       expect.objectContaining({ amount: -100, description: 'Test' }),

@@ -1,11 +1,12 @@
-import { describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
+
 import CategoryForm from '../../../src/components/CategoryForm'
 
 describe('CategoryForm', () => {
   it('shows validation error when submitting with an empty name', async () => {
     const onSubmit = vi.fn()
-    const { container } = render(<CategoryForm onSubmit={onSubmit} onCancel={vi.fn()} />)
+    const { container } = render(<CategoryForm onCancel={vi.fn()} onSubmit={onSubmit} />)
     fireEvent.submit(container.querySelector('form')!)
     await waitFor(() => {
       expect(screen.getByText(/Ponle un nombre/i)).toBeInTheDocument()
@@ -15,7 +16,7 @@ describe('CategoryForm', () => {
 
   it('calls onSubmit with the form data', async () => {
     const onSubmit = vi.fn()
-    const { container } = render(<CategoryForm onSubmit={onSubmit} onCancel={vi.fn()} />)
+    const { container } = render(<CategoryForm onCancel={vi.fn()} onSubmit={onSubmit} />)
     const input = container.querySelector('input[type="text"]')!
     fireEvent.change(input, { target: { value: 'Test' } })
     fireEvent.submit(container.querySelector('form')!)
@@ -28,8 +29,8 @@ describe('CategoryForm', () => {
     render(
       <CategoryForm
         initial={{ id: 'cat-1', label: 'Comida', color: '#ff0000', icon: 'cart', budget: 200 }}
-        onSubmit={vi.fn()}
         onCancel={vi.fn()}
+        onSubmit={vi.fn()}
       />,
     )
     expect(screen.getByLabelText(/Nombre/i)).toHaveValue('Comida')
@@ -37,25 +38,25 @@ describe('CategoryForm', () => {
 
   it('cancels editing', () => {
     const onCancel = vi.fn()
-    render(<CategoryForm onSubmit={vi.fn()} onCancel={onCancel} />)
+    render(<CategoryForm onCancel={onCancel} onSubmit={vi.fn()} />)
     fireEvent.click(screen.getByRole('button', { name: /Cancelar/i }))
     expect(onCancel).toHaveBeenCalled()
   })
 
   it('renders color swatches', () => {
-    render(<CategoryForm onSubmit={vi.fn()} onCancel={vi.fn()} />)
+    render(<CategoryForm onCancel={vi.fn()} onSubmit={vi.fn()} />)
     const swatches = screen.getAllByRole('button').filter((b) => b.className.includes('swatch'))
     expect(swatches.length).toBeGreaterThan(0)
   })
 
   it('shows the category icon selector', () => {
-    render(<CategoryForm onSubmit={vi.fn()} onCancel={vi.fn()} />)
+    render(<CategoryForm onCancel={vi.fn()} onSubmit={vi.fn()} />)
     expect(screen.getByText(/Icono/i)).toBeInTheDocument()
   })
 
   it('shows validation error when budget is invalid', async () => {
     const onSubmit = vi.fn()
-    const { container } = render(<CategoryForm onSubmit={onSubmit} onCancel={vi.fn()} />)
+    const { container } = render(<CategoryForm onCancel={vi.fn()} onSubmit={onSubmit} />)
     const input = container.querySelector('input[type="text"]')!
     fireEvent.change(input, { target: { value: 'Test' } })
     const budgetInput = screen.getByPlaceholderText('Sin límite')
@@ -69,7 +70,7 @@ describe('CategoryForm', () => {
 
   it('submits with budget as undefined when budget is zero', async () => {
     const onSubmit = vi.fn()
-    const { container } = render(<CategoryForm onSubmit={onSubmit} onCancel={vi.fn()} />)
+    const { container } = render(<CategoryForm onCancel={vi.fn()} onSubmit={onSubmit} />)
     const input = container.querySelector('input[type="text"]')!
     fireEvent.change(input, { target: { value: 'Test' } })
     const budgetInput = screen.getByPlaceholderText('Sin límite')
@@ -84,8 +85,8 @@ describe('CategoryForm', () => {
     render(
       <CategoryForm
         initial={{ id: 'cat-1', label: 'Comida', color: '#ff0000', icon: 'cart', budget: 200 }}
-        onSubmit={vi.fn()}
         onCancel={vi.fn()}
+        onSubmit={vi.fn()}
       />,
     )
     expect(screen.getByPlaceholderText('Sin límite')).toHaveValue('200')

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { budgetStatusRank, budgetStatusLabel } from '../../../src/components/budgetStatus'
+
+import { budgetStatusLabel, budgetStatusRank } from '../../../src/components/budgetStatus'
 
 describe('budgetStatusRank', () => {
   it('marks over as the worst status', () => {

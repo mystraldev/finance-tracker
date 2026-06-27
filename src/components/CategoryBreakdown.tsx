@@ -1,38 +1,35 @@
-import Icon from './Icon'
+import type { CategoryBreakdownItem } from '../types/finance'
+
 import { formatCurrency, formatPercent } from '../utils/format'
 import { fractionOf } from '../utils/math'
-import type { CategoryBreakdownItem } from '../types/finance'
+import Icon from './Icon'
 
 const RADIUS = 70
 const STROKE = 22
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 const GAP = 2
 
-type CategoryBreakdownProps = {
+type CategoryBreakdownProperties = {
   categories: CategoryBreakdownItem[]
 }
 
-function CategoryBreakdown({ categories }: CategoryBreakdownProps) {
+function CategoryBreakdown({ categories }: CategoryBreakdownProperties) {
   const total = categories.reduce((sum, c) => sum + c.amount, 0)
 
-  const { arcs } = categories.reduce<{
-    arcs: (CategoryBreakdownItem & { fraction: number; dash: number; gap: number; rotation: number })[]
-    offset: number
-  }>(
-    (acc, c) => {
-      const fraction = fractionOf(c.amount, total)
-      const len = Math.max(fraction * CIRCUMFERENCE - GAP, 0)
-      acc.arcs.push({
-        ...c,
-        fraction,
-        dash: len,
-        gap: CIRCUMFERENCE - len,
-        rotation: fractionOf(acc.offset, total) * 360,
-      })
-      return { arcs: acc.arcs, offset: acc.offset + c.amount }
-    },
-    { arcs: [], offset: 0 },
-  )
+  const arcs: (CategoryBreakdownItem & { fraction: number; dash: number; gap: number; rotation: number })[] = []
+  let offset = 0
+  for (const c of categories) {
+    const fraction = fractionOf(c.amount, total)
+    const length_ = Math.max(fraction * CIRCUMFERENCE - GAP, 0)
+    arcs.push({
+      ...c,
+      fraction,
+      dash: length_,
+      gap: CIRCUMFERENCE - length_,
+      rotation: fractionOf(offset, total) * 360,
+    })
+    offset += c.amount
+  }
 
   return (
     <section className="card breakdown">
@@ -48,23 +45,23 @@ function CategoryBreakdown({ categories }: CategoryBreakdownProps) {
               className="donut__bg"
               cx="90"
               cy="90"
-              r={RADIUS}
               fill="none"
+              r={RADIUS}
               strokeWidth={STROKE}
             />
             <g transform="rotate(-90 90 90)">
               {arcs.map((arc) => (
                 <circle
-                  key={arc.id}
                   cx="90"
                   cy="90"
-                  r={RADIUS}
                   fill="none"
+                  key={arc.id}
+                  r={RADIUS}
                   stroke={arc.color}
-                  strokeWidth={STROKE}
-                  strokeLinecap="round"
                   strokeDasharray={`${arc.dash} ${arc.gap}`}
                   strokeDashoffset={-((arc.rotation / 360) * CIRCUMFERENCE)}
+                  strokeLinecap="round"
+                  strokeWidth={STROKE}
                 />
               ))}
             </g>
@@ -77,7 +74,7 @@ function CategoryBreakdown({ categories }: CategoryBreakdownProps) {
 
         <ul className="breakdown__list">
           {arcs.map((arc) => (
-            <li key={arc.id} className="breakdown__item">
+            <li className="breakdown__item" key={arc.id}>
               <span className="breakdown__icon" style={{ '--c': arc.color } as Record<string, string>}>
                 <Icon name={arc.icon} size={17} />
               </span>

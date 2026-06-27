@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useReducer, type ReactNode } from 'react'
-import { financeRepository } from '../data/financeRepository'
+import type { Account, Category, FinanceAction, FinanceData, FinanceState, SavingsGoal, Transaction, TransactionQuery } from '../types/finance'
+import type {ReactNode} from 'react';
+
+import {  useEffect, useMemo, useReducer } from 'react'
+
+import { financeRepo } from '../data/financeRepo'
 import { currentMonth } from '../utils/derive'
 import { FinanceContext } from './financeContext'
-import type { Account, Category, FinanceAction, FinanceData, FinanceState, SavingsGoal, Transaction, TransactionQuery } from '../types/finance'
 
 function uid(): string {
   if (typeof globalThis.crypto?.randomUUID === 'function') {
@@ -12,11 +15,12 @@ function uid(): string {
       /* fallback */
     }
   }
+  // eslint-disable-next-line sonarjs/pseudo-random -- crypto.randomUUID fallback; IDs not security-critical
   return `id-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 }
 
 function init(): FinanceState {
-  return createState(financeRepository.load())
+  return createState(financeRepo.load())
 }
 
 function createState(data: FinanceData): FinanceState {
@@ -25,37 +29,42 @@ function createState(data: FinanceData): FinanceState {
 
 function selectInitialMonth(data: FinanceData): string {
   const month = currentMonth()
-  const months = financeRepository.availableMonths(data)
+  const months = financeRepo.availableMonths(data)
   return months.includes(month) ? month : months[0] ?? month
 }
 
 function reducer(state: FinanceState, action: FinanceAction): FinanceState {
   switch (action.type) {
-    case 'ADD_TRANSACTION':
+    case 'ADD_TRANSACTION': {
       return { ...state, transactions: [...state.transactions, action.payload] }
-    case 'UPDATE_TRANSACTION':
+    }
+    case 'UPDATE_TRANSACTION': {
       return {
         ...state,
         transactions: state.transactions.map((t) =>
           t.id === action.payload.id ? { ...t, ...action.payload } : t,
         ),
       }
-    case 'DELETE_TRANSACTION':
+    }
+    case 'DELETE_TRANSACTION': {
       return {
         ...state,
         transactions: state.transactions.filter((t) => t.id !== action.payload),
       }
+    }
 
-    case 'ADD_CATEGORY':
+    case 'ADD_CATEGORY': {
       return { ...state, categories: [...state.categories, action.payload] }
-    case 'UPDATE_CATEGORY':
+    }
+    case 'UPDATE_CATEGORY': {
       return {
         ...state,
         categories: state.categories.map((c) =>
           c.id === action.payload.id ? { ...c, ...action.payload } : c,
         ),
       }
-    case 'DELETE_CATEGORY':
+    }
+    case 'DELETE_CATEGORY': {
       if (state.transactions.some((t) => t.categoryId === action.payload)) {
         return state
       }
@@ -63,17 +72,20 @@ function reducer(state: FinanceState, action: FinanceAction): FinanceState {
         ...state,
         categories: state.categories.filter((c) => c.id !== action.payload),
       }
+    }
 
-    case 'ADD_ACCOUNT':
+    case 'ADD_ACCOUNT': {
       return { ...state, accounts: [...state.accounts, action.payload] }
-    case 'UPDATE_ACCOUNT':
+    }
+    case 'UPDATE_ACCOUNT': {
       return {
         ...state,
         accounts: state.accounts.map((a) =>
           a.id === action.payload.id ? { ...a, ...action.payload } : a,
         ),
       }
-    case 'DELETE_ACCOUNT':
+    }
+    case 'DELETE_ACCOUNT': {
       if (
         state.transactions.some((t) => t.accountId === action.payload) ||
         state.savingsGoals.some((g) => g.accountId === action.payload)
@@ -84,52 +96,60 @@ function reducer(state: FinanceState, action: FinanceAction): FinanceState {
         ...state,
         accounts: state.accounts.filter((a) => a.id !== action.payload),
       }
+    }
 
-    case 'ADD_SAVINGS_GOAL':
+    case 'ADD_SAVINGS_GOAL': {
       return { ...state, savingsGoals: [...state.savingsGoals, action.payload] }
-    case 'UPDATE_SAVINGS_GOAL':
+    }
+    case 'UPDATE_SAVINGS_GOAL': {
       return {
         ...state,
         savingsGoals: state.savingsGoals.map((g) =>
           g.id === action.payload.id ? { ...g, ...action.payload } : g,
         ),
       }
-    case 'DELETE_SAVINGS_GOAL':
+    }
+    case 'DELETE_SAVINGS_GOAL': {
       return {
         ...state,
         savingsGoals: state.savingsGoals.filter((g) => g.id !== action.payload),
       }
+    }
 
-    case 'SET_MONTH':
+    case 'SET_MONTH': {
       return { ...state, selectedMonth: action.payload }
-    case 'IMPORT_DATA':
+    }
+    case 'IMPORT_DATA': {
       return createState(action.payload)
-    case 'RESET':
-      return createState(financeRepository.seed())
+    }
+    case 'RESET': {
+      return createState(financeRepo.seed())
+    }
 
-    default:
+    default: {
       return state
+    }
   }
 }
 
-type FinanceProviderProps = {
+type FinanceProviderProperties = {
   children: ReactNode
 }
 
-export function FinanceProvider({ children }: FinanceProviderProps) {
+export function FinanceProvider({ children }: FinanceProviderProperties) {
   const [state, dispatch] = useReducer(reducer, undefined, init)
   const { accounts, categories, transactions, savingsGoals } = state
 
   useEffect(() => {
-    financeRepository.save({ accounts, categories, transactions, savingsGoals })
+    financeRepo.save({ accounts, categories, transactions, savingsGoals })
   }, [accounts, categories, savingsGoals, transactions])
 
   const value = useMemo(
     () => ({
       ...state,
       getTransactions: (query?: TransactionQuery) =>
-        financeRepository.listTransactions(state, query),
-      getAvailableMonths: () => financeRepository.availableMonths(state),
+        financeRepo.listTransactions(state, query),
+      getAvailableMonths: () => financeRepo.availableMonths(state),
       addTransaction: (tx: Omit<Transaction, 'id'>) =>
         dispatch({ type: 'ADD_TRANSACTION', payload: { id: uid(), ...tx } }),
       updateTransaction: (tx: Partial<Transaction> & { id: string }) =>
@@ -140,10 +160,10 @@ export function FinanceProvider({ children }: FinanceProviderProps) {
       updateCategory: (cat: Partial<Category> & { id: string }) =>
         dispatch({ type: 'UPDATE_CATEGORY', payload: cat }),
       deleteCategory: (id: string) => dispatch({ type: 'DELETE_CATEGORY', payload: id }),
-      addAccount: (acc: Omit<Account, 'id'>) =>
-        dispatch({ type: 'ADD_ACCOUNT', payload: { id: uid(), ...acc } }),
-      updateAccount: (acc: Partial<Account> & { id: string }) =>
-        dispatch({ type: 'UPDATE_ACCOUNT', payload: acc }),
+      addAccount: (accumulator: Omit<Account, 'id'>) =>
+        dispatch({ type: 'ADD_ACCOUNT', payload: { id: uid(), ...accumulator } }),
+      updateAccount: (accumulator: Partial<Account> & { id: string }) =>
+        dispatch({ type: 'UPDATE_ACCOUNT', payload: accumulator }),
       deleteAccount: (id: string) => dispatch({ type: 'DELETE_ACCOUNT', payload: id }),
       addSavingsGoal: (goal: Omit<SavingsGoal, 'id'>) =>
         dispatch({ type: 'ADD_SAVINGS_GOAL', payload: { id: uid(), ...goal } }),

@@ -1,5 +1,6 @@
-import { describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
+
 import ConfirmDialog from '../../../src/components/ConfirmDialog'
 
 describe('ConfirmDialog', () => {
@@ -8,10 +9,10 @@ describe('ConfirmDialog', () => {
     const onCancel = vi.fn()
     render(
       <ConfirmDialog
-        message="¿Borrar esto?"
         confirmLabel="Borrar"
-        onConfirm={onConfirm}
+        message="¿Borrar esto?"
         onCancel={onCancel}
+        onConfirm={onConfirm}
       />,
     )
 

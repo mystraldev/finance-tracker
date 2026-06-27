@@ -1,7 +1,9 @@
-import { describe, expect, it } from 'vitest'
-import { render, screen } from '@testing-library/react'
-import BudgetProgress from '../../../src/components/BudgetProgress'
 import type { CategoryBudget } from '../../../src/types/finance'
+
+import { render, screen } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
+
+import BudgetProgress from '../../../src/components/BudgetProgress'
 
 const budget: CategoryBudget = {
   id: 'food',

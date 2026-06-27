@@ -1,5 +1,6 @@
-import { seed } from './finance'
 import type { Account, Category, FinanceData, SavingsGoal, Transaction, TransactionQuery } from '../types/finance'
+
+import { seed } from './finance'
 
 export const FINANCE_STORAGE_KEY = 'finance-tracker:v2'
 export const FINANCE_RECOVERY_SUFFIX = ':recovery'
@@ -15,7 +16,7 @@ export type FinanceBackup = {
   data: FinanceData
 }
 
-export interface FinanceRepository {
+export interface FinanceRepo {
   load(): FinanceData
   save(data: FinanceData): void
   seed(): FinanceData
@@ -24,7 +25,7 @@ export interface FinanceRepository {
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
+  return typeof value === 'object' && value !== undefined
 }
 
 function isString(value: unknown): value is string {
@@ -40,7 +41,7 @@ function isAccount(value: unknown): value is Account {
   return (
     isString(value.id) &&
     isString(value.name) &&
-    (value.type === 'cash' || value.type === 'savings' || value.type === 'investment') &&
+    (['cash', 'savings', 'investment'] as const).includes(value.type) &&
     isString(value.icon) &&
     isString(value.accent) &&
     isFiniteNumber(value.openingBalance) &&
@@ -106,18 +107,18 @@ export function createFinanceBackup(
   }
 }
 
-export function parseFinanceData(value: unknown): FinanceData | null {
-  if (!isRecord(value)) return null
+export function parseFinanceData(value: unknown): FinanceData | undefined {
+  if (!isRecord(value)) return undefined
   if (
     !Array.isArray(value.accounts) ||
     !Array.isArray(value.categories) ||
     !Array.isArray(value.transactions)
   ) {
-    return null
+    return undefined
   }
   const savingsGoals = value.savingsGoals
   if (savingsGoals !== undefined && !Array.isArray(savingsGoals)) {
-    return null
+    return undefined
   }
   if (
     !value.accounts.every(isAccount) ||
@@ -125,7 +126,7 @@ export function parseFinanceData(value: unknown): FinanceData | null {
     !value.transactions.every(isTransaction) ||
     (Array.isArray(savingsGoals) && !savingsGoals.every(isSavingsGoal))
   ) {
-    return null
+    return undefined
   }
   return cloneFinanceData({
     accounts: value.accounts,
@@ -135,20 +136,20 @@ export function parseFinanceData(value: unknown): FinanceData | null {
   })
 }
 
-export function parseFinanceBackup(value: unknown): FinanceData | null {
-  if (!isRecord(value)) return null
+export function parseFinanceBackup(value: unknown): FinanceData | undefined {
+  if (!isRecord(value)) return undefined
   if (
     value.app !== FINANCE_BACKUP_APP ||
     value.version !== FINANCE_BACKUP_VERSION ||
     !isString(value.exportedAt)
   ) {
-    return null
+    return undefined
   }
   return parseFinanceData(value.data)
 }
 
 export function transactionMonthKey(date: string): string {
-  return String(date).slice(0, 7)
+  return date.slice(0, 7)
 }
 
 function normaliseSearch(text: string): string {
@@ -156,7 +157,7 @@ function normaliseSearch(text: string): string {
     .trim()
     .toLocaleLowerCase('es-ES')
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replaceAll(/[\u{300}-\u{36F}]/gu, '')
 }
 
 export function listTransactions(
@@ -181,9 +182,10 @@ export function listTransactions(
     .filter((t) => month === 'all' || transactionMonthKey(t.date) === month)
     .filter((t) => categoryId === 'all' || t.categoryId === categoryId)
     .filter((t) => accountId === 'all' || t.accountId === accountId)
-    .filter((t) =>
-      type === 'all' ? true : type === 'income' ? t.amount > 0 : t.amount < 0,
-    )
+    .filter((t) => {
+      if (type === 'all') return true
+      return type === 'income' ? t.amount > 0 : t.amount < 0
+    })
     .filter((t) => {
       if (!needle) return true
       const haystack = [
@@ -197,15 +199,14 @@ export function listTransactions(
   const sorted =
     sort === 'none'
       ? transactions
-      : [...transactions].sort((a, b) => {
+      : [...transactions].toSorted((a, b) => {
           if (sort === 'amount-desc' || sort === 'amount-asc') {
             const byAmount = Math.abs(b.amount) - Math.abs(a.amount)
             return sort === 'amount-desc' ? byAmount : -byAmount
           }
           if (a.date === b.date) return 0
-          return sort === 'date-desc'
-            ? a.date < b.date ? 1 : -1
-            : a.date < b.date ? -1 : 1
+          if (sort === 'date-desc') return a.date < b.date ? 1 : -1
+          return a.date < b.date ? -1 : 1
         })
 
   return typeof limit === 'number' ? sorted.slice(0, limit) : sorted
@@ -213,19 +214,19 @@ export function listTransactions(
 
 export function availableTransactionMonths(data: FinanceData): string[] {
   const set = new Set(data.transactions.map((t) => transactionMonthKey(t.date)))
-  return [...set].sort((a, b) => (a < b ? 1 : -1))
+  return [...set].toSorted((a, b) => b.localeCompare(a))
 }
 
-function resolveStorage(storage?: StorageLike): StorageLike | null {
+function resolveStorage(storage?: StorageLike): StorageLike | undefined {
   if (storage) return storage
   try {
-    return globalThis.localStorage ?? null
+    return globalThis.localStorage ?? undefined
   } catch {
-    return null
+    return undefined
   }
 }
 
-export function createLocalStorageFinanceRepository({
+export function createLocalStorageFinanceRepo({
   key = FINANCE_STORAGE_KEY,
   storage,
   seedData = seed,
@@ -233,7 +234,7 @@ export function createLocalStorageFinanceRepository({
   key?: string
   storage?: StorageLike
   seedData?: FinanceData
-} = {}): FinanceRepository {
+} = {}): FinanceRepo {
   const getSeed = () => cloneFinanceData(seedData)
 
   return {
@@ -241,9 +242,9 @@ export function createLocalStorageFinanceRepository({
       const target = resolveStorage(storage)
       if (!target) return getSeed()
 
-      let raw: string | null
+      let raw: string | undefined
       try {
-        raw = target.getItem(key)
+        raw = target.getItem(key) ?? undefined
       } catch {
         return getSeed()
       }
@@ -282,4 +283,4 @@ export function createLocalStorageFinanceRepository({
   }
 }
 
-export const financeRepository = createLocalStorageFinanceRepository()
+export const financeRepo = createLocalStorageFinanceRepo()

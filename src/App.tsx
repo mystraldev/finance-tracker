@@ -1,27 +1,26 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+
 import './App.css'
 import Layout from './components/Layout'
-import DashboardPage from './pages/DashboardPage'
-import TransactionsPage from './pages/TransactionsPage'
-import CategoriesPage from './pages/CategoriesPage'
 import AccountsPage from './pages/AccountsPage'
+import CategoriesPage from './pages/CategoriesPage'
+import DashboardPage from './pages/DashboardPage'
 import SettingsPage from './pages/SettingsPage'
+import TransactionsPage from './pages/TransactionsPage'
 
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/movimientos" element={<TransactionsPage />} />
-          <Route path="/categorias" element={<CategoriesPage />} />
-          <Route path="/cuentas" element={<AccountsPage />} />
-          <Route path="/ajustes" element={<SettingsPage />} />
-          <Route path="*" element={<DashboardPage />} />
+          <Route element={<DashboardPage />} path="/" />
+          <Route element={<TransactionsPage />} path="/movimientos" />
+          <Route element={<CategoriesPage />} path="/categorias" />
+          <Route element={<AccountsPage />} path="/cuentas" />
+          <Route element={<SettingsPage />} path="/ajustes" />
+          <Route element={<DashboardPage />} path="*" />
         </Route>
       </Routes>
     </BrowserRouter>
   )
 }
-
-export default App

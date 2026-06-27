@@ -120,8 +120,8 @@ export interface FinanceContextValue extends FinanceState {
   addCategory: (cat: Omit<Category, 'id'>) => void
   updateCategory: (cat: Partial<Category> & { id: string }) => void
   deleteCategory: (_id: string) => void
-  addAccount: (acc: Omit<Account, 'id'>) => void
-  updateAccount: (acc: Partial<Account> & { id: string }) => void
+  addAccount: (accumulator: Omit<Account, 'id'>) => void
+  updateAccount: (accumulator: Partial<Account> & { id: string }) => void
   deleteAccount: (_id: string) => void
   addSavingsGoal: (goal: Omit<SavingsGoal, 'id'>) => void
   updateSavingsGoal: (goal: Partial<SavingsGoal> & { id: string }) => void

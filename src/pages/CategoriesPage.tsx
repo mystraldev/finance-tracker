@@ -1,16 +1,133 @@
+import type { Category } from '../types/finance'
+
 import { useState } from 'react'
-import Icon from '../components/Icon'
-import Modal from '../components/Modal'
+
+import BudgetProgress from '../components/BudgetProgress'
 import CategoryForm from '../components/CategoryForm'
 import ConfirmDialog from '../components/ConfirmDialog'
+import Icon from '../components/Icon'
+import Modal from '../components/Modal'
 import MonthSelector from '../components/MonthSelector'
-import BudgetProgress from '../components/BudgetProgress'
 import { useFinance } from '../store/financeContext'
 import { categoryBudgets, monthLabel } from '../utils/derive'
 import { formatCurrency } from '../utils/format'
-import type { Category } from '../types/finance'
 
 const INCOME_CATEGORY_ID = 'income'
+
+function monthlyUsage(id: string, transactions: { categoryId: string; amount: number }[]) {
+  const txs = transactions.filter((t) => t.categoryId === id)
+  return {
+    count: txs.length,
+    total: txs.reduce((s, t) => s + Math.abs(t.amount), 0),
+  }
+}
+
+function usageCount(id: string, transactions: { categoryId: string }[]) {
+  return transactions.filter((t) => t.categoryId === id).length
+}
+
+function handleDelete(
+  cat: Category,
+  transactions: { categoryId: string }[],
+  onBlocked: (cat: Category) => void,
+  onDeleting: (cat: Category) => void,
+) {
+  if (usageCount(cat.id, transactions) > 0) onBlocked(cat)
+  else onDeleting(cat)
+}
+
+function CreateModal({
+  open,
+  onClose,
+  onSave,
+}: {
+  open: boolean
+  onClose: () => void
+  onSave: (cat: Omit<Category, 'id'>) => void
+}) {
+  if (!open) return
+  return (
+    <Modal onClose={onClose} title="Nueva categoría">
+      <CategoryForm
+        onCancel={onClose}
+        onSubmit={(cat) => {
+          onSave(cat as Omit<Category, 'id'>)
+          onClose()
+        }}
+      />
+    </Modal>
+  )
+}
+
+function EditModal({
+  category,
+  onClose,
+  onSave,
+}: {
+  category: Category | undefined
+  onClose: () => void
+  onSave: (cat: Partial<Category> & { id: string }) => void
+}) {
+  if (!category) return
+  return (
+    <Modal onClose={onClose} title="Editar categoría">
+      <CategoryForm
+        initial={category}
+        onCancel={onClose}
+        onSubmit={(cat) => {
+          onSave(cat as Partial<Category> & { id: string })
+          onClose()
+        }}
+      />
+    </Modal>
+  )
+}
+
+function DeleteConfirm({
+  category,
+  onCancel,
+  onConfirm,
+}: {
+  category: Category | undefined
+  onCancel: () => void
+  onConfirm: (id: string) => void
+}) {
+  if (!category) return
+  return (
+    <ConfirmDialog
+      message={`¿Seguro que quieres borrar "${category.label}"?`}
+      onCancel={onCancel}
+      onConfirm={() => {
+        onConfirm(category.id)
+        onCancel()
+      }}
+      title="Borrar categoría"
+    />
+  )
+}
+
+function BlockedModal({
+  category,
+  onClose,
+}: {
+  category: Category | undefined
+  onClose: () => void
+}) {
+  if (!category) return
+  return (
+    <Modal onClose={onClose} title="No se puede borrar">
+      <p className="confirm__message">
+        La categoría <strong>{category.label}</strong> tiene movimientos asociados.
+        Reasigna o borra esos movimientos antes de eliminarla.
+      </p>
+      <div className="form__actions">
+        <button className="btn-primary" onClick={onClose} type="button">
+          Entendido
+        </button>
+      </div>
+    </Modal>
+  )
+}
 
 function CategoriesPage() {
   const { categories, transactions, selectedMonth, getTransactions, addCategory, updateCategory, deleteCategory } =
@@ -18,32 +135,16 @@ function CategoriesPage() {
 
   const selectedMonthTransactions = getTransactions({ month: selectedMonth })
 
-  // Budget status (for the selected month) indexed by category id.
   const budgetById = new Map(
     categoryBudgets(transactions, categories, selectedMonth).map((b) => [b.id, b]),
   )
 
   const [creating, setCreating] = useState(false)
-  const [editing, setEditing] = useState<Category | null>(null)
-  const [deleting, setDeleting] = useState<Category | null>(null)
-  const [blocked, setBlocked] = useState<Category | null>(null)
+  const [editing, setEditing] = useState<Category | undefined>(undefined)
+  const [deleting, setDeleting] = useState<Category | undefined>(undefined)
+  const [blocked, setBlocked] = useState<Category | undefined>(undefined)
 
   const managed = categories.filter((c) => c.id !== INCOME_CATEGORY_ID)
-
-  const monthlyUsage = (id: string) => {
-    const txs = selectedMonthTransactions.filter((t) => t.categoryId === id)
-    return {
-      count: txs.length,
-      total: txs.reduce((s, t) => s + Math.abs(t.amount), 0),
-    }
-  }
-
-  const usageCount = (id: string) => transactions.filter((t) => t.categoryId === id).length
-
-  function handleDelete(cat: Category) {
-    if (usageCount(cat.id) > 0) setBlocked(cat)
-    else setDeleting(cat)
-  }
 
   return (
     <>
@@ -55,7 +156,7 @@ function CategoriesPage() {
         </div>
         <div className="page-header__actions">
           <MonthSelector />
-          <button type="button" className="btn-primary" onClick={() => setCreating(true)}>
+          <button className="btn-primary" onClick={() => setCreating(true)} type="button">
             <Icon name="plus" size={18} strokeWidth={2.2} />
             Nueva categoría
           </button>
@@ -64,10 +165,10 @@ function CategoriesPage() {
 
       <div className="cat-grid">
         {managed.map((c) => {
-          const { count, total } = monthlyUsage(c.id)
+          const { count, total } = monthlyUsage(c.id, selectedMonthTransactions)
           const budget = budgetById.get(c.id)
           return (
-            <article key={c.id} className="cat-card">
+            <article className="cat-card" key={c.id}>
               <span
                 className="icon-tile"
                 style={{ color: c.color, background: `color-mix(in srgb, ${c.color} 14%, transparent)` }}
@@ -87,9 +188,9 @@ function CategoriesPage() {
                 )}
                 {!budget && (
                   <button
-                    type="button"
                     className="cat-budget-cta"
                     onClick={() => setEditing(c)}
+                    type="button"
                   >
                     Definir presupuesto
                   </button>
@@ -97,18 +198,18 @@ function CategoriesPage() {
               </div>
               <div className="cat-card__actions">
                 <button
-                  type="button"
-                  className="icon-btn"
                   aria-label="Editar"
+                  className="icon-btn"
                   onClick={() => setEditing(c)}
+                  type="button"
                 >
                   <Icon name="edit" size={16} />
                 </button>
                 <button
-                  type="button"
-                  className="icon-btn icon-btn--danger"
                   aria-label="Borrar"
-                  onClick={() => handleDelete(c)}
+                  className="icon-btn icon-btn--danger"
+                  onClick={() => handleDelete(c, transactions, setBlocked, setDeleting)}
+                  type="button"
                 >
                   <Icon name="delete" size={16} />
                 </button>
@@ -118,56 +219,28 @@ function CategoriesPage() {
         })}
       </div>
 
-      {creating && (
-        <Modal title="Nueva categoría" onClose={() => setCreating(false)}>
-          <CategoryForm
-            onSubmit={(cat) => {
-              addCategory(cat as Omit<Category, 'id'>)
-              setCreating(false)
-            }}
-            onCancel={() => setCreating(false)}
-          />
-        </Modal>
-      )}
+      <CreateModal
+        onClose={() => setCreating(false)}
+        onSave={(cat) => addCategory(cat)}
+        open={creating}
+      />
 
-      {editing && (
-        <Modal title="Editar categoría" onClose={() => setEditing(null)}>
-          <CategoryForm
-            initial={editing}
-            onSubmit={(cat) => {
-              updateCategory(cat as Partial<Category> & { id: string })
-              setEditing(null)
-            }}
-            onCancel={() => setEditing(null)}
-          />
-        </Modal>
-      )}
+      <EditModal
+        category={editing}
+        onClose={() => setEditing(undefined)}
+        onSave={(cat) => updateCategory(cat)}
+      />
 
-      {deleting && (
-        <ConfirmDialog
-          title="Borrar categoría"
-          message={`¿Seguro que quieres borrar "${deleting.label}"?`}
-          onConfirm={() => {
-            deleteCategory(deleting.id)
-            setDeleting(null)
-          }}
-          onCancel={() => setDeleting(null)}
-        />
-      )}
+      <DeleteConfirm
+        category={deleting}
+        onCancel={() => setDeleting(undefined)}
+        onConfirm={(id) => deleteCategory(id)}
+      />
 
-      {blocked && (
-        <Modal title="No se puede borrar" onClose={() => setBlocked(null)}>
-          <p className="confirm__message">
-            La categoría <strong>{blocked.label}</strong> tiene movimientos asociados.
-            Reasigna o borra esos movimientos antes de eliminarla.
-          </p>
-          <div className="form__actions">
-            <button type="button" className="btn-primary" onClick={() => setBlocked(null)}>
-              Entendido
-            </button>
-          </div>
-        </Modal>
-      )}
+      <BlockedModal
+        category={blocked}
+        onClose={() => setBlocked(undefined)}
+      />
     </>
   )
 }

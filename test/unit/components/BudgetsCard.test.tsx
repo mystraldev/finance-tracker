@@ -1,9 +1,11 @@
-import { describe, expect, it } from 'vitest'
+import type { CategoryBudget } from '../../../src/types/finance'
+import type { ReactElement } from 'react'
+
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import type { ReactElement } from 'react'
+import { describe, expect, it } from 'vitest'
+
 import BudgetsCard from '../../../src/components/BudgetsCard'
-import type { CategoryBudget } from '../../../src/types/finance'
 
 const budgets: CategoryBudget[] = [
   {

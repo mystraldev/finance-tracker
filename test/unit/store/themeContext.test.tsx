@@ -1,6 +1,8 @@
-import { describe, expect, it, vi } from 'vitest'
-import { renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
+
+import { renderHook } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
+
 import { ThemeContext, useTheme } from '../../../src/store/themeContext'
 
 const value = {

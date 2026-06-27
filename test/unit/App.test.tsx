@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { ThemeProvider } from '../../src/store/ThemeProvider'
-import { FinanceProvider } from '../../src/store/FinanceProvider'
+
 import App from '../../src/App'
+import { FinanceProvider } from '../../src/store/FinanceProvider'
+import { ThemeProvider } from '../../src/store/ThemeProvider'
 
 function renderApp() {
   return render(

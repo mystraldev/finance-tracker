@@ -1,5 +1,6 @@
-import { createContext, useContext } from 'react'
 import type { Theme, ThemeMode } from './theme'
+
+import { createContext, useContext } from 'react'
 
 export type ThemeContextValue = {
   mode: ThemeMode
@@ -9,12 +10,12 @@ export type ThemeContextValue = {
   cycleMode: () => void
 }
 
-export const ThemeContext = createContext<ThemeContextValue | null>(null)
+export const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
 
 export function useTheme(): ThemeContextValue {
-  const ctx = useContext(ThemeContext)
-  if (!ctx) {
+  const context = useContext(ThemeContext)
+  if (!context) {
     throw new Error('useTheme debe usarse dentro de <ThemeProvider>')
   }
-  return ctx
+  return context
 }

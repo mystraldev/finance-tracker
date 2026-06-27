@@ -1,7 +1,9 @@
-import { describe, expect, it, vi } from 'vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
-import TransactionForm from '../../../src/components/TransactionForm'
 import type { Account, Category } from '../../../src/types/finance'
+
+import { fireEvent, render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
+
+import TransactionForm from '../../../src/components/TransactionForm'
 
 const accounts: Account[] = [
   {
@@ -33,8 +35,8 @@ describe('TransactionForm', () => {
       <TransactionForm
         accounts={accounts}
         categories={categories}
-        onSubmit={onSubmit}
         onCancel={() => {}}
+        onSubmit={onSubmit}
       />,
     )
 
@@ -52,8 +54,8 @@ describe('TransactionForm', () => {
       <TransactionForm
         accounts={accounts}
         categories={categories}
-        onSubmit={onSubmit}
         onCancel={() => {}}
+        onSubmit={onSubmit}
       />,
     )
 
@@ -71,8 +73,8 @@ describe('TransactionForm', () => {
       <TransactionForm
         accounts={accounts}
         categories={categories}
-        onSubmit={vi.fn()}
         onCancel={() => {}}
+        onSubmit={vi.fn()}
       />,
     )
     fireEvent.click(screen.getByRole('button', { name: /Añadir movimiento/i }))
@@ -84,8 +86,8 @@ describe('TransactionForm', () => {
       <TransactionForm
         accounts={accounts}
         categories={categories}
-        onSubmit={vi.fn()}
         onCancel={() => {}}
+        onSubmit={vi.fn()}
       />,
     )
     fireEvent.change(screen.getByPlaceholderText('0,00'), { target: { value: '50' } })
@@ -99,8 +101,8 @@ describe('TransactionForm', () => {
       <TransactionForm
         accounts={accounts}
         categories={categories}
-        onSubmit={onSubmit}
         onCancel={() => {}}
+        onSubmit={onSubmit}
       />,
     )
 
@@ -119,8 +121,8 @@ describe('TransactionForm', () => {
       <TransactionForm
         accounts={[]}
         categories={categories}
-        onSubmit={vi.fn()}
         onCancel={() => {}}
+        onSubmit={vi.fn()}
       />,
     )
     fireEvent.change(screen.getByPlaceholderText('0,00'), { target: { value: '50' } })
@@ -134,8 +136,8 @@ describe('TransactionForm', () => {
       <TransactionForm
         accounts={accounts}
         categories={categories}
-        onSubmit={vi.fn()}
         onCancel={() => {}}
+        onSubmit={vi.fn()}
       />,
     )
     expect(screen.getByText('Categoría')).toBeInTheDocument()
@@ -156,8 +158,8 @@ describe('TransactionForm', () => {
           accountId: 'checking',
           categoryId: 'food',
         }}
-        onSubmit={vi.fn()}
         onCancel={() => {}}
+        onSubmit={vi.fn()}
       />,
     )
     expect(screen.getByPlaceholderText('Ej. Compra semanal')).toHaveValue('Gasolina')

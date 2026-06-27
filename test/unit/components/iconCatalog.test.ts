@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+
 import { selectableIcons } from '../../../src/components/iconCatalog'
 
 describe('selectableIcons', () => {

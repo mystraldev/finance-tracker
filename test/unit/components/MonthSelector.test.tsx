@@ -1,8 +1,10 @@
-import { describe, expect, it, vi } from 'vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
-import { FinanceContext } from '../../../src/store/financeContext'
-import MonthSelector from '../../../src/components/MonthSelector'
 import type { FinanceContextValue } from '../../../src/types/finance'
+
+import { fireEvent, render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
+
+import MonthSelector from '../../../src/components/MonthSelector'
+import { FinanceContext } from '../../../src/store/financeContext'
 
 function renderSelector(selectedMonth = '2026-06') {
   const setMonth = vi.fn()
@@ -47,7 +49,7 @@ describe('MonthSelector', () => {
   it('calls setMonth when navigating forward', () => {
     const { setMonth } = renderSelector('2026-06')
     const buttons = screen.getAllByRole('button')
-    fireEvent.click(buttons[buttons.length - 1])
+    fireEvent.click(buttons.at(-1))
     expect(setMonth).toHaveBeenCalledOnce()
   })
 

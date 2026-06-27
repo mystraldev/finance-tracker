@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
-import { ThemeProvider } from '../../../src/store/ThemeProvider'
+import { describe, expect, it } from 'vitest'
+
 import Sidebar from '../../../src/components/Sidebar'
+import { ThemeProvider } from '../../../src/store/ThemeProvider'
 
 function renderSidebar() {
   return render(
@@ -45,7 +46,7 @@ describe('Sidebar', () => {
 
   it('renders the investments nav item as disabled', () => {
     renderSidebar()
-    const disabledBtn = screen.getByText('Inversiones').closest('button')
-    expect(disabledBtn).toBeDisabled()
+    const disabledButton = screen.getByText('Inversiones').closest('button')
+    expect(disabledButton).toBeDisabled()
   })
 })

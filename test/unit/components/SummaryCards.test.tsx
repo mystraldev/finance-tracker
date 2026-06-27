@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
+
 import SummaryCards from '../../../src/components/SummaryCards'
 
 const accounts = [
@@ -20,11 +21,11 @@ const accounts = [
     type: 'savings' as const,
     icon: 'piggy',
     accent: 'emerald',
-    openingBalance: 12500,
+    openingBalance: 12_500,
     interestRate: 0.0275,
-    balance: 13000,
+    balance: 13_000,
     monthlyGrowthRate: -0.01,
-    history: [12500, 12800, 13000],
+    history: [12_500, 12_800, 13_000],
   },
 ]
 
