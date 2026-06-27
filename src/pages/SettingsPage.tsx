@@ -1,14 +1,16 @@
+import type { ThemeMode } from '../store/theme'
+import type { FinanceData } from '../types/finance'
+
 import { useRef, useState } from 'react'
+
 import ConfirmDialog from '../components/ConfirmDialog'
 import Icon from '../components/Icon'
 import {
   createFinanceBackup,
   parseFinanceBackup,
-} from '../data/financeRepository'
+} from '../data/financeRepo'
 import { useFinance } from '../store/financeContext'
 import { useTheme } from '../store/themeContext'
-import type { ThemeMode } from '../store/theme'
-import type { FinanceData } from '../types/finance'
 
 const THEME_OPTIONS: Array<{ mode: ThemeMode; label: string; icon: string }> = [
   { mode: 'system', label: 'Sistema', icon: 'system' },
@@ -26,65 +28,154 @@ function backupFileName() {
   return `finance-tracker-backup-${stamp}.json`
 }
 
+function getThemeLabel(mode: ThemeMode, systemTheme: string) {
+  if (mode === 'system') {
+    return `Sistema (${systemTheme === 'dark' ? 'oscuro' : 'claro'})`
+  }
+  if (mode === 'dark') return 'Oscuro'
+  return 'Claro'
+}
+
+function getThemeIcon(mode: ThemeMode) {
+  if (mode === 'dark') return 'moon'
+  if (mode === 'light') return 'sun'
+  return 'system'
+}
+
+function handleExport(
+  data: Pick<FinanceData, 'accounts' | 'categories' | 'transactions' | 'savingsGoals'>,
+  setStatus: (status: Status | undefined) => void,
+) {
+  const backup = createFinanceBackup(data)
+  // eslint-disable-next-line unicorn/no-null
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {
+    type: 'application/json',
+  })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = backupFileName()
+  link.click()
+  URL.revokeObjectURL(url)
+  setStatus({ type: 'success', message: 'Backup exportado correctamente.' })
+}
+
+async function handleImport(
+  file: File | undefined,
+  setStatus: (status: Status | undefined) => void,
+  setPendingImport: (data: FinanceData | undefined) => void,
+  inputElement: HTMLInputElement | null,
+) {
+  if (!file) return
+
+  try {
+    const parsed = parseFinanceBackup(JSON.parse(await file.text()))
+    if (!parsed) {
+      setStatus({ type: 'error', message: 'El archivo no tiene un backup válido.' })
+      return
+    }
+
+    setPendingImport(parsed)
+  } catch {
+    setStatus({ type: 'error', message: 'No se ha podido leer el archivo JSON.' })
+  } finally {
+    if (inputElement) inputElement.value = ''
+  }
+}
+
+function handleConfirmImport(
+  pendingImport: FinanceData | undefined,
+  importData: (data: FinanceData) => void,
+  setPendingImport: (data: FinanceData | undefined) => void,
+  setStatus: (status: Status | undefined) => void,
+) {
+  if (!pendingImport) return
+  importData(pendingImport)
+  setPendingImport(undefined)
+  setStatus({ type: 'success', message: 'Datos importados correctamente.' })
+}
+
+function handleReset(
+  reset: () => void,
+  setConfirmingReset: (isConfirming: boolean) => void,
+  setStatus: (status: Status | undefined) => void,
+) {
+  reset()
+  setConfirmingReset(false)
+  setStatus({ type: 'success', message: 'Datos restaurados al estado demo.' })
+}
+
+function BackupDataCard({
+  accountsLength,
+  categoriesLength,
+  transactionsLength,
+  savingsGoalsLength,
+  onExport,
+  onImport,
+}: {
+  accountsLength: number
+  categoriesLength: number
+  transactionsLength: number
+  savingsGoalsLength: number
+  onExport: () => void
+  onImport: () => void
+}) {
+  return (
+    <article className="card settings-card">
+      <div className="settings-card__head">
+        <span className="icon-tile icon-tile--indigo">
+          <Icon name="database" size={20} />
+        </span>
+        <div>
+          <h2 className="card__title">Datos locales</h2>
+          <p className="settings-card__copy">
+            {accountsLength} cuentas · {categoriesLength} categorías · {transactionsLength}{' '}
+            movimientos · {savingsGoalsLength} objetivos
+          </p>
+        </div>
+      </div>
+
+      <div className="settings-actions">
+        <button className="btn-primary" onClick={onExport} type="button">
+          <Icon name="download" size={18} strokeWidth={2.2} />
+          Exportar JSON
+        </button>
+        <button className="btn-ghost" onClick={onImport} type="button">
+          <Icon name="upload" size={18} strokeWidth={2.2} />
+          Importar JSON
+        </button>
+      </div>
+    </article>
+  )
+}
+
+function ImportConfirmDialog({
+  pendingImport,
+  onConfirm,
+  onCancel,
+}: {
+  pendingImport: FinanceData
+  onConfirm: () => void
+  onCancel: () => void
+}) {
+  return (
+    <ConfirmDialog
+      confirmLabel="Importar"
+      message={`Se reemplazarán tus datos actuales por los del backup: ${pendingImport.accounts.length} cuentas, ${pendingImport.categories.length} categorías, ${pendingImport.transactions.length} movimientos y ${pendingImport.savingsGoals.length} objetivos.`}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      title="Importar backup"
+    />
+  )
+}
+
 function SettingsPage() {
   const { accounts, categories, transactions, savingsGoals, importData, reset } = useFinance()
   const { mode, theme, systemTheme, setMode } = useTheme()
-  const [status, setStatus] = useState<Status | null>(null)
+  const [status, setStatus] = useState<Status | undefined>(undefined)
   const [confirmingReset, setConfirmingReset] = useState(false)
-  const [pendingImport, setPendingImport] = useState<FinanceData | null>(null)
-  const inputRef = useRef<HTMLInputElement | null>(null)
-
-  function handleExport() {
-    const backup = createFinanceBackup({ accounts, categories, transactions, savingsGoals })
-    const blob = new Blob([JSON.stringify(backup, null, 2)], {
-      type: 'application/json',
-    })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = backupFileName()
-    link.click()
-    URL.revokeObjectURL(url)
-    setStatus({ type: 'success', message: 'Backup exportado correctamente.' })
-  }
-
-  async function handleImport(file: File | undefined) {
-    if (!file) return
-
-    try {
-      const parsed = parseFinanceBackup(JSON.parse(await file.text()))
-      if (!parsed) {
-        setStatus({ type: 'error', message: 'El archivo no tiene un backup válido.' })
-        return
-      }
-
-      setPendingImport(parsed)
-    } catch {
-      setStatus({ type: 'error', message: 'No se ha podido leer el archivo JSON.' })
-    } finally {
-      if (inputRef.current) inputRef.current.value = ''
-    }
-  }
-
-  function handleConfirmImport() {
-    if (!pendingImport) return
-    importData(pendingImport)
-    setPendingImport(null)
-    setStatus({ type: 'success', message: 'Datos importados correctamente.' })
-  }
-
-  function handleReset() {
-    reset()
-    setConfirmingReset(false)
-    setStatus({ type: 'success', message: 'Datos restaurados al estado demo.' })
-  }
-
-  const themeLabel =
-    mode === 'system'
-      ? `Sistema (${systemTheme === 'dark' ? 'oscuro' : 'claro'})`
-      : mode === 'dark'
-        ? 'Oscuro'
-        : 'Claro'
+  const [pendingImport, setPendingImport] = useState<FinanceData | undefined>(undefined)
+  const inputReference = useRef<HTMLInputElement | undefined>(undefined)
 
   return (
     <>
@@ -92,7 +183,7 @@ function SettingsPage() {
         <div>
           <p className="page-header__greeting">Preferencias</p>
           <h1 className="page-header__title">Ajustes</h1>
-          <p className="page-header__description">Tema actual: {themeLabel}</p>
+          <p className="page-header__description">Tema actual: {getThemeLabel(mode, systemTheme)}</p>
         </div>
       </header>
 
@@ -103,44 +194,28 @@ function SettingsPage() {
       )}
 
       <section className="settings-grid">
-        <article className="card settings-card">
-          <div className="settings-card__head">
-            <span className="icon-tile icon-tile--indigo">
-              <Icon name="database" size={20} />
-            </span>
-            <div>
-              <h2 className="card__title">Datos locales</h2>
-              <p className="settings-card__copy">
-                {accounts.length} cuentas · {categories.length} categorías · {transactions.length}{' '}
-                movimientos · {savingsGoals.length} objetivos
-              </p>
-            </div>
-          </div>
+        <BackupDataCard
+          accountsLength={accounts.length}
+          categoriesLength={categories.length}
+          onExport={() => handleExport({ accounts, categories, transactions, savingsGoals }, setStatus)}
+          onImport={() => inputReference.current?.click()}
+          savingsGoalsLength={savingsGoals.length}
+          transactionsLength={transactions.length}
+        />
 
-          <div className="settings-actions">
-            <button type="button" className="btn-primary" onClick={handleExport}>
-              <Icon name="download" size={18} strokeWidth={2.2} />
-              Exportar JSON
-            </button>
-            <button type="button" className="btn-ghost" onClick={() => inputRef.current?.click()}>
-              <Icon name="upload" size={18} strokeWidth={2.2} />
-              Importar JSON
-            </button>
-            <input
-              ref={inputRef}
-              className="sr-only"
-              type="file"
-              accept="application/json,.json"
-              aria-label="Seleccionar backup JSON"
-              onChange={(event) => void handleImport(event.target.files?.[0])}
-            />
-          </div>
-        </article>
+        <input
+          accept="application/json,.json"
+          aria-label="Seleccionar backup JSON"
+          className="sr-only"
+          onChange={(event) => void handleImport(event.target.files?.[0], setStatus, setPendingImport, inputReference.current)}
+          ref={inputReference}
+          type="file"
+        />
 
         <article className="card settings-card">
           <div className="settings-card__head">
             <span className="icon-tile icon-tile--emerald">
-              <Icon name={mode === 'dark' ? 'moon' : mode === 'light' ? 'sun' : 'system'} size={20} />
+              <Icon name={getThemeIcon(mode)} size={20} />
             </span>
             <div>
               <h2 className="card__title">Tema</h2>
@@ -150,14 +225,14 @@ function SettingsPage() {
             </div>
           </div>
 
-          <div className="theme-segmented" role="group" aria-label="Modo de tema">
+          <div aria-label="Modo de tema" className="theme-segmented" role="group">
             {THEME_OPTIONS.map((option) => (
               <button
-                key={option.mode}
-                type="button"
-                className={`theme-segmented__btn${mode === option.mode ? ' is-active' : ''}`}
                 aria-pressed={mode === option.mode}
+                className={`theme-segmented__btn${mode === option.mode ? ' is-active' : ''}`}
+                key={option.mode}
                 onClick={() => setMode(option.mode)}
+                type="button"
               >
                 <Icon name={option.icon} size={17} />
                 {option.label}
@@ -177,7 +252,7 @@ function SettingsPage() {
             </div>
           </div>
 
-          <button type="button" className="btn-danger" onClick={() => setConfirmingReset(true)}>
+          <button className="btn-danger" onClick={() => setConfirmingReset(true)} type="button">
             <Icon name="reset" size={18} strokeWidth={2.2} />
             Reiniciar demo
           </button>
@@ -185,22 +260,20 @@ function SettingsPage() {
       </section>
 
       {pendingImport && (
-        <ConfirmDialog
-          title="Importar backup"
-          message={`Se reemplazarán tus datos actuales por los del backup: ${pendingImport.accounts.length} cuentas, ${pendingImport.categories.length} categorías, ${pendingImport.transactions.length} movimientos y ${pendingImport.savingsGoals.length} objetivos.`}
-          confirmLabel="Importar"
-          onConfirm={handleConfirmImport}
-          onCancel={() => setPendingImport(null)}
+        <ImportConfirmDialog
+          onCancel={() => setPendingImport(undefined)}
+          onConfirm={() => handleConfirmImport(pendingImport, importData, setPendingImport, setStatus)}
+          pendingImport={pendingImport}
         />
       )}
 
       {confirmingReset && (
         <ConfirmDialog
-          title="Reiniciar datos"
-          message="Se reemplazarán tus datos locales por los datos demo incluidos en la app."
           confirmLabel="Reiniciar"
-          onConfirm={handleReset}
+          message="Se reemplazarán tus datos locales por los datos demo incluidos en la app."
           onCancel={() => setConfirmingReset(false)}
+          onConfirm={() => handleReset(reset, setConfirmingReset, setStatus)}
+          title="Reiniciar datos"
         />
       )}
     </>

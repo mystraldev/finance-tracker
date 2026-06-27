@@ -1,16 +1,20 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { ThemeContext } from './themeContext'
+import type {Theme, ThemeMode} from './theme';
+import type {ReactNode} from 'react';
+
+import {  useEffect, useMemo, useState } from 'react'
+
 import {
   isThemeMode,
   resolveTheme,
+  
   THEME_MODES,
-  THEME_STORAGE_KEY,
-  type Theme,
-  type ThemeMode,
+  THEME_STORAGE_KEY
+  
 } from './theme'
+import { ThemeContext } from './themeContext'
 
 function getSystemTheme(): Theme {
-  if (typeof globalThis.matchMedia !== 'function') return 'light'
+  if (typeof matchMedia !== 'function') return 'light'
   return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
@@ -23,17 +27,17 @@ function loadThemeMode(): ThemeMode {
   }
 }
 
-type ThemeProviderProps = {
+type ThemeProviderProperties = {
   children: ReactNode
 }
 
-export function ThemeProvider({ children }: ThemeProviderProps) {
+export function ThemeProvider({ children }: ThemeProviderProperties) {
   const [mode, setMode] = useState<ThemeMode>(loadThemeMode)
   const [systemTheme, setSystemTheme] = useState<Theme>(getSystemTheme)
   const theme = resolveTheme(mode, systemTheme)
 
   useEffect(() => {
-    if (typeof globalThis.matchMedia !== 'function') return undefined
+    if (typeof matchMedia !== 'function') return
 
     const query = matchMedia('(prefers-color-scheme: dark)')
     const handleChange = (event: MediaQueryListEvent) => {

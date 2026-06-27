@@ -1,7 +1,10 @@
-import { useState, type FormEvent } from 'react'
+import type { Category } from '../types/finance'
+import type {FormEvent} from 'react';
+
+import {  useState } from 'react'
+
 import Icon from './Icon'
 import { selectableIcons } from './iconCatalog'
-import type { Category } from '../types/finance'
 
 const PALETTE = [
   '#0a6ce0', '#8d66d9', '#a855f7', '#ec4899', '#f43f5e', '#ef4444',
@@ -9,35 +12,41 @@ const PALETTE = [
   '#64748b', '#94a3b8',
 ]
 
-type CategoryFormProps = {
+type CategoryFormProperties = {
   initial?: Category
   onSubmit: (cat: Omit<Category, 'id'> | Partial<Category> & { id: string }) => void
   onCancel: () => void
 }
 
-/** '' or 0 -> undefined (no budget); invalid -> null; otherwise the parsed number. */
-function parseBudget(text: string): number | undefined | null {
+function parseBudget(text: string): number | undefined {
   const trimmed = text.trim()
   if (!trimmed) return undefined
-  const value = parseFloat(trimmed.replace(',', '.'))
-  if (!Number.isFinite(value) || value < 0) return null
+  const value = Number(trimmed.replace(',', '.'))
+  if (!Number.isFinite(value) || value < 0) return undefined
   return value === 0 ? undefined : value
 }
 
-function CategoryForm({ initial, onSubmit, onCancel }: CategoryFormProps) {
+function isInvalidBudgetInput(text: string): boolean {
+  const trimmed = text.trim()
+  if (!trimmed) return false
+  const value = Number(trimmed.replace(',', '.'))
+  return !Number.isFinite(value) || value < 0
+}
+
+function CategoryForm({ initial, onSubmit, onCancel }: CategoryFormProperties) {
   const [label, setLabel] = useState(initial?.label ?? '')
   const [color, setColor] = useState(initial?.color ?? PALETTE[0])
   const [icon, setIcon] = useState(initial?.icon ?? 'package')
-  const [budget, setBudget] = useState(initial?.budget != null ? String(initial.budget) : '')
+  const [budget, setBudget] = useState(initial?.budget === undefined ? '' : String(initial.budget))
   const [error, setError] = useState('')
 
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault()
+  function handleSubmit(event_: FormEvent) {
+    event_.preventDefault()
     if (!label.trim()) return setError('Ponle un nombre a la categoría.')
+    if (isInvalidBudgetInput(budget)) return setError('El presupuesto no es válido.')
     const parsedBudget = parseBudget(budget)
-    if (parsedBudget === null) return setError('El presupuesto no es válido.')
     onSubmit({
-      ...(initial?.id ? { id: initial.id } : {}),
+      ...(initial?.id && { id: initial.id }),
       label: label.trim(),
       color,
       icon,
@@ -58,11 +67,10 @@ function CategoryForm({ initial, onSubmit, onCancel }: CategoryFormProps) {
         <span className="field__label">Nombre</span>
         <input
           className="field__input"
-          type="text"
+          onChange={(event_) => setLabel(event_.target.value)}
           placeholder="Ej. Suscripciones"
+          type="text"
           value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          autoFocus
         />
       </label>
 
@@ -72,9 +80,9 @@ function CategoryForm({ initial, onSubmit, onCancel }: CategoryFormProps) {
           <input
             className="field__input"
             inputMode="decimal"
+            onChange={(event_) => setBudget(event_.target.value)}
             placeholder="Sin límite"
             value={budget}
-            onChange={(e) => setBudget(e.target.value)}
           />
           <span className="field__suffix">€</span>
         </div>
@@ -85,12 +93,12 @@ function CategoryForm({ initial, onSubmit, onCancel }: CategoryFormProps) {
         <div className="swatches">
           {PALETTE.map((c) => (
             <button
-              key={c}
-              type="button"
-              className={`swatch ${c === color ? 'is-active' : ''}`}
-              style={{ background: c }}
-              onClick={() => setColor(c)}
               aria-label={`Color ${c}`}
+              className={`swatch ${c === color ? 'is-active' : ''}`}
+              key={c}
+              onClick={() => setColor(c)}
+              style={{ background: c }}
+              type="button"
             >
               {c === color && <Icon name="check" size={14} strokeWidth={3} />}
             </button>
@@ -103,12 +111,12 @@ function CategoryForm({ initial, onSubmit, onCancel }: CategoryFormProps) {
         <div className="icon-picker">
           {selectableIcons.map((name) => (
             <button
-              key={name}
-              type="button"
-              className={`icon-pick ${name === icon ? 'is-active' : ''}`}
-              style={name === icon ? { color, borderColor: color } : undefined}
-              onClick={() => setIcon(name)}
               aria-label={name}
+              className={`icon-pick ${name === icon ? 'is-active' : ''}`}
+              key={name}
+              onClick={() => setIcon(name)}
+              style={name === icon ? { color, borderColor: color } : undefined}
+              type="button"
             >
               <Icon name={name} size={18} />
             </button>
@@ -119,10 +127,10 @@ function CategoryForm({ initial, onSubmit, onCancel }: CategoryFormProps) {
       {error && <p className="form__error">{error}</p>}
 
       <div className="form__actions">
-        <button type="button" className="btn-ghost" onClick={onCancel}>
+        <button className="btn-ghost" onClick={onCancel} type="button">
           Cancelar
         </button>
-        <button type="submit" className="btn-primary">
+        <button className="btn-primary" type="submit">
           <Icon name="check" size={18} strokeWidth={2.2} />
           {initial ? 'Guardar cambios' : 'Crear categoría'}
         </button>

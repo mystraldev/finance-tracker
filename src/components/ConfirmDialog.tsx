@@ -1,7 +1,7 @@
 import Icon from './Icon'
 import Modal from './Modal'
 
-type ConfirmDialogProps = {
+type ConfirmDialogProperties = {
   title?: string
   message: string
   confirmLabel?: string
@@ -15,15 +15,15 @@ function ConfirmDialog({
   confirmLabel = 'Borrar',
   onConfirm,
   onCancel,
-}: ConfirmDialogProps) {
+}: ConfirmDialogProperties) {
   return (
-    <Modal title={title} onClose={onCancel}>
+    <Modal onClose={onCancel} title={title}>
       <p className="confirm__message">{message}</p>
       <div className="form__actions">
-        <button type="button" className="btn-ghost" onClick={onCancel}>
+        <button className="btn-ghost" onClick={onCancel} type="button">
           Cancelar
         </button>
-        <button type="button" className="btn-danger" onClick={onConfirm}>
+        <button className="btn-danger" onClick={onConfirm} type="button">
           <Icon name="delete" size={17} strokeWidth={2} />
           {confirmLabel}
         </button>

@@ -2,7 +2,7 @@
  *  "1234,56", "12.5"). Dots in groups of three with no comma are treated
  *  as thousands separators. Returns NaN for invalid or ambiguous input. */
 export function parseDecimal(text: string): number {
-  const raw = String(text).trim()
+  const raw = text.trim()
   if (!raw) return NaN
 
   const lastComma = raw.lastIndexOf(',')
@@ -13,16 +13,16 @@ export function parseDecimal(text: string): number {
     // Both separators present: the last one is the decimal separator.
     normalised =
       lastComma > lastDot
-        ? raw.replace(/\./g, '').replace(',', '.')
-        : raw.replace(/,/g, '')
+        ? raw.replaceAll('.', '').replace(',', '.')
+        : raw.replaceAll(',', '')
   } else if (lastComma !== -1) {
     normalised = raw.replace(',', '.')
-  } else if (lastDot !== -1 && /^-?\d{1,3}(\.\d{3})+$/.test(raw)) {
-    normalised = raw.replace(/\./g, '')
+  } else if (lastDot !== -1 && /^-?\d{1,3}(?:\.\d{3})+$/.test(raw)) {
+    normalised = raw.replaceAll('.', '')
   } else {
     normalised = raw
   }
 
-  if (!/^-?\d+(\.\d+)?$/.test(normalised)) return NaN
+  if (!/^-?\d+(?:\.\d+)?$/.test(normalised)) return NaN
   return Number(normalised)
 }

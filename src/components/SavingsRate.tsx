@@ -9,18 +9,25 @@ const tiers = {
   low: { label: 'Mejorable', from: '#f59e0b', to: '#fbbf24' },
 }
 
-type SavingsRateProps = {
+type SavingsRateProperties = {
   income: number
   expenses: number
 }
 
-function SavingsRate({ income, expenses }: SavingsRateProps) {
+function SavingsRate({ income, expenses }: SavingsRateProperties) {
   const saved = income - expenses
   const rate = income > 0 ? saved / income : 0
   const clamped = Math.max(0, Math.min(1, rate))
   const dash = clamped * CIRCUMFERENCE
 
-  const tierKey = rate >= 0.2 ? 'good' : rate >= 0.1 ? 'mid' : 'low'
+  let tierKey: 'good' | 'mid' | 'low'
+  if (rate >= 0.2) {
+    tierKey = 'good'
+  } else if (rate >= 0.1) {
+    tierKey = 'mid'
+  } else {
+    tierKey = 'low'
+  }
   const tier = tiers[tierKey]
 
   return (
@@ -31,9 +38,9 @@ function SavingsRate({ income, expenses }: SavingsRateProps) {
       </header>
 
       <div className="savings__gauge">
-        <svg viewBox="0 0 200 116" className="gauge">
+        <svg className="gauge" viewBox="0 0 200 116">
           <defs>
-            <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="0">
+            <linearGradient id="gaugeGrad" x1="0" x2="1" y1="0" y2="0">
               <stop offset="0%" stopColor={tier.from} />
               <stop offset="100%" stopColor={tier.to} />
             </linearGradient>

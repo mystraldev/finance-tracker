@@ -1,12 +1,13 @@
-import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vitest/config'
 
 // https://vite.dev/config/ · https://vitest.dev/config/
 export default defineConfig({
   plugins: [react()],
   test: {
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
+    setupFiles: ['./test/unit/setup.ts'],
+    include: ['src/**/*.{test,spec}.{ts,tsx}', 'test/unit/**/*.{test,spec}.{ts,tsx}'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'text-summary', 'html'],
@@ -18,20 +19,13 @@ export default defineConfig({
         'src/vite-env.d.ts',
         'src/main.tsx',
         'src/data/**',
+        'test/**',
       ],
       thresholds: {
-        // Global baseline — locks current coverage so it can't regress.
-        statements: 30,
-        branches: 17,
-        functions: 30,
-        lines: 30,
-        // Pure logic is fully tested; hold it to a high bar.
-        'src/utils/**': {
-          statements: 90,
-          branches: 85,
-          functions: 90,
-          lines: 90,
-        },
+        statements: 80,
+        branches: 80,
+        functions: 80,
+        lines: 80,
       },
     },
   },

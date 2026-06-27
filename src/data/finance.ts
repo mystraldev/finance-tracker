@@ -15,7 +15,7 @@ export const accounts: Account[] = [
     type: 'savings',
     icon: 'piggy',
     accent: 'emerald',
-    openingBalance: 12500,
+    openingBalance: 12_500,
     interestRate: 0.0275,
   },
   {
@@ -24,7 +24,7 @@ export const accounts: Account[] = [
     type: 'investment',
     icon: 'trending',
     accent: 'violet',
-    openingBalance: 18340.18,
+    openingBalance: 18_340.18,
   },
 ]
 
@@ -49,11 +49,11 @@ const EXPENSE_TEMPLATE: { categoryId: string; description: string; base: number;
   { categoryId: 'other', description: 'Compras varias', base: 285, day: 23 },
 ]
 
-const VARIATION = [0.92, 1.08, 0.85, 1.12, 0.97, 1.0]
+const VARIATION = [0.92, 1.08, 0.85, 1.12, 0.97, 1]
 
 function buildTransactions(): Transaction[] {
   const txs: Transaction[] = []
-  MONTHS.forEach((month, i) => {
+  for (const [index, month] of MONTHS.entries()) {
     txs.push({
       id: `seed-${month}-income`,
       accountId: 'checking',
@@ -62,19 +62,19 @@ function buildTransactions(): Transaction[] {
       date: `${month}-01`,
       amount: 3200,
     })
-    EXPENSE_TEMPLATE.forEach((e) => {
-      const factor = e.fixed ? 1 : VARIATION[i]
-      const amount = Math.round(e.base * factor * 100) / 100
+    for (const event_ of EXPENSE_TEMPLATE) {
+      const factor = event_.fixed ? 1 : VARIATION[index]
+      const amount = Math.round(event_.base * factor * 100) / 100
       txs.push({
-        id: `seed-${month}-${e.categoryId}`,
+        id: `seed-${month}-${event_.categoryId}`,
         accountId: 'checking',
-        categoryId: e.categoryId,
-        description: e.description,
-        date: `${month}-${String(e.day).padStart(2, '0')}`,
+        categoryId: event_.categoryId,
+        description: event_.description,
+        date: `${month}-${String(event_.day).padStart(2, '0')}`,
         amount: -amount,
       })
-    })
-  })
+    }
+  }
   return txs
 }
 

@@ -1,4 +1,4 @@
-type SparklineProps = {
+type SparklineProperties = {
   data: number[]
   color?: string
   width?: number
@@ -16,8 +16,8 @@ function Sparkline({
   strokeWidth = 2,
   fill = false,
   id,
-}: SparklineProps) {
-  if (!data || data.length < 2) return null
+}: SparklineProperties) {
+  if (!data || data.length < 2) return
 
   const min = Math.min(...data)
   const max = Math.max(...data)
@@ -26,29 +26,29 @@ function Sparkline({
   const innerW = width - pad * 2
   const innerH = height - pad * 2
 
-  const points = data.map((value, i) => {
-    const x = pad + (i / (data.length - 1)) * innerW
+  const points = data.map((value, index) => {
+    const x = pad + (index / (data.length - 1)) * innerW
     const y = pad + (1 - (value - min) / span) * innerH
     return [x, y] as const
   })
 
-  const line = points.map(([x, y], i) => `${i === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`).join(' ')
+  const line = points.map(([x, y], index) => `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`).join(' ')
   const area = `${line} L ${points.at(-1)![0].toFixed(2)} ${height} L ${points[0][0].toFixed(2)} ${height} Z`
   const gradId = `spark-${id}`
 
   return (
     <svg
+      aria-hidden
       className="sparkline"
-      viewBox={`0 0 ${width} ${height}`}
-      width={width}
       height={height}
       preserveAspectRatio="none"
-      aria-hidden
+      viewBox={`0 0 ${width} ${height}`}
+      width={width}
     >
       {fill && (
         <>
           <defs>
-            <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id={gradId} x1="0" x2="0" y1="0" y2="1">
               <stop offset="0%" stopColor={color} stopOpacity="0.22" />
               <stop offset="100%" stopColor={color} stopOpacity="0" />
             </linearGradient>
@@ -60,9 +60,9 @@ function Sparkline({
         d={line}
         fill="none"
         stroke={color}
-        strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
+        strokeWidth={strokeWidth}
       />
     </svg>
   )

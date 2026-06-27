@@ -1,7 +1,8 @@
+import type { AccountWithBalance } from '../types/finance'
+
+import { formatCurrency, formatPercent } from '../utils/format'
 import Icon from './Icon'
 import Sparkline from './Sparkline'
-import { formatCurrency, formatPercent } from '../utils/format'
-import type { AccountWithBalance } from '../types/finance'
 
 const tagByType: Record<string, string> = {
   cash: 'Disponible',
@@ -15,20 +16,20 @@ const accentColor: Record<string, string> = {
   violet: '#8d66d9',
 }
 
-type SummaryCardsProps = {
+type SummaryCardsProperties = {
   accounts: (AccountWithBalance & { monthlyGrowthRate: number; history: number[] })[]
 }
 
-function SummaryCards({ accounts }: SummaryCardsProps) {
+function SummaryCards({ accounts }: SummaryCardsProperties) {
   return (
     <div className="summary-cards">
-      {accounts.map((account, i) => {
-        const positive = account.monthlyGrowthRate >= 0
+      {accounts.map((account, index) => {
+        const isPositive = account.monthlyGrowthRate >= 0
         return (
           <article
-            key={account.id}
             className={`summary-card summary-card--${account.accent}`}
-            style={{ animationDelay: `${0.05 + i * 0.06}s` }}
+            key={account.id}
+            style={{ animationDelay: `${0.05 + index * 0.06}s` }}
           >
             <header className="summary-card__header">
               <span className={`icon-tile icon-tile--${account.accent}`}>
@@ -43,11 +44,11 @@ function SummaryCards({ accounts }: SummaryCardsProps) {
             </p>
 
             <footer className="summary-card__footer">
-              <span className={`delta ${positive ? 'delta--up' : 'delta--down'}`}>
-                <Icon name={positive ? 'up' : 'down'} size={13} strokeWidth={2.4} />
+              <span className={`delta ${isPositive ? 'delta--up' : 'delta--down'}`}>
+                <Icon name={isPositive ? 'up' : 'down'} size={13} strokeWidth={2.4} />
                 {formatPercent(Math.abs(account.monthlyGrowthRate))}
               </span>
-              {account.type === 'savings' && account.interestRate != null ? (
+              {account.type === 'savings' && account.interestRate !== undefined ? (
                 <span className="summary-card__note tnum">
                   {formatPercent(account.interestRate)} TAE
                 </span>
@@ -56,12 +57,12 @@ function SummaryCards({ accounts }: SummaryCardsProps) {
               )}
               <span className="summary-card__spark">
                 <Sparkline
-                  id={account.id}
-                  data={account.history}
                   color={accentColor[account.accent]}
-                  width={84}
-                  height={30}
+                  data={account.history}
                   fill
+                  height={30}
+                  id={account.id}
+                  width={84}
                 />
               </span>
             </footer>
