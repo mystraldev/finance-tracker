@@ -22,18 +22,10 @@ export default defineConfig({
         'test/**',
       ],
       thresholds: {
-        // Global baseline — locks current coverage so it can't regress.
-        statements: 30,
-        branches: 17,
-        functions: 30,
-        lines: 30,
-        // Pure logic is fully tested; hold it to a high bar.
-        'src/utils/**': {
-          statements: 90,
-          branches: 85,
-          functions: 90,
-          lines: 90,
-        },
+        statements: 80,
+        branches: 80,
+        functions: 80,
+        lines: 80,
       },
     },
   },
