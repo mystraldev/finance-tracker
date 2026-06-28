@@ -1,20 +1,31 @@
 import type { Category } from '../types/finance'
-import type {FormEvent} from 'react';
+import type { FormEvent } from 'react'
 
-import {  useState } from 'react'
+import { useState } from 'react'
 
 import Icon from './Icon'
 import { selectableIcons } from './iconCatalog'
 
 const PALETTE = [
-  '#0a6ce0', '#8d66d9', '#a855f7', '#ec4899', '#f43f5e', '#ef4444',
-  '#f59e0b', '#eab308', '#10b981', '#14b8a6', '#06b6d4', '#3b82f6',
-  '#64748b', '#94a3b8',
+  '#0a6ce0',
+  '#8d66d9',
+  '#a855f7',
+  '#ec4899',
+  '#f43f5e',
+  '#ef4444',
+  '#f59e0b',
+  '#eab308',
+  '#10b981',
+  '#14b8a6',
+  '#06b6d4',
+  '#3b82f6',
+  '#64748b',
+  '#94a3b8',
 ]
 
 type CategoryFormProperties = {
   initial?: Category
-  onSubmit: (cat: Omit<Category, 'id'> | Partial<Category> & { id: string }) => void
+  onSubmit: (cat: Omit<Category, 'id'> | (Partial<Category> & { id: string })) => void
   onCancel: () => void
 }
 
@@ -57,7 +68,10 @@ function CategoryForm({ initial, onSubmit, onCancel }: CategoryFormProperties) {
   return (
     <form className="form" onSubmit={handleSubmit}>
       <div className="cat-preview">
-        <span className="icon-tile" style={{ color, background: `color-mix(in srgb, ${color} 14%, transparent)` }}>
+        <span
+          className="icon-tile"
+          style={{ color, background: `color-mix(in srgb, ${color} 14%, transparent)` }}
+        >
           <Icon name={icon} size={22} />
         </span>
         <span className="cat-preview__name">{label.trim() || 'Nueva categoría'}</span>

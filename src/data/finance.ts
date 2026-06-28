@@ -40,7 +40,13 @@ export const categories: Category[] = [
 
 const MONTHS = ['2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06']
 
-const EXPENSE_TEMPLATE: { categoryId: string; description: string; base: number; day: number; fixed?: boolean }[] = [
+const EXPENSE_TEMPLATE: {
+  categoryId: string
+  description: string
+  base: number
+  day: number
+  fixed?: boolean
+}[] = [
   { categoryId: 'home', description: 'Alquiler', base: 850, day: 2, fixed: true },
   { categoryId: 'food', description: 'Supermercado', base: 410, day: 8 },
   { categoryId: 'transport', description: 'Gasolina', base: 185, day: 11 },

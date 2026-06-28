@@ -4,17 +4,17 @@ Aplicación web para el seguimiento de finanzas personales. Construida con React
 
 ## Tech stack
 
-| Capa | Tecnología |
-|------|-----------|
-| UI | React 19, React Router 7 |
-| Lenguaje | TypeScript 6 (strict mode) |
-| Build | Vite 8 |
-| State | `useReducer` + Context |
-| Test | Vitest |
-| Lint | ESLint 10 (flat config) + typescript-eslint |
-| Paquete | pnpm 11.6.0 |
-| Docker | node:24-alpine (multi-stage) |
-| Deploy | Vercel |
+| Capa     | Tecnología                                  |
+| -------- | ------------------------------------------- |
+| UI       | React 19, React Router 7                    |
+| Lenguaje | TypeScript 6 (strict mode)                  |
+| Build    | Vite 8                                      |
+| State    | `useReducer` + Context                      |
+| Test     | Vitest                                      |
+| Lint     | ESLint 10 (flat config) + typescript-eslint |
+| Paquete  | pnpm 11.6.0                                 |
+| Docker   | node:24-alpine (multi-stage)                |
+| Deploy   | Vercel                                      |
 
 ## State management
 
@@ -26,22 +26,22 @@ Sin librería externa — `useReducer` + React Context con persistencia automát
 
 ### Rutas
 
-| Path | Página | Descripción |
-|------|--------|-------------|
-| `/` | DashboardPage | Resumen: patrimonio, cuentas, ahorro, gastos |
-| `/movimientos` | TransactionsPage | CRUD de movimientos con filtros |
-| `/categorias` | CategoriesPage | CRUD de categorías |
-| `/cuentas` | AccountsPage | CRUD de cuentas |
+| Path           | Página           | Descripción                                  |
+| -------------- | ---------------- | -------------------------------------------- |
+| `/`            | DashboardPage    | Resumen: patrimonio, cuentas, ahorro, gastos |
+| `/movimientos` | TransactionsPage | CRUD de movimientos con filtros              |
+| `/categorias`  | CategoriesPage   | CRUD de categorías                           |
+| `/cuentas`     | AccountsPage     | CRUD de cuentas                              |
 
 ### Tipos principales
 
-| Tipo | Descripción |
-|------|-------------|
-| `Account` | Cuenta con `type: 'cash'\|'savings'\|'investment'` y `openingBalance` |
-| `Category` | Categoría de gasto/ingreso con `color` e `icon` |
-| `Transaction` | Movimiento con `amount` (signado), `accountId`, `categoryId` |
-| `FinanceAction` | 10 tipos de acción discriminada para el reducer |
-| `FinanceContextValue` | Interface completa del contexto (estado + métodos) |
+| Tipo                  | Descripción                                                           |
+| --------------------- | --------------------------------------------------------------------- |
+| `Account`             | Cuenta con `type: 'cash'\|'savings'\|'investment'` y `openingBalance` |
+| `Category`            | Categoría de gasto/ingreso con `color` e `icon`                       |
+| `Transaction`         | Movimiento con `amount` (signado), `accountId`, `categoryId`          |
+| `FinanceAction`       | 10 tipos de acción discriminada para el reducer                       |
+| `FinanceContextValue` | Interface completa del contexto (estado + métodos)                    |
 
 ## Desarrollo
 
@@ -92,11 +92,11 @@ src/components/*.test.tsx        → Sparkline, Modal, ConfirmDialog, SavingsRat
 
 Vercel con configuración en `vercel.json`. El framework se detecta automáticamente como Vite.
 
-| Entorno | Rama | URL |
-|---------|------|-----|
-| **Producción** | `main` | [finance-tracker-ruby-mu.vercel.app](https://finance-tracker-ruby-mu.vercel.app) |
-| **Staging** (preview permanente) | `dev` | [finance-tracker-git-dev-joseppascualbadia-8623s-projects.vercel.app](https://finance-tracker-git-dev-joseppascualbadia-8623s-projects.vercel.app) |
-| Preview por PR | automática | generada automáticamente |
+| Entorno                          | Rama       | URL                                                                                                                                                |
+| -------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Producción**                   | `main`     | [finance-tracker-ruby-mu.vercel.app](https://finance-tracker-ruby-mu.vercel.app)                                                                   |
+| **Staging** (preview permanente) | `dev`      | [finance-tracker-git-dev-joseppascualbadia-8623s-projects.vercel.app](https://finance-tracker-git-dev-joseppascualbadia-8623s-projects.vercel.app) |
+| Preview por PR                   | automática | generada automáticamente                                                                                                                           |
 
 ## Tracker de incidencias
 

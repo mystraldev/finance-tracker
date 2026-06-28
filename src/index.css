@@ -1,6 +1,11 @@
 :root {
   font-family:
-    'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    'Inter',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
 
   /* ---- Neutrales (gris puro, sin tinte) ---- */
   --gray-50: #f7f7f8;
@@ -154,8 +159,7 @@ body {
   min-height: 100vh;
   background-color: var(--bg);
   /* Tinte ambiental muy tenue para dar profundidad sin saturar. */
-  background-image:
-    radial-gradient(1100px 520px at 15% -10%, var(--bg-glow), transparent 60%);
+  background-image: radial-gradient(1100px 520px at 15% -10%, var(--bg-glow), transparent 60%);
   background-attachment: fixed;
   transition:
     background-color 0.22s ease,

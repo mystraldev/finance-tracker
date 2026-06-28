@@ -1,7 +1,7 @@
 import type { Account, Category, Transaction } from '../types/finance'
-import type {FormEvent} from 'react';
+import type { FormEvent } from 'react'
 
-import {  useState } from 'react'
+import { useState } from 'react'
 
 import { parseDecimal } from '../utils/number'
 import Icon from './Icon'
@@ -19,13 +19,20 @@ type TransactionFormProperties = {
   accounts: Account[]
   categories: Category[]
   initial?: Transaction
-  onSubmit: (tx: Omit<Transaction, 'id'> | Partial<Transaction> & { id: string }) => void
+  onSubmit: (tx: Omit<Transaction, 'id'> | (Partial<Transaction> & { id: string })) => void
   onCancel: () => void
 }
 
 type ValidationResult = { valid: true } | { valid: false; error: string }
 
-function validateForm(amount: string, description: string, accountId: string, type: string, categoryId: string, date: string): ValidationResult {
+function validateForm(
+  amount: string,
+  description: string,
+  accountId: string,
+  type: string,
+  categoryId: string,
+  date: string,
+): ValidationResult {
   const value = parseDecimal(amount)
   if (!Number.isFinite(value) || value <= 0) {
     return { valid: false, error: 'Introduce un importe válido mayor que 0.' }
@@ -45,7 +52,15 @@ function validateForm(amount: string, description: string, accountId: string, ty
   return { valid: true }
 }
 
-function toPayload(amount: string, description: string, accountId: string, type: string, categoryId: string, date: string, initial?: Transaction) {
+function toPayload(
+  amount: string,
+  description: string,
+  accountId: string,
+  type: string,
+  categoryId: string,
+  date: string,
+  initial?: Transaction,
+) {
   const value = parseDecimal(amount)
   const signed = type === 'gasto' ? -Math.abs(value) : Math.abs(value)
   return {
@@ -188,7 +203,13 @@ function DateField({ value, onChange }: FieldProperties) {
   )
 }
 
-function TransactionForm({ accounts, categories, initial, onSubmit, onCancel }: TransactionFormProperties) {
+function TransactionForm({
+  accounts,
+  categories,
+  initial,
+  onSubmit,
+  onCancel,
+}: TransactionFormProperties) {
   const expenseCategories = categories.filter((c) => c.id !== INCOME_CATEGORY_ID)
   const isEditingIncome = initial ? initial.amount > 0 : false
 
@@ -196,9 +217,7 @@ function TransactionForm({ accounts, categories, initial, onSubmit, onCancel }: 
   const [amount, setAmount] = useState(initial ? String(Math.abs(initial.amount)) : '')
   const [description, setDescription] = useState(initial?.description ?? '')
   const [categoryId, setCategoryId] = useState(
-    initial && !isEditingIncome
-      ? initial.categoryId
-      : (expenseCategories[0]?.id ?? ''),
+    initial && !isEditingIncome ? initial.categoryId : (expenseCategories[0]?.id ?? ''),
   )
   const [accountId, setAccountId] = useState(initial?.accountId ?? accounts[0]?.id ?? '')
   const [date, setDate] = useState(initial?.date ?? todayISO())
@@ -218,7 +237,9 @@ function TransactionForm({ accounts, categories, initial, onSubmit, onCancel }: 
       <TypeSelector onChange={setType} type={type} />
       <AmountField onChange={setAmount} value={amount} />
       <DescriptionField onChange={setDescription} value={description} />
-      {type === 'gasto' && <CategoryField categories={expenseCategories} onChange={setCategoryId} value={categoryId} />}
+      {type === 'gasto' && (
+        <CategoryField categories={expenseCategories} onChange={setCategoryId} value={categoryId} />
+      )}
       <div className="field-row">
         <AccountField accounts={accounts} onChange={setAccountId} value={accountId} />
         <DateField onChange={setDate} value={date} />

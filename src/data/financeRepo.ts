@@ -1,4 +1,11 @@
-import type { Account, Category, FinanceData, SavingsGoal, Transaction, TransactionQuery } from '../types/finance'
+import type {
+  Account,
+  Category,
+  FinanceData,
+  SavingsGoal,
+  Transaction,
+  TransactionQuery,
+} from '../types/finance'
 
 import { seed } from './finance'
 
@@ -160,10 +167,7 @@ function normaliseSearch(text: string): string {
     .replaceAll(/[\u{300}-\u{36F}]/gu, '')
 }
 
-export function listTransactions(
-  data: FinanceData,
-  query: TransactionQuery = {},
-): Transaction[] {
+export function listTransactions(data: FinanceData, query: TransactionQuery = {}): Transaction[] {
   const {
     month = 'all',
     categoryId = 'all',

@@ -1,6 +1,21 @@
-import type { Account, AccountWithBalance, BudgetStatus, Category, CategoryBreakdownItem, CategoryBudget, EnrichedTransaction, FinanceData, SparklineDatum, Transaction } from '../types/finance'
+import type {
+  Account,
+  AccountWithBalance,
+  BudgetStatus,
+  Category,
+  CategoryBreakdownItem,
+  CategoryBudget,
+  EnrichedTransaction,
+  FinanceData,
+  SparklineDatum,
+  Transaction,
+} from '../types/finance'
 
-import { availableTransactionMonths, listTransactions, transactionMonthKey } from '../data/financeRepo'
+import {
+  availableTransactionMonths,
+  listTransactions,
+  transactionMonthKey,
+} from '../data/financeRepo'
 import { fractionOf } from './math'
 
 const BUDGET_WARNING_RATIO = 0.8
@@ -63,19 +78,29 @@ export function monthTransactions(transactions: Transaction[], month: string): T
 }
 
 export function availableMonths(transactions: Transaction[]): string[] {
-  return availableTransactionMonths({ accounts: [], categories: [], transactions, savingsGoals: [] })
+  return availableTransactionMonths({
+    accounts: [],
+    categories: [],
+    transactions,
+    savingsGoals: [],
+  })
 }
 
-export function incomeExpenses(transactions: Transaction[], month: string): { income: number; expenses: number; saved: number } {
+export function incomeExpenses(
+  transactions: Transaction[],
+  month: string,
+): { income: number; expenses: number; saved: number } {
   const m = monthTransactions(transactions, month)
   const income = m.filter((t) => t.amount > 0).reduce((s, t) => s + t.amount, 0)
-  const expenses = m
-    .filter((t) => t.amount < 0)
-    .reduce((s, t) => s + Math.abs(t.amount), 0)
+  const expenses = m.filter((t) => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0)
   return { income, expenses, saved: income - expenses }
 }
 
-export function accountBalanceAsOf(account: Account, transactions: Transaction[], month?: string): number {
+export function accountBalanceAsOf(
+  account: Account,
+  transactions: Transaction[],
+  month?: string,
+): number {
   const sum = transactions
     .filter((t) => t.accountId === account.id && (!month || monthKey(t.date) <= month))
     .reduce((s, t) => s + t.amount, 0)
@@ -96,7 +121,11 @@ export function netWorthAsOf(state: FinanceData, month?: string): number {
   )
 }
 
-export function monthlyGrowthRate(account: Account, transactions: Transaction[], month: string): number {
+export function monthlyGrowthRate(
+  account: Account,
+  transactions: Transaction[],
+  month: string,
+): number {
   const [previous] = monthsBack(month, 2)
   const current = accountBalanceAsOf(account, transactions, month)
   const before = accountBalanceAsOf(account, transactions, previous)
@@ -112,17 +141,24 @@ export function netWorthSeries(state: FinanceData, n: number, endMonth: string):
   }))
 }
 
-export function accountSeries(account: Account, transactions: Transaction[], n: number, endMonth: string): number[] {
-  return monthsBack(endMonth, n).map((m) =>
-    accountBalanceAsOf(account, transactions, m),
-  )
+export function accountSeries(
+  account: Account,
+  transactions: Transaction[],
+  n: number,
+  endMonth: string,
+): number[] {
+  return monthsBack(endMonth, n).map((m) => accountBalanceAsOf(account, transactions, m))
 }
 
 export function categoryMap(categories: Category[]): Record<string, Category> {
   return Object.fromEntries(categories.map((c) => [c.id, c]))
 }
 
-export function categoryBreakdown(transactions: Transaction[], categories: Category[], month: string): CategoryBreakdownItem[] {
+export function categoryBreakdown(
+  transactions: Transaction[],
+  categories: Category[],
+  month: string,
+): CategoryBreakdownItem[] {
   const totals = new Map<string, number>()
   const monthExpenses = monthTransactions(transactions, month).filter((t) => t.amount < 0)
   for (const t of monthExpenses) {
@@ -136,7 +172,11 @@ export function categoryBreakdown(transactions: Transaction[], categories: Categ
 
 /** Spend vs budget for each budgeted category in a month, sorted by usage desc.
  *  Categories without a budget are excluded. `pct` may exceed 1 when over budget. */
-export function categoryBudgets(transactions: Transaction[], categories: Category[], month: string): CategoryBudget[] {
+export function categoryBudgets(
+  transactions: Transaction[],
+  categories: Category[],
+  month: string,
+): CategoryBudget[] {
   const spentByCat = new Map<string, number>()
   const monthExpenses = monthTransactions(transactions, month).filter((t) => t.amount < 0)
   for (const t of monthExpenses) {
@@ -163,11 +203,10 @@ export function categoryBudgets(transactions: Transaction[], categories: Categor
 
 export function recentTransactions(state: FinanceData, n = 6): EnrichedTransaction[] {
   const cats = categoryMap(state.categories)
-  return listTransactions(state, { sort: 'date-desc', limit: n })
-    .map((t) => ({
-      ...t,
-      category: cats[t.categoryId]?.label ?? 'Sin categoría',
-      icon: cats[t.categoryId]?.icon ?? 'package',
-      color: cats[t.categoryId]?.color ?? '#64748b',
-    }))
+  return listTransactions(state, { sort: 'date-desc', limit: n }).map((t) => ({
+    ...t,
+    category: cats[t.categoryId]?.label ?? 'Sin categoría',
+    icon: cats[t.categoryId]?.icon ?? 'package',
+    color: cats[t.categoryId]?.color ?? '#64748b',
+  }))
 }

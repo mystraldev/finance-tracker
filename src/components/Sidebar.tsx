@@ -48,9 +48,7 @@ export default function Sidebar() {
         {navItems.map((item) =>
           item.to ? (
             <NavLink
-              className={({ isActive }) =>
-                `nav-item${isActive ? ' nav-item--active' : ''}`
-              }
+              className={({ isActive }) => `nav-item${isActive ? ' nav-item--active' : ''}`}
               end={item.to === '/'}
               key={item.id}
               to={item.to}

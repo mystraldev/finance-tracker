@@ -117,8 +117,8 @@ function BlockedModal({
   return (
     <Modal onClose={onClose} title="No se puede borrar">
       <p className="confirm__message">
-        La categoría <strong>{category.label}</strong> tiene movimientos asociados.
-        Reasigna o borra esos movimientos antes de eliminarla.
+        La categoría <strong>{category.label}</strong> tiene movimientos asociados. Reasigna o borra
+        esos movimientos antes de eliminarla.
       </p>
       <div className="form__actions">
         <button className="btn-primary" onClick={onClose} type="button">
@@ -130,8 +130,15 @@ function BlockedModal({
 }
 
 function CategoriesPage() {
-  const { categories, transactions, selectedMonth, getTransactions, addCategory, updateCategory, deleteCategory } =
-    useFinance()
+  const {
+    categories,
+    transactions,
+    selectedMonth,
+    getTransactions,
+    addCategory,
+    updateCategory,
+    deleteCategory,
+  } = useFinance()
 
   const selectedMonthTransactions = getTransactions({ month: selectedMonth })
 
@@ -171,14 +178,19 @@ function CategoriesPage() {
             <article className="cat-card" key={c.id}>
               <span
                 className="icon-tile"
-                style={{ color: c.color, background: `color-mix(in srgb, ${c.color} 14%, transparent)` }}
+                style={{
+                  color: c.color,
+                  background: `color-mix(in srgb, ${c.color} 14%, transparent)`,
+                }}
               >
                 <Icon name={c.icon} size={20} />
               </span>
               <div className="cat-card__info">
                 <span className="cat-card__name">{c.label}</span>
                 <span className="cat-card__meta">
-                  <span>{count} {count === 1 ? 'movimiento' : 'movimientos'} este mes</span>
+                  <span>
+                    {count} {count === 1 ? 'movimiento' : 'movimientos'} este mes
+                  </span>
                   <span className="tnum">{formatCurrency(total)}</span>
                 </span>
                 {budget && (
@@ -187,11 +199,7 @@ function CategoriesPage() {
                   </div>
                 )}
                 {!budget && (
-                  <button
-                    className="cat-budget-cta"
-                    onClick={() => setEditing(c)}
-                    type="button"
-                  >
+                  <button className="cat-budget-cta" onClick={() => setEditing(c)} type="button">
                     Definir presupuesto
                   </button>
                 )}
@@ -237,10 +245,7 @@ function CategoriesPage() {
         onConfirm={(id) => deleteCategory(id)}
       />
 
-      <BlockedModal
-        category={blocked}
-        onClose={() => setBlocked(undefined)}
-      />
+      <BlockedModal category={blocked} onClose={() => setBlocked(undefined)} />
     </>
   )
 }

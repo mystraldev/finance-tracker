@@ -99,11 +99,11 @@ describe('CategoriesPage', () => {
   it('creates a new category', () => {
     const value = renderPage()
     fireEvent.click(screen.getByRole('button', { name: /Nueva categoría/i }))
-    fireEvent.change(screen.getByPlaceholderText('Ej. Suscripciones'), { target: { value: 'Ocio' } })
+    fireEvent.change(screen.getByPlaceholderText('Ej. Suscripciones'), {
+      target: { value: 'Ocio' },
+    })
     fireEvent.click(screen.getByRole('button', { name: 'Crear categoría' }))
-    expect(value.addCategory).toHaveBeenCalledWith(
-      expect.objectContaining({ label: 'Ocio' }),
-    )
+    expect(value.addCategory).toHaveBeenCalledWith(expect.objectContaining({ label: 'Ocio' }))
   })
 
   it('deletes a category after confirmation', () => {

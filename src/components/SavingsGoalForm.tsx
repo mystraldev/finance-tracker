@@ -1,7 +1,7 @@
 import type { AccountWithBalance, SavingsGoal } from '../types/finance'
-import type {FormEvent} from 'react';
+import type { FormEvent } from 'react'
 
-import {  useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { formatCurrency } from '../utils/format'
 import { parseDecimal } from '../utils/number'
@@ -9,8 +9,16 @@ import Icon from './Icon'
 import { selectableIcons } from './iconCatalog'
 
 const PALETTE = [
-  '#0a6ce0', '#8d66d9', '#ec4899', '#f43f5e', '#f59e0b', '#1ea35b',
-  '#14b8a6', '#06b6d4', '#3b82f6', '#64748b',
+  '#0a6ce0',
+  '#8d66d9',
+  '#ec4899',
+  '#f43f5e',
+  '#f59e0b',
+  '#1ea35b',
+  '#14b8a6',
+  '#06b6d4',
+  '#3b82f6',
+  '#64748b',
 ]
 
 function isCompleteTargetDate(value: string): boolean {
@@ -23,9 +31,7 @@ function autoSavedAmount(availableForAccount: number | undefined, targetText: st
   if (availableForAccount === undefined) return ''
   const available = Math.max(availableForAccount, 0)
   const target = parseDecimal(targetText)
-  const nextSaved = Number.isFinite(target) && target > 0
-    ? Math.min(available, target)
-    : available
+  const nextSaved = Number.isFinite(target) && target > 0 ? Math.min(available, target) : available
   return nextSaved > 0 ? String(nextSaved) : ''
 }
 
@@ -85,9 +91,12 @@ function Preview({ name, color, icon }: { name: string; color: string; icon: str
 }
 
 function BudgetFields({
-  targetAmount, setTargetAmount,
-  savedAmount, setSavedAmount,
-  savedTouched, setSavedTouched,
+  targetAmount,
+  setTargetAmount,
+  savedAmount,
+  setSavedAmount,
+  savedTouched,
+  setSavedTouched,
   availableForAccount,
 }: {
   targetAmount: string
@@ -143,10 +152,16 @@ function BudgetFields({
 }
 
 function AccountDateFields({
-  accounts, goals, initial,
-  accountId, setAccountId,
-  targetDate, setTargetDate,
-  savedTouched, setSavedAmount, targetAmount,
+  accounts,
+  goals,
+  initial,
+  accountId,
+  setAccountId,
+  targetDate,
+  setTargetDate,
+  savedTouched,
+  setSavedAmount,
+  targetAmount,
 }: {
   accounts: AccountWithBalance[]
   goals: SavingsGoal[]
@@ -220,7 +235,15 @@ function ColorSwatches({ color, setColor }: { color: string; setColor: (v: strin
   )
 }
 
-function IconPicker({ icon, setIcon, color }: { icon: string; setIcon: (v: string) => void; color: string }) {
+function IconPicker({
+  icon,
+  setIcon,
+  color,
+}: {
+  icon: string
+  setIcon: (v: string) => void
+  color: string
+}) {
   return (
     <div className="field">
       <span className="field__label">Icono</span>
@@ -243,19 +266,17 @@ function IconPicker({ icon, setIcon, color }: { icon: string; setIcon: (v: strin
 }
 
 function useSavingsGoalFormState({
-  accounts, goals, initial,
+  accounts,
+  goals,
+  initial,
 }: {
   accounts: AccountWithBalance[]
   goals: SavingsGoal[]
   initial?: SavingsGoal
 }) {
   const [name, setName] = useState(initial?.name ?? '')
-  const [targetAmount, setTargetAmount] = useState(
-    initial ? String(initial.targetAmount) : '',
-  )
-  const [savedAmount, setSavedAmount] = useState(
-    initial ? String(initial.savedAmount) : '',
-  )
+  const [targetAmount, setTargetAmount] = useState(initial ? String(initial.targetAmount) : '')
+  const [savedAmount, setSavedAmount] = useState(initial ? String(initial.savedAmount) : '')
   const [savedTouched, setSavedTouched] = useState(Boolean(initial))
   const [accountId, setAccountId] = useState(initial?.accountId ?? '')
   const [targetDate, setTargetDate] = useState(initial?.targetDate ?? '')
@@ -268,19 +289,35 @@ function useSavingsGoalFormState({
     [accounts, accountId],
   )
   const otherReserved = useMemo(
-    () => goals
-      .filter((g) => g.id !== initial?.id && g.accountId === accountId)
-      .reduce((sum, g) => sum + g.savedAmount, 0),
+    () =>
+      goals
+        .filter((g) => g.id !== initial?.id && g.accountId === accountId)
+        .reduce((sum, g) => sum + g.savedAmount, 0),
     [accountId, goals, initial?.id],
   )
   const availableForAccount = linkedAccount ? linkedAccount.balance - otherReserved : undefined
 
   return {
-    name, setName, targetAmount, setTargetAmount,
-    savedAmount, setSavedAmount, savedTouched, setSavedTouched,
-    accountId, setAccountId, targetDate, setTargetDate,
-    color, setColor, icon, setIcon,
-    error, setError, linkedAccount, availableForAccount,
+    name,
+    setName,
+    targetAmount,
+    setTargetAmount,
+    savedAmount,
+    setSavedAmount,
+    savedTouched,
+    setSavedTouched,
+    accountId,
+    setAccountId,
+    targetDate,
+    setTargetDate,
+    color,
+    setColor,
+    icon,
+    setIcon,
+    error,
+    setError,
+    linkedAccount,
+    availableForAccount,
   }
 }
 
@@ -288,7 +325,7 @@ type SavingsGoalFormProperties = {
   accounts: AccountWithBalance[]
   goals: SavingsGoal[]
   initial?: SavingsGoal
-  onSubmit: (goal: Omit<SavingsGoal, 'id'> | Partial<SavingsGoal> & { id: string }) => void
+  onSubmit: (goal: Omit<SavingsGoal, 'id'> | (Partial<SavingsGoal> & { id: string })) => void
   onCancel: () => void
 }
 
@@ -300,17 +337,41 @@ function SavingsGoalForm({
   onCancel,
 }: SavingsGoalFormProperties) {
   const {
-    name, setName, targetAmount, setTargetAmount,
-    savedAmount, setSavedAmount, savedTouched, setSavedTouched,
-    accountId, setAccountId, targetDate, setTargetDate,
-    color, setColor, icon, setIcon,
-    error, setError, linkedAccount, availableForAccount,
+    name,
+    setName,
+    targetAmount,
+    setTargetAmount,
+    savedAmount,
+    setSavedAmount,
+    savedTouched,
+    setSavedTouched,
+    accountId,
+    setAccountId,
+    targetDate,
+    setTargetDate,
+    color,
+    setColor,
+    icon,
+    setIcon,
+    error,
+    setError,
+    linkedAccount,
+    availableForAccount,
   } = useSavingsGoalFormState({ accounts, goals, initial })
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    const validationError = validateGoal(name, targetAmount, savedAmount, targetDate, availableForAccount)
-    if (validationError) { setError(validationError); return }
+    const validationError = validateGoal(
+      name,
+      targetAmount,
+      savedAmount,
+      targetDate,
+      availableForAccount,
+    )
+    if (validationError) {
+      setError(validationError)
+      return
+    }
     onSubmit({
       ...(initial?.id && { id: initial.id }),
       name: name.trim(),

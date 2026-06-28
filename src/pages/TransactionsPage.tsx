@@ -8,11 +8,7 @@ import Icon from '../components/Icon'
 import Modal from '../components/Modal'
 import TransactionForm from '../components/TransactionForm'
 import { useFinance } from '../store/financeContext'
-import {
-  categoryMap,
-  monthKey,
-  monthLabel,
-} from '../utils/derive'
+import { categoryMap, monthKey, monthLabel } from '../utils/derive'
 import { formatCurrency, formatDate, formatSignedCurrency } from '../utils/format'
 
 const PAGE_SIZE = 24
@@ -52,9 +48,7 @@ function groupTransactions(transactions: Transaction[], sort: TransactionSort): 
       return a < b ? 1 : -1
     })
     .map(([month, items]) => {
-      const income = items
-        .filter((tx) => tx.amount > 0)
-        .reduce((sum, tx) => sum + tx.amount, 0)
+      const income = items.filter((tx) => tx.amount > 0).reduce((sum, tx) => sum + tx.amount, 0)
       const expenses = items
         .filter((tx) => tx.amount < 0)
         .reduce((sum, tx) => sum + Math.abs(tx.amount), 0)
@@ -99,19 +93,45 @@ function useTransactionFilters() {
   else if (type === 'gasto') filterType = 'expense'
 
   return {
-    month, setMonth, categoryId, setCategoryId,
-    accountId, setAccountId, type, setType,
-    search, setSearch, sort, setSort,
-    filterType, visibleCount, setVisibleCount,
-    setFilter, resetFilters, hasFilters,
+    month,
+    setMonth,
+    categoryId,
+    setCategoryId,
+    accountId,
+    setAccountId,
+    type,
+    setType,
+    search,
+    setSearch,
+    sort,
+    setSort,
+    filterType,
+    visibleCount,
+    setVisibleCount,
+    setFilter,
+    resetFilters,
+    hasFilters,
   }
 }
 
 function TransactionFilters({
-  months, categories, accounts,
-  search, month, type, categoryId, accountId, sort,
-  hasFilters, setFilter,
-  setMonth, setType, setCategoryId, setAccountId, setSearch, setSort,
+  months,
+  categories,
+  accounts,
+  search,
+  month,
+  type,
+  categoryId,
+  accountId,
+  sort,
+  hasFilters,
+  setFilter,
+  setMonth,
+  setType,
+  setCategoryId,
+  setAccountId,
+  setSearch,
+  setSort,
   resetFilters,
 }: {
   months: string[]
@@ -124,7 +144,7 @@ function TransactionFilters({
   accountId: string
   sort: TransactionSort
   hasFilters: boolean
-  setFilter: <T,>(setter: (value: T) => void, value: T) => void
+  setFilter: <T>(setter: (value: T) => void, value: T) => void
   setMonth: (value: string) => void
   setType: (value: string) => void
   setCategoryId: (value: string) => void
@@ -160,7 +180,12 @@ function TransactionFilters({
             </option>
           ))}
         </select>
-        <select aria-label="Tipo" className="filters__select" onChange={(event_) => setFilter(setType, event_.target.value)} value={type}>
+        <select
+          aria-label="Tipo"
+          className="filters__select"
+          onChange={(event_) => setFilter(setType, event_.target.value)}
+          value={type}
+        >
           <option value="all">Ingresos y gastos</option>
           <option value="gasto">Solo gastos</option>
           <option value="ingreso">Solo ingresos</option>
@@ -213,7 +238,10 @@ function TransactionFilters({
 }
 
 function TransactionSummary({
-  count, income, expenses, net,
+  count,
+  income,
+  expenses,
+  net,
 }: {
   count: number
   income: number
@@ -246,102 +274,123 @@ function TransactionSummary({
 
 function TransactionGroups(properties: TransactionGroupsProperties) {
   const {
-    groups, cats, accumulatorById, hasTransactions, hasFilters, resetFilters,
-    visibleCount, filteredCount, onEdit, onDelete, onLoadMore,
+    groups,
+    cats,
+    accumulatorById,
+    hasTransactions,
+    hasFilters,
+    resetFilters,
+    visibleCount,
+    filteredCount,
+    onEdit,
+    onDelete,
+    onLoadMore,
   } = properties
-  if (groups.length === 0) return (
-    <div className="card empty">
-      <Icon name="transactions" size={28} />
-      <p>{hasTransactions ? 'No hay movimientos con estos filtros.' : 'Todavía no hay movimientos.'}</p>
-      {hasFilters && <button className="filters__clear" onClick={resetFilters} type="button">Limpiar filtros</button>}
-    </div>
-  )
+  if (groups.length === 0)
+    return (
+      <div className="card empty">
+        <Icon name="transactions" size={28} />
+        <p>
+          {hasTransactions
+            ? 'No hay movimientos con estos filtros.'
+            : 'Todavía no hay movimientos.'}
+        </p>
+        {hasFilters && (
+          <button className="filters__clear" onClick={resetFilters} type="button">
+            Limpiar filtros
+          </button>
+        )}
+      </div>
+    )
 
   return (
     <div className="card tx-groups">
       {groups.map((g) => (
         <section className="tx-group" key={g.month}>
           <header className="tx-group__header">
-              <h3 className="tx-group__date">{monthLabel(g.month)}</h3>
-              <dl aria-label={`Subtotal de ${monthLabel(g.month)}`} className="tx-group__summary">
-                <div>
-                  <dt>Ingresos</dt>
-                  <dd className="tnum is-in">{formatCurrency(g.income)}</dd>
-                </div>
-                <div>
-                  <dt>Gastos</dt>
-                  <dd className="tnum">{formatCurrency(g.expenses)}</dd>
-                </div>
-                <div>
-                  <dt>Neto</dt>
-                  <dd className={`tnum ${g.net >= 0 ? 'is-in' : ''}`}>
-                    {formatSignedCurrency(g.net)}
-                  </dd>
-                </div>
-              </dl>
-            </header>
-            <ul className="txrow-list">
-              {g.items.map((t) => {
-                const cat = cats[t.categoryId]
-                const isIncome = t.amount > 0
-                return (
-                  <li className="txrow" key={t.id}>
-                    <time className="txrow__date" dateTime={t.date}>
-                      {formatDate(t.date)}
-                    </time>
-                    <span
-                      className="txrow__icon"
-                      style={{ '--c': isIncome ? '#10b981' : cat?.color ?? '#94a3b8' } as Record<string, string>}
+            <h3 className="tx-group__date">{monthLabel(g.month)}</h3>
+            <dl aria-label={`Subtotal de ${monthLabel(g.month)}`} className="tx-group__summary">
+              <div>
+                <dt>Ingresos</dt>
+                <dd className="tnum is-in">{formatCurrency(g.income)}</dd>
+              </div>
+              <div>
+                <dt>Gastos</dt>
+                <dd className="tnum">{formatCurrency(g.expenses)}</dd>
+              </div>
+              <div>
+                <dt>Neto</dt>
+                <dd className={`tnum ${g.net >= 0 ? 'is-in' : ''}`}>
+                  {formatSignedCurrency(g.net)}
+                </dd>
+              </div>
+            </dl>
+          </header>
+          <ul className="txrow-list">
+            {g.items.map((t) => {
+              const cat = cats[t.categoryId]
+              const isIncome = t.amount > 0
+              return (
+                <li className="txrow" key={t.id}>
+                  <time className="txrow__date" dateTime={t.date}>
+                    {formatDate(t.date)}
+                  </time>
+                  <span
+                    className="txrow__icon"
+                    style={
+                      { '--c': isIncome ? '#10b981' : (cat?.color ?? '#94a3b8') } as Record<
+                        string,
+                        string
+                      >
+                    }
+                  >
+                    <Icon name={cat?.icon ?? 'package'} size={18} />
+                  </span>
+                  <div className="txrow__info">
+                    <span className="txrow__desc">{t.description}</span>
+                  </div>
+                  <span
+                    className="pill txrow__category"
+                    style={{ '--c': cat?.color ?? '#94a3b8' } as Record<string, string>}
+                  >
+                    {cat?.label ?? 'Sin categoría'}
+                  </span>
+                  <span className="txrow__account">
+                    {accumulatorById[t.accountId]?.name ?? 'Cuenta'}
+                  </span>
+                  <span className={`txrow__amount tnum ${isIncome ? 'is-in' : ''}`}>
+                    {formatSignedCurrency(t.amount)}
+                  </span>
+                  <div className="txrow__actions">
+                    <button
+                      aria-label="Editar"
+                      className="icon-btn"
+                      onClick={() => onEdit(t)}
+                      type="button"
                     >
-                      <Icon name={cat?.icon ?? 'package'} size={18} />
-                    </span>
-                    <div className="txrow__info">
-                      <span className="txrow__desc">{t.description}</span>
-                    </div>
-                    <span className="pill txrow__category" style={{ '--c': cat?.color ?? '#94a3b8' } as Record<string, string>}>
-                      {cat?.label ?? 'Sin categoría'}
-                    </span>
-                    <span className="txrow__account">
-                      {accumulatorById[t.accountId]?.name ?? 'Cuenta'}
-                    </span>
-                    <span className={`txrow__amount tnum ${isIncome ? 'is-in' : ''}`}>
-                      {formatSignedCurrency(t.amount)}
-                    </span>
-                    <div className="txrow__actions">
-                      <button
-                        aria-label="Editar"
-                        className="icon-btn"
-                        onClick={() => onEdit(t)}
-                        type="button"
-                      >
-                        <Icon name="edit" size={16} />
-                      </button>
-                      <button
-                        aria-label="Borrar"
-                        className="icon-btn icon-btn--danger"
-                        onClick={() => onDelete(t)}
-                        type="button"
-                      >
-                        <Icon name="delete" size={16} />
-                      </button>
-                    </div>
-                  </li>
-                )
-              })}
-            </ul>
-          </section>
-        )
-      )}
+                      <Icon name="edit" size={16} />
+                    </button>
+                    <button
+                      aria-label="Borrar"
+                      className="icon-btn icon-btn--danger"
+                      onClick={() => onDelete(t)}
+                      type="button"
+                    >
+                      <Icon name="delete" size={16} />
+                    </button>
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      ))}
       <footer className="tx-load">
         <span className="tx-load__count">
           Mostrando {visibleCount} de {filteredCount} movimientos
         </span>
         {visibleCount < filteredCount && (
-          <button
-            className="btn-ghost"
-            onClick={onLoadMore}
-            type="button"
-          >
+          <button className="btn-ghost" onClick={onLoadMore} type="button">
             Cargar más
           </button>
         )}
@@ -351,8 +400,11 @@ function TransactionGroups(properties: TransactionGroupsProperties) {
 }
 
 function EditTransactionModal({
-  transaction, accounts, categories,
-  onClose, onSave,
+  transaction,
+  accounts,
+  categories,
+  onClose,
+  onSave,
 }: {
   transaction: Transaction
   accounts: Account[]
@@ -377,7 +429,9 @@ function EditTransactionModal({
 }
 
 function DeleteTransactionModal({
-  transaction, onClose, onConfirm,
+  transaction,
+  onClose,
+  onConfirm,
 }: {
   transaction: Transaction
   onClose: () => void
@@ -397,28 +451,45 @@ function DeleteTransactionModal({
 }
 
 function TransactionsPage() {
-  const { categories, accounts, getTransactions, getAvailableMonths, updateTransaction, deleteTransaction } =
-    useFinance()
+  const {
+    categories,
+    accounts,
+    getTransactions,
+    getAvailableMonths,
+    updateTransaction,
+    deleteTransaction,
+  } = useFinance()
 
   const cats = categoryMap(categories)
   const accumulatorById = Object.fromEntries(accounts.map((a) => [a.id, a]))
   const months = getAvailableMonths()
 
   const {
-    month, setMonth, categoryId, setCategoryId,
-    accountId, setAccountId, type, setType,
-    search, setSearch, sort, setSort,
-    filterType, visibleCount, setVisibleCount,
-    setFilter, resetFilters, hasFilters,
+    month,
+    setMonth,
+    categoryId,
+    setCategoryId,
+    accountId,
+    setAccountId,
+    type,
+    setType,
+    search,
+    setSearch,
+    sort,
+    setSort,
+    filterType,
+    visibleCount,
+    setVisibleCount,
+    setFilter,
+    resetFilters,
+    hasFilters,
   } = useTransactionFilters()
 
   const allTransactions = getTransactions({ sort: 'date-desc' })
   const filtered = getTransactions({ month, categoryId, accountId, type: filterType, search, sort })
 
   const income = filtered.filter((t) => t.amount > 0).reduce((s, t) => s + t.amount, 0)
-  const expenses = filtered
-    .filter((t) => t.amount < 0)
-    .reduce((s, t) => s + Math.abs(t.amount), 0)
+  const expenses = filtered.filter((t) => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0)
   const net = income - expenses
 
   const visibleTransactions = filtered.slice(0, visibleCount)

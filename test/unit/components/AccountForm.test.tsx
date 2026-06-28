@@ -23,11 +23,13 @@ describe('AccountForm', () => {
     fireEvent.change(screen.getByLabelText('Tipo'), { target: { value: 'cash' } })
     fireEvent.click(screen.getByRole('button', { name: /Guardar cambios/i }))
 
-    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
-      id: 'savings',
-      type: 'cash',
-      interestRate: undefined,
-    }))
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'savings',
+        type: 'cash',
+        interestRate: undefined,
+      }),
+    )
   })
 
   it('shows validation error when name is empty', () => {
@@ -47,17 +49,19 @@ describe('AccountForm', () => {
   it('submits a new account', () => {
     const onSubmit = vi.fn()
     render(<AccountForm onCancel={() => {}} onSubmit={onSubmit} />)
-    fireEvent.change(screen.getByPlaceholderText('Ej. Cuenta nómina'), { target: { value: 'Nómina' } })
+    fireEvent.change(screen.getByPlaceholderText('Ej. Cuenta nómina'), {
+      target: { value: 'Nómina' },
+    })
     fireEvent.click(screen.getByRole('button', { name: /Crear cuenta/i }))
-    expect(onSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'Nómina', type: 'cash' }),
-    )
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ name: 'Nómina', type: 'cash' }))
   })
 
   it('submits without id when creating', () => {
     const onSubmit = vi.fn()
     render(<AccountForm onCancel={() => {}} onSubmit={onSubmit} />)
-    fireEvent.change(screen.getByPlaceholderText('Ej. Cuenta nómina'), { target: { value: 'Nueva' } })
+    fireEvent.change(screen.getByPlaceholderText('Ej. Cuenta nómina'), {
+      target: { value: 'Nueva' },
+    })
     fireEvent.click(screen.getByRole('button', { name: /Crear cuenta/i }))
     expect(onSubmit).toHaveBeenCalledWith(expect.not.objectContaining({ id: expect.any(String) }))
   })

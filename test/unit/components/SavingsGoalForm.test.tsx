@@ -22,12 +22,7 @@ const goals: SavingsGoal[] = []
 describe('SavingsGoalForm', () => {
   it('pre-fills the saved amount from the linked account balance', async () => {
     render(
-      <SavingsGoalForm
-        accounts={accounts}
-        goals={goals}
-        onCancel={() => {}}
-        onSubmit={() => {}}
-      />,
+      <SavingsGoalForm accounts={accounts} goals={goals} onCancel={() => {}} onSubmit={() => {}} />,
     )
 
     fireEvent.change(screen.getByLabelText('Objetivo'), { target: { value: '15000' } })
@@ -40,12 +35,7 @@ describe('SavingsGoalForm', () => {
 
   it('caps the pre-filled saved amount at the target amount', async () => {
     render(
-      <SavingsGoalForm
-        accounts={accounts}
-        goals={goals}
-        onCancel={() => {}}
-        onSubmit={() => {}}
-      />,
+      <SavingsGoalForm accounts={accounts} goals={goals} onCancel={() => {}} onSubmit={() => {}} />,
     )
 
     fireEvent.change(screen.getByLabelText('Objetivo'), { target: { value: '5000' } })
@@ -59,12 +49,7 @@ describe('SavingsGoalForm', () => {
   it('submits the selected target date', () => {
     const onSubmit = vi.fn()
     render(
-      <SavingsGoalForm
-        accounts={accounts}
-        goals={goals}
-        onCancel={() => {}}
-        onSubmit={onSubmit}
-      />,
+      <SavingsGoalForm accounts={accounts} goals={goals} onCancel={() => {}} onSubmit={onSubmit} />,
     )
 
     fireEvent.change(screen.getByLabelText('Nombre'), { target: { value: 'Viaje' } })
@@ -74,21 +59,18 @@ describe('SavingsGoalForm', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: 'Crear objetivo' }))
 
-    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
-      name: 'Viaje',
-      targetDate: '2026-09-01',
-    }))
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Viaje',
+        targetDate: '2026-09-01',
+      }),
+    )
   })
 
   it('submits the auto-filled saved amount', async () => {
     const onSubmit = vi.fn()
     render(
-      <SavingsGoalForm
-        accounts={accounts}
-        goals={goals}
-        onCancel={() => {}}
-        onSubmit={onSubmit}
-      />,
+      <SavingsGoalForm accounts={accounts} goals={goals} onCancel={() => {}} onSubmit={onSubmit} />,
     )
 
     fireEvent.change(screen.getByLabelText('Nombre'), { target: { value: 'Entrada' } })
@@ -101,11 +83,13 @@ describe('SavingsGoalForm', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Crear objetivo' }))
 
-    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
-      name: 'Entrada',
-      targetAmount: 15_000,
-      savedAmount: 12_500,
-      accountId: 'savings',
-    }))
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Entrada',
+        targetAmount: 15_000,
+        savedAmount: 12_500,
+        accountId: 'savings',
+      }),
+    )
   })
 })

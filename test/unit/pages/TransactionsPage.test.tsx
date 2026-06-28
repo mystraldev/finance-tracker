@@ -32,9 +32,30 @@ const data: FinanceData = {
     { id: 'food', label: 'Alimentación', color: '#10b981', icon: 'cart' },
   ],
   transactions: [
-    { id: 't1', date: '2026-06-01', amount: 2000, description: 'Nómina', accountId: 'checking', categoryId: 'income' },
-    { id: 't2', date: '2026-06-05', amount: -600, description: 'Alquiler', accountId: 'checking', categoryId: 'home' },
-    { id: 't3', date: '2026-06-12', amount: -150, description: 'Compra semanal', accountId: 'savings', categoryId: 'food' },
+    {
+      id: 't1',
+      date: '2026-06-01',
+      amount: 2000,
+      description: 'Nómina',
+      accountId: 'checking',
+      categoryId: 'income',
+    },
+    {
+      id: 't2',
+      date: '2026-06-05',
+      amount: -600,
+      description: 'Alquiler',
+      accountId: 'checking',
+      categoryId: 'home',
+    },
+    {
+      id: 't3',
+      date: '2026-06-12',
+      amount: -150,
+      description: 'Compra semanal',
+      accountId: 'savings',
+      categoryId: 'food',
+    },
   ],
   savingsGoals: [],
 }

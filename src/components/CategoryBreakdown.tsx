@@ -16,7 +16,12 @@ type CategoryBreakdownProperties = {
 function CategoryBreakdown({ categories }: CategoryBreakdownProperties) {
   const total = categories.reduce((sum, c) => sum + c.amount, 0)
 
-  const arcs: (CategoryBreakdownItem & { fraction: number; dash: number; gap: number; rotation: number })[] = []
+  const arcs: (CategoryBreakdownItem & {
+    fraction: number
+    dash: number
+    gap: number
+    rotation: number
+  })[] = []
   let offset = 0
   for (const c of categories) {
     const fraction = fractionOf(c.amount, total)
@@ -75,7 +80,10 @@ function CategoryBreakdown({ categories }: CategoryBreakdownProperties) {
         <ul className="breakdown__list">
           {arcs.map((arc) => (
             <li className="breakdown__item" key={arc.id}>
-              <span className="breakdown__icon" style={{ '--c': arc.color } as Record<string, string>}>
+              <span
+                className="breakdown__icon"
+                style={{ '--c': arc.color } as Record<string, string>}
+              >
                 <Icon name={arc.icon} size={17} />
               </span>
               <span className="breakdown__label">{arc.label}</span>

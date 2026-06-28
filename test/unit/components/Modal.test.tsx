@@ -17,21 +17,33 @@ describe('Modal', () => {
 
   it('calls onClose when clicking the close button', () => {
     const onClose = vi.fn()
-    render(<Modal onClose={onClose} title="X"><span /></Modal>)
+    render(
+      <Modal onClose={onClose} title="X">
+        <span />
+      </Modal>,
+    )
     fireEvent.click(screen.getByLabelText('Cerrar'))
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
   it('calls onClose when pressing Escape', () => {
     const onClose = vi.fn()
-    render(<Modal onClose={onClose} title="X"><span /></Modal>)
+    render(
+      <Modal onClose={onClose} title="X">
+        <span />
+      </Modal>,
+    )
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
   it('closes on overlay click but not on panel click', () => {
     const onClose = vi.fn()
-    render(<Modal onClose={onClose} title="X"><span>panel</span></Modal>)
+    render(
+      <Modal onClose={onClose} title="X">
+        <span>panel</span>
+      </Modal>,
+    )
     const dialog = screen.getByRole('dialog')
     fireEvent.mouseDown(dialog) // panel stops propagation
     expect(onClose).not.toHaveBeenCalled()

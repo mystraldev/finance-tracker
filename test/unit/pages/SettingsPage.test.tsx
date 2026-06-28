@@ -1,4 +1,4 @@
-import type {ThemeContextValue} from '../../../src/store/themeContext';
+import type { ThemeContextValue } from '../../../src/store/themeContext'
 import type { FinanceContextValue, FinanceData } from '../../../src/types/finance'
 
 import { fireEvent, render, screen } from '@testing-library/react'
@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { createFinanceBackup } from '../../../src/data/financeRepo'
 import SettingsPage from '../../../src/pages/SettingsPage'
 import { FinanceContext } from '../../../src/store/financeContext'
-import { ThemeContext  } from '../../../src/store/themeContext'
+import { ThemeContext } from '../../../src/store/themeContext'
 
 const data: FinanceData = {
   accounts: [

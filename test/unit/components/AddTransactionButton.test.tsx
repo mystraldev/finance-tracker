@@ -8,7 +8,16 @@ import { FinanceContext } from '../../../src/store/financeContext'
 
 function createValue(): FinanceContextValue {
   return {
-    accounts: [{ id: 'cash', name: 'Cash', type: 'cash', icon: 'wallet', accent: 'indigo', openingBalance: 0 }],
+    accounts: [
+      {
+        id: 'cash',
+        name: 'Cash',
+        type: 'cash',
+        icon: 'wallet',
+        accent: 'indigo',
+        openingBalance: 0,
+      },
+    ],
     categories: [
       { id: 'income', label: 'Income', color: '#22c55e', icon: 'salary' },
       { id: 'food', label: 'Food', color: '#10b981', icon: 'cart' },
@@ -76,7 +85,9 @@ describe('AddTransactionButton', () => {
     fireEvent.click(screen.getByRole('button', { name: /Añadir movimiento/i }))
 
     fireEvent.change(screen.getByPlaceholderText('0,00'), { target: { value: '100' } })
-    fireEvent.change(screen.getByPlaceholderText('Ej. Compra semanal'), { target: { value: 'Test' } })
+    fireEvent.change(screen.getByPlaceholderText('Ej. Compra semanal'), {
+      target: { value: 'Test' },
+    })
     const submitButton = screen.getByRole('dialog').querySelector('button[type="submit"]')!
     fireEvent.click(submitButton)
 

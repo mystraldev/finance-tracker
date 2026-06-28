@@ -43,13 +43,62 @@ const data: FinanceData = {
     { id: 'food', label: 'Food', color: '#10b981', icon: 'cart' },
   ],
   transactions: [
-    { id: 't1', date: '2026-05-01', amount: 2000, description: 'Salary', accountId: 'checking', categoryId: 'income' },
-    { id: 't2', date: '2026-05-10', amount: -500, description: 'Rent', accountId: 'checking', categoryId: 'home' },
-    { id: 't3', date: '2026-06-01', amount: 2000, description: 'Salary', accountId: 'checking', categoryId: 'income' },
-    { id: 't4', date: '2026-06-05', amount: -600, description: 'Rent', accountId: 'checking', categoryId: 'home' },
-    { id: 't5', date: '2026-06-12', amount: -150, description: 'Groceries', accountId: 'checking', categoryId: 'food' },
-    { id: 't6', date: '2026-06-20', amount: -25, description: 'Snacks', accountId: 'savings', categoryId: 'food' },
-    { id: 't7', date: '2026-06-25', amount: -40, description: 'Café', accountId: 'checking', categoryId: 'food' },
+    {
+      id: 't1',
+      date: '2026-05-01',
+      amount: 2000,
+      description: 'Salary',
+      accountId: 'checking',
+      categoryId: 'income',
+    },
+    {
+      id: 't2',
+      date: '2026-05-10',
+      amount: -500,
+      description: 'Rent',
+      accountId: 'checking',
+      categoryId: 'home',
+    },
+    {
+      id: 't3',
+      date: '2026-06-01',
+      amount: 2000,
+      description: 'Salary',
+      accountId: 'checking',
+      categoryId: 'income',
+    },
+    {
+      id: 't4',
+      date: '2026-06-05',
+      amount: -600,
+      description: 'Rent',
+      accountId: 'checking',
+      categoryId: 'home',
+    },
+    {
+      id: 't5',
+      date: '2026-06-12',
+      amount: -150,
+      description: 'Groceries',
+      accountId: 'checking',
+      categoryId: 'food',
+    },
+    {
+      id: 't6',
+      date: '2026-06-20',
+      amount: -25,
+      description: 'Snacks',
+      accountId: 'savings',
+      categoryId: 'food',
+    },
+    {
+      id: 't7',
+      date: '2026-06-25',
+      amount: -40,
+      description: 'Café',
+      accountId: 'checking',
+      categoryId: 'food',
+    },
   ],
   savingsGoals: [
     {
@@ -148,8 +197,12 @@ describe('financeRepo validation', () => {
       savingsGoals: [],
     })
     expect(parseFinanceData({ ...data, categories: undefined })).toBeUndefined()
-    expect(parseFinanceData({ ...data, transactions: [{ ...data.transactions[0], amount: '10' }] })).toBeUndefined()
-    expect(parseFinanceData({ ...data, savingsGoals: [{ ...data.savingsGoals[0], savedAmount: '10' }] })).toBeUndefined()
+    expect(
+      parseFinanceData({ ...data, transactions: [{ ...data.transactions[0], amount: '10' }] }),
+    ).toBeUndefined()
+    expect(
+      parseFinanceData({ ...data, savingsGoals: [{ ...data.savingsGoals[0], savedAmount: '10' }] }),
+    ).toBeUndefined()
   })
 
   it('clones finance data without sharing array item references', () => {

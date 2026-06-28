@@ -29,7 +29,7 @@ function BudgetProgress({
           className={`budget-bar__fill budget-bar__fill--${budget.status}`}
           style={{
             width: `${Math.min(budget.pct, 1) * 100}%`,
-            ...((budget.status === 'ok') && { background: budget.color }),
+            ...(budget.status === 'ok' && { background: budget.color }),
           }}
         />
       </div>
@@ -39,7 +39,9 @@ function BudgetProgress({
           {formatCurrency(budget.spent)} / {formatCurrency(budget.budget)}
         </span>
         <span className="budget-meter__status">
-          {showPercent && <span className="budget-meter__pct tnum">{formatPercent(budget.pct)}</span>}
+          {showPercent && (
+            <span className="budget-meter__pct tnum">{formatPercent(budget.pct)}</span>
+          )}
           {showBadge && (
             <span className={`budget-badge budget-badge--${budget.status}`}>
               {budgetStatusLabel[budget.status]}

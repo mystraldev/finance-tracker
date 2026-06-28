@@ -1,7 +1,7 @@
 import type { Account } from '../types/finance'
-import type {FormEvent} from 'react';
+import type { FormEvent } from 'react'
 
-import {  useState } from 'react'
+import { useState } from 'react'
 
 import { parseDecimal } from '../utils/number'
 import Icon from './Icon'
@@ -22,7 +22,7 @@ const ACCOUNT_ICONS = ['wallet', 'piggy', 'trending', 'card', 'accounts'] as con
 
 type AccountFormProperties = {
   initial?: Account
-  onSubmit: (accumulator: Omit<Account, 'id'> | Partial<Account> & { id: string }) => void
+  onSubmit: (accumulator: Omit<Account, 'id'> | (Partial<Account> & { id: string })) => void
   onCancel: () => void
 }
 
@@ -30,7 +30,15 @@ function getAccentColor(accent: string): string {
   return ACCENTS.find((a) => a.value === accent)?.color ?? '#0a6ce0'
 }
 
-function AccountPreview({ accentColor, icon, name }: { accentColor: string; icon: string; name: string }) {
+function AccountPreview({
+  accentColor,
+  icon,
+  name,
+}: {
+  accentColor: string
+  icon: string
+  name: string
+}) {
   return (
     <div className="cat-preview">
       <span
@@ -95,7 +103,13 @@ function BalanceFields({
   )
 }
 
-function ColorSwatches({ accent, onAccentChange }: { accent: string; onAccentChange: (value: string) => void }) {
+function ColorSwatches({
+  accent,
+  onAccentChange,
+}: {
+  accent: string
+  onAccentChange: (value: string) => void
+}) {
   return (
     <div className="field">
       <span className="field__label">Color</span>
@@ -117,7 +131,15 @@ function ColorSwatches({ accent, onAccentChange }: { accent: string; onAccentCha
   )
 }
 
-function IconPicker({ icon, onIconChange, accentColor }: { icon: string; onIconChange: (value: string) => void; accentColor: string }) {
+function IconPicker({
+  icon,
+  onIconChange,
+  accentColor,
+}: {
+  icon: string
+  onIconChange: (value: string) => void
+  accentColor: string
+}) {
   return (
     <div className="field">
       <span className="field__label">Icono</span>
@@ -128,11 +150,7 @@ function IconPicker({ icon, onIconChange, accentColor }: { icon: string; onIconC
             className={`icon-pick ${name === icon ? 'is-active' : ''}`}
             key={name}
             onClick={() => onIconChange(name)}
-            style={
-              name === icon
-                ? { color: accentColor }
-                : undefined
-            }
+            style={name === icon ? { color: accentColor } : undefined}
             type="button"
           >
             <Icon name={name} size={18} />
@@ -164,7 +182,7 @@ function AccountForm({ initial, onSubmit, onCancel }: AccountFormProperties) {
     if (!Number.isFinite(opening)) return setError('El saldo inicial no es válido.')
 
     const rate = type === 'savings' ? parseDecimal(interestRate || '0') : NaN
-    const payload: Omit<Account, 'id'> | Partial<Account> & { id: string } = {
+    const payload: Omit<Account, 'id'> | (Partial<Account> & { id: string }) = {
       ...(initial?.id && { id: initial.id }),
       name: name.trim(),
       type,

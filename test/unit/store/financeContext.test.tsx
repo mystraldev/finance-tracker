@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { FinanceContext, useFinance  } from '../../../src/store/financeContext'
+import { FinanceContext, useFinance } from '../../../src/store/financeContext'
 
 const value = {
   accounts: [],

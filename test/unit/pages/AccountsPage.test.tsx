@@ -82,9 +82,11 @@ describe('AccountsPage', () => {
 
     expect(screen.getByText('Objetivos de ahorro')).toBeInTheDocument()
     expect(screen.getByText('Fondo de emergencia')).toBeInTheDocument()
-    expect(screen.getByRole('meter', {
-      name: /Fondo de emergencia: 2400,00\s€ de 6000,00\s€/,
-    })).toBeInTheDocument()
+    expect(
+      screen.getByRole('meter', {
+        name: /Fondo de emergencia: 2400,00\s€ de 6000,00\s€/,
+      }),
+    ).toBeInTheDocument()
   })
 
   it('creates a linked savings goal', () => {
@@ -97,12 +99,14 @@ describe('AccountsPage', () => {
     fireEvent.change(screen.getByLabelText('Cuenta asociada'), { target: { value: 'checking' } })
     fireEvent.click(screen.getByRole('button', { name: 'Crear objetivo' }))
 
-    expect(value.addSavingsGoal).toHaveBeenCalledWith(expect.objectContaining({
-      name: 'Viaje',
-      targetAmount: 3000,
-      savedAmount: 850,
-      accountId: 'checking',
-    }))
+    expect(value.addSavingsGoal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Viaje',
+        targetAmount: 3000,
+        savedAmount: 850,
+        accountId: 'checking',
+      }),
+    )
   })
 
   it('rejects a linked goal that exceeds the account available balance', () => {
@@ -115,7 +119,9 @@ describe('AccountsPage', () => {
     fireEvent.change(screen.getByLabelText('Cuenta asociada'), { target: { value: 'checking' } })
     fireEvent.click(screen.getByRole('button', { name: 'Crear objetivo' }))
 
-    expect(screen.getByText(/Esta cuenta solo tiene 1000,00\s€ disponible para reservar\./)).toBeInTheDocument()
+    expect(
+      screen.getByText(/Esta cuenta solo tiene 1000,00\s€ disponible para reservar\./),
+    ).toBeInTheDocument()
     expect(value.addSavingsGoal).not.toHaveBeenCalled()
   })
 
@@ -139,7 +145,14 @@ describe('AccountsPage', () => {
       ...data,
       savingsGoals: [],
       transactions: [
-        { id: 'tx-1', date: '2026-06-01', amount: -50, description: 'Gasto', accountId: 'checking', categoryId: 'income' },
+        {
+          id: 'tx-1',
+          date: '2026-06-01',
+          amount: -50,
+          description: 'Gasto',
+          accountId: 'checking',
+          categoryId: 'income',
+        },
       ],
     }
     renderPage(createValue(dataWithTxs))
@@ -200,7 +213,14 @@ describe('AccountsPage', () => {
   })
 
   it('shows empty state when there are no savings goals', () => {
-    renderPage(createValue({ accounts: data.accounts, categories: data.categories, transactions: [], savingsGoals: [] }))
+    renderPage(
+      createValue({
+        accounts: data.accounts,
+        categories: data.categories,
+        transactions: [],
+        savingsGoals: [],
+      }),
+    )
     expect(screen.getByText('Todavía no hay objetivos.')).toBeInTheDocument()
   })
 })

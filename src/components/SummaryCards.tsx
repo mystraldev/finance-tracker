@@ -39,9 +39,7 @@ function SummaryCards({ accounts }: SummaryCardsProperties) {
             </header>
 
             <h3 className="summary-card__name">{account.name}</h3>
-            <p className="summary-card__balance tnum">
-              {formatCurrency(account.balance)}
-            </p>
+            <p className="summary-card__balance tnum">{formatCurrency(account.balance)}</p>
 
             <footer className="summary-card__footer">
               <span className={`delta ${isPositive ? 'delta--up' : 'delta--down'}`}>

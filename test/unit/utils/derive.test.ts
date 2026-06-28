@@ -25,8 +25,23 @@ import {
 } from '../../../src/utils/derive'
 
 const accounts: Account[] = [
-  { id: 'checking', name: 'Cuenta corriente', type: 'cash', icon: 'wallet', accent: 'indigo', openingBalance: 1000 },
-  { id: 'savings', name: 'Ahorro', type: 'savings', icon: 'piggy', accent: 'emerald', openingBalance: 5000, interestRate: 0.02 },
+  {
+    id: 'checking',
+    name: 'Cuenta corriente',
+    type: 'cash',
+    icon: 'wallet',
+    accent: 'indigo',
+    openingBalance: 1000,
+  },
+  {
+    id: 'savings',
+    name: 'Ahorro',
+    type: 'savings',
+    icon: 'piggy',
+    accent: 'emerald',
+    openingBalance: 5000,
+    interestRate: 0.02,
+  },
 ]
 
 const categories: Category[] = [
@@ -36,12 +51,54 @@ const categories: Category[] = [
 ]
 
 const transactions: Transaction[] = [
-  { id: 't1', date: '2026-05-01', amount: 2000, description: 'Nómina', accountId: 'checking', categoryId: 'income' },
-  { id: 't2', date: '2026-05-10', amount: -500, description: 'Alquiler', accountId: 'checking', categoryId: 'home' },
-  { id: 't3', date: '2026-06-01', amount: 2000, description: 'Nómina', accountId: 'checking', categoryId: 'income' },
-  { id: 't4', date: '2026-06-05', amount: -600, description: 'Alquiler', accountId: 'checking', categoryId: 'home' },
-  { id: 't5', date: '2026-06-12', amount: -150, description: 'Compra', accountId: 'checking', categoryId: 'food' },
-  { id: 't6', date: '2026-06-20', amount: -150, description: 'Compra 2', accountId: 'checking', categoryId: 'food' },
+  {
+    id: 't1',
+    date: '2026-05-01',
+    amount: 2000,
+    description: 'Nómina',
+    accountId: 'checking',
+    categoryId: 'income',
+  },
+  {
+    id: 't2',
+    date: '2026-05-10',
+    amount: -500,
+    description: 'Alquiler',
+    accountId: 'checking',
+    categoryId: 'home',
+  },
+  {
+    id: 't3',
+    date: '2026-06-01',
+    amount: 2000,
+    description: 'Nómina',
+    accountId: 'checking',
+    categoryId: 'income',
+  },
+  {
+    id: 't4',
+    date: '2026-06-05',
+    amount: -600,
+    description: 'Alquiler',
+    accountId: 'checking',
+    categoryId: 'home',
+  },
+  {
+    id: 't5',
+    date: '2026-06-12',
+    amount: -150,
+    description: 'Compra',
+    accountId: 'checking',
+    categoryId: 'food',
+  },
+  {
+    id: 't6',
+    date: '2026-06-20',
+    amount: -150,
+    description: 'Compra 2',
+    accountId: 'checking',
+    categoryId: 'food',
+  },
 ]
 
 const data: FinanceData = { accounts, categories, transactions, savingsGoals: [] }
@@ -86,8 +143,16 @@ describe('transaction selectors', () => {
   })
 
   it('incomeExpenses sums income, expenses and savings', () => {
-    expect(incomeExpenses(transactions, '2026-06')).toEqual({ income: 2000, expenses: 900, saved: 1100 })
-    expect(incomeExpenses(transactions, '2026-05')).toEqual({ income: 2000, expenses: 500, saved: 1500 })
+    expect(incomeExpenses(transactions, '2026-06')).toEqual({
+      income: 2000,
+      expenses: 900,
+      saved: 1100,
+    })
+    expect(incomeExpenses(transactions, '2026-05')).toEqual({
+      income: 2000,
+      expenses: 500,
+      saved: 1500,
+    })
     expect(incomeExpenses(transactions, '2026-01')).toEqual({ income: 0, expenses: 0, saved: 0 })
   })
 })
@@ -113,14 +178,35 @@ describe('balances and net worth', () => {
   it('monthlyGrowthRate is a fraction and is 0 when the previous balance is 0', () => {
     expect(monthlyGrowthRate(accounts[0], transactions, '2026-06')).toBeCloseTo(0.44, 5)
     expect(monthlyGrowthRate(accounts[1], transactions, '2026-06')).toBe(0)
-    const empty: Account = { id: 'new', name: 'Nueva', type: 'cash', icon: 'wallet', accent: 'indigo', openingBalance: 0 }
+    const empty: Account = {
+      id: 'new',
+      name: 'Nueva',
+      type: 'cash',
+      icon: 'wallet',
+      accent: 'indigo',
+      openingBalance: 0,
+    }
     expect(monthlyGrowthRate(empty, transactions, '2026-06')).toBe(0)
   })
 
   it('monthlyGrowthRate keeps the sign of the change when the previous balance is negative', () => {
-    const overdrawn: Account = { id: 'over', name: 'Descubierto', type: 'cash', icon: 'wallet', accent: 'indigo', openingBalance: -1000 }
+    const overdrawn: Account = {
+      id: 'over',
+      name: 'Descubierto',
+      type: 'cash',
+      icon: 'wallet',
+      accent: 'indigo',
+      openingBalance: -1000,
+    }
     const recovery = [
-      { id: 'r1', date: '2026-06-10', amount: 500, description: 'Ingreso', accountId: 'over', categoryId: 'income' },
+      {
+        id: 'r1',
+        date: '2026-06-10',
+        amount: 500,
+        description: 'Ingreso',
+        accountId: 'over',
+        categoryId: 'income',
+      },
     ]
     // Balance goes from -1000 to -500: an improvement must be positive.
     expect(monthlyGrowthRate(overdrawn, recovery, '2026-06')).toBeCloseTo(0.5, 5)
@@ -170,7 +256,16 @@ describe('recentTransactions', () => {
       accounts,
       categories,
       savingsGoals: [],
-      transactions: [{ id: 'x', date: '2026-06-30', amount: -10, description: 'Misterio', accountId: 'checking', categoryId: 'ghost' }],
+      transactions: [
+        {
+          id: 'x',
+          date: '2026-06-30',
+          amount: -10,
+          description: 'Misterio',
+          accountId: 'checking',
+          categoryId: 'ghost',
+        },
+      ],
     }
     expect(recentTransactions(orphan, 1)[0]).toMatchObject({
       category: 'Sin categoría',

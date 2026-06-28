@@ -205,10 +205,12 @@ describe('FinanceProvider store', () => {
     })
 
     const added = result.current.savingsGoals.at(-1)
-    expect(added).toEqual(expect.objectContaining({
-      name: 'Emergency fund',
-      savedAmount: 100,
-    }))
+    expect(added).toEqual(
+      expect.objectContaining({
+        name: 'Emergency fund',
+        savedAmount: 100,
+      }),
+    )
 
     act(() => {
       result.current.updateSavingsGoal({ id: added?.id ?? '', savedAmount: 250 })

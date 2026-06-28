@@ -87,9 +87,7 @@ export default defineConfig([
       'sonarjs/cognitive-complexity': ['error', 15],
       'max-depth': ['warn', { max: 4 }],
       'max-lines': ['warn', { max: 300 }],
-      'max-lines-per-function': ['warn', { max: 120 }],
-
-
+      'max-lines-per-function': ['warn', { max: 130 }],
     },
   },
 
@@ -126,6 +124,7 @@ export default defineConfig([
   {
     files: [
       'src/components/SavingsGoalForm.tsx',
+      'src/pages/AccountsPage.tsx',
       'src/pages/TransactionsPage.tsx',
     ],
     rules: {

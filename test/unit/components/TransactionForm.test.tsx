@@ -108,7 +108,9 @@ describe('TransactionForm', () => {
 
     fireEvent.click(screen.getByText('Ingreso'))
     fireEvent.change(screen.getByPlaceholderText('0,00'), { target: { value: '2500' } })
-    fireEvent.change(screen.getByPlaceholderText('Ej. Compra semanal'), { target: { value: 'Nómina' } })
+    fireEvent.change(screen.getByPlaceholderText('Ej. Compra semanal'), {
+      target: { value: 'Nómina' },
+    })
     fireEvent.click(screen.getByRole('button', { name: /Añadir movimiento/i }))
 
     expect(onSubmit).toHaveBeenCalledWith(
@@ -126,7 +128,9 @@ describe('TransactionForm', () => {
       />,
     )
     fireEvent.change(screen.getByPlaceholderText('0,00'), { target: { value: '50' } })
-    fireEvent.change(screen.getByPlaceholderText('Ej. Compra semanal'), { target: { value: 'Test' } })
+    fireEvent.change(screen.getByPlaceholderText('Ej. Compra semanal'), {
+      target: { value: 'Test' },
+    })
     fireEvent.click(screen.getByRole('button', { name: /Añadir movimiento/i }))
     expect(screen.getByText('Selecciona una cuenta.')).toBeInTheDocument()
   })

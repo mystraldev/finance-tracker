@@ -1,7 +1,16 @@
-import type { Account, Category, FinanceAction, FinanceData, FinanceState, SavingsGoal, Transaction, TransactionQuery } from '../types/finance'
-import type {ReactNode} from 'react';
+import type {
+  Account,
+  Category,
+  FinanceAction,
+  FinanceData,
+  FinanceState,
+  SavingsGoal,
+  Transaction,
+  TransactionQuery,
+} from '../types/finance'
+import type { ReactNode } from 'react'
 
-import {  useEffect, useMemo, useReducer } from 'react'
+import { useEffect, useMemo, useReducer } from 'react'
 
 import { financeRepo } from '../data/financeRepo'
 import { currentMonth } from '../utils/derive'
@@ -30,7 +39,7 @@ function createState(data: FinanceData): FinanceState {
 function selectInitialMonth(data: FinanceData): string {
   const month = currentMonth()
   const months = financeRepo.availableMonths(data)
-  return months.includes(month) ? month : months[0] ?? month
+  return months.includes(month) ? month : (months[0] ?? month)
 }
 
 function reducer(state: FinanceState, action: FinanceAction): FinanceState {
@@ -147,8 +156,7 @@ export function FinanceProvider({ children }: FinanceProviderProperties) {
   const value = useMemo(
     () => ({
       ...state,
-      getTransactions: (query?: TransactionQuery) =>
-        financeRepo.listTransactions(state, query),
+      getTransactions: (query?: TransactionQuery) => financeRepo.listTransactions(state, query),
       getAvailableMonths: () => financeRepo.availableMonths(state),
       addTransaction: (tx: Omit<Transaction, 'id'>) =>
         dispatch({ type: 'ADD_TRANSACTION', payload: { id: uid(), ...tx } }),
@@ -169,8 +177,7 @@ export function FinanceProvider({ children }: FinanceProviderProperties) {
         dispatch({ type: 'ADD_SAVINGS_GOAL', payload: { id: uid(), ...goal } }),
       updateSavingsGoal: (goal: Partial<SavingsGoal> & { id: string }) =>
         dispatch({ type: 'UPDATE_SAVINGS_GOAL', payload: goal }),
-      deleteSavingsGoal: (id: string) =>
-        dispatch({ type: 'DELETE_SAVINGS_GOAL', payload: id }),
+      deleteSavingsGoal: (id: string) => dispatch({ type: 'DELETE_SAVINGS_GOAL', payload: id }),
       setMonth: (m: string) => dispatch({ type: 'SET_MONTH', payload: m }),
       importData: (data: FinanceData) => dispatch({ type: 'IMPORT_DATA', payload: data }),
       reset: () => dispatch({ type: 'RESET' }),

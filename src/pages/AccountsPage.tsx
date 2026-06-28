@@ -17,7 +17,12 @@ const TYPE_LABEL: Record<string, string> = {
   investment: 'Inversión',
 }
 
-function GoalCard({ goal, accountById, onEdit, onDelete }: {
+function GoalCard({
+  goal,
+  accountById,
+  onEdit,
+  onDelete,
+}: {
   goal: SavingsGoal
   accountById: Map<string, Account>
   onEdit: () => void
@@ -30,12 +35,32 @@ function GoalCard({ goal, accountById, onEdit, onDelete }: {
   return (
     <article className="goal-card">
       <div className="goal-card__top">
-        <span className="icon-tile" style={{ color: goal.color, background: `color-mix(in srgb, ${goal.color} 14%, transparent)` }}>
+        <span
+          className="icon-tile"
+          style={{
+            color: goal.color,
+            background: `color-mix(in srgb, ${goal.color} 14%, transparent)`,
+          }}
+        >
           <Icon name={goal.icon} size={20} />
         </span>
         <div className="cat-card__actions">
-          <button aria-label={`Editar objetivo ${goal.name}`} className="icon-btn" onClick={onEdit} type="button"><Icon name="edit" size={16} /></button>
-          <button aria-label={`Borrar objetivo ${goal.name}`} className="icon-btn icon-btn--danger" onClick={onDelete} type="button"><Icon name="delete" size={16} /></button>
+          <button
+            aria-label={`Editar objetivo ${goal.name}`}
+            className="icon-btn"
+            onClick={onEdit}
+            type="button"
+          >
+            <Icon name="edit" size={16} />
+          </button>
+          <button
+            aria-label={`Borrar objetivo ${goal.name}`}
+            className="icon-btn icon-btn--danger"
+            onClick={onDelete}
+            type="button"
+          >
+            <Icon name="delete" size={16} />
+          </button>
         </div>
       </div>
       <div className="goal-card__body">
@@ -51,11 +76,26 @@ function GoalCard({ goal, accountById, onEdit, onDelete }: {
         </span>
       </div>
       <div className="goal-progress">
-        <div aria-label={`${goal.name}: ${formatCurrency(goal.savedAmount)} de ${formatCurrency(goal.targetAmount)}`} aria-valuemax={goal.targetAmount} aria-valuemin={0} aria-valuenow={Math.min(goal.savedAmount, goal.targetAmount)} className="goal-progress__bar" role="meter">
-          <span className="goal-progress__fill" style={{ width: `${Math.min(pct, 1) * 100}%`, background: isComplete ? 'var(--grad-emerald)' : goal.color }} />
+        <div
+          aria-label={`${goal.name}: ${formatCurrency(goal.savedAmount)} de ${formatCurrency(goal.targetAmount)}`}
+          aria-valuemax={goal.targetAmount}
+          aria-valuemin={0}
+          aria-valuenow={Math.min(goal.savedAmount, goal.targetAmount)}
+          className="goal-progress__bar"
+          role="meter"
+        >
+          <span
+            className="goal-progress__fill"
+            style={{
+              width: `${Math.min(pct, 1) * 100}%`,
+              background: isComplete ? 'var(--grad-emerald)' : goal.color,
+            }}
+          />
         </div>
         <div className="goal-progress__meta">
-          <span className="tnum">{formatCurrency(goal.savedAmount)} / {formatCurrency(goal.targetAmount)}</span>
+          <span className="tnum">
+            {formatCurrency(goal.savedAmount)} / {formatCurrency(goal.targetAmount)}
+          </span>
           <span className="tnum">{formatPercent(pct)}</span>
         </div>
       </div>
@@ -63,7 +103,13 @@ function GoalCard({ goal, accountById, onEdit, onDelete }: {
   )
 }
 
-function SavingsGoalsSection({ goals, accountById, onEdit, onDelete, onAdd }: {
+function SavingsGoalsSection({
+  goals,
+  accountById,
+  onEdit,
+  onDelete,
+  onAdd,
+}: {
   goals: SavingsGoal[]
   accountById: Map<string, Account>
   onEdit: (g: SavingsGoal) => void
@@ -91,24 +137,40 @@ function SavingsGoalsSection({ goals, accountById, onEdit, onDelete, onAdd }: {
       {goals.length > 0 ? (
         <div className="goals-grid">
           {goals.map((goal) => (
-            <GoalCard accountById={accountById} goal={goal} key={goal.id} onDelete={() => onDelete(goal)} onEdit={() => onEdit(goal)} />
+            <GoalCard
+              accountById={accountById}
+              goal={goal}
+              key={goal.id}
+              onDelete={() => onDelete(goal)}
+              onEdit={() => onEdit(goal)}
+            />
           ))}
         </div>
       ) : (
         <div className="goal-empty">
-          <span className="budget-empty__icon"><Icon name="piggy" size={18} /></span>
+          <span className="budget-empty__icon">
+            <Icon name="piggy" size={18} />
+          </span>
           <div className="budget-empty__copy">
             <p>Todavía no hay objetivos.</p>
             <span>Empieza por una meta pequeña y reserva una cantidad inicial.</span>
           </div>
-          <button className="card__action" onClick={onAdd} type="button">Crear objetivo</button>
+          <button className="card__action" onClick={onAdd} type="button">
+            Crear objetivo
+          </button>
         </div>
       )}
     </section>
   )
 }
 
-function AccountsGrid({ accounts, usageCount, goalUsageCount, onEdit, onDelete }: {
+function AccountsGrid({
+  accounts,
+  usageCount,
+  goalUsageCount,
+  onEdit,
+  onDelete,
+}: {
   accounts: Account[]
   usageCount: (id: string) => number
   goalUsageCount: (id: string) => number
@@ -120,17 +182,35 @@ function AccountsGrid({ accounts, usageCount, goalUsageCount, onEdit, onDelete }
       {accounts.map((a) => (
         <article className={`account-card account-card--${a.accent}`} key={a.id}>
           <div className="account-card__top">
-            <span className={`icon-tile icon-tile--${a.accent}`}><Icon name={a.icon} size={20} /></span>
+            <span className={`icon-tile icon-tile--${a.accent}`}>
+              <Icon name={a.icon} size={20} />
+            </span>
             <div className="cat-card__actions">
-              <button aria-label="Editar" className="icon-btn" onClick={() => onEdit(a)} type="button"><Icon name="edit" size={16} /></button>
-              <button aria-label="Borrar" className="icon-btn icon-btn--danger" onClick={() => onDelete(a)} type="button"><Icon name="delete" size={16} /></button>
+              <button
+                aria-label="Editar"
+                className="icon-btn"
+                onClick={() => onEdit(a)}
+                type="button"
+              >
+                <Icon name="edit" size={16} />
+              </button>
+              <button
+                aria-label="Borrar"
+                className="icon-btn icon-btn--danger"
+                onClick={() => onDelete(a)}
+                type="button"
+              >
+                <Icon name="delete" size={16} />
+              </button>
             </div>
           </div>
           <span className="account-card__name">{a.name}</span>
           <span className="account-card__balance tnum">{formatCurrency(a.balance)}</span>
           <span className="account-card__meta">
             {TYPE_LABEL[a.type] ?? a.type}
-            {a.type === 'savings' && a.interestRate !== undefined && ` · ${formatPercent(a.interestRate)} TAE`}
+            {a.type === 'savings' &&
+              a.interestRate !== undefined &&
+              ` · ${formatPercent(a.interestRate)} TAE`}
             {` · ${usageCount(a.id)} mov.`}
             {goalUsageCount(a.id) > 0 && ` · ${goalUsageCount(a.id)} obj.`}
           </span>
@@ -140,7 +220,19 @@ function AccountsGrid({ accounts, usageCount, goalUsageCount, onEdit, onDelete }
   )
 }
 
-function AccountModals({ creating, editing, deleting, blocked, onCloseCreate, onCloseEdit, onCloseDelete, onCloseBlocked, addAccount, updateAccount, deleteAccount }: {
+function AccountModals({
+  creating,
+  editing,
+  deleting,
+  blocked,
+  onCloseCreate,
+  onCloseEdit,
+  onCloseDelete,
+  onCloseBlocked,
+  addAccount,
+  updateAccount,
+  deleteAccount,
+}: {
   creating: boolean
   editing: Account | undefined
   deleting: Account | undefined
@@ -157,16 +249,37 @@ function AccountModals({ creating, editing, deleting, blocked, onCloseCreate, on
     <>
       {creating && (
         <Modal onClose={onCloseCreate} title="Nueva cuenta">
-          <AccountForm onCancel={onCloseCreate} onSubmit={(a) => { addAccount(a as Omit<Account, 'id'>); onCloseCreate() }} />
+          <AccountForm
+            onCancel={onCloseCreate}
+            onSubmit={(a) => {
+              addAccount(a as Omit<Account, 'id'>)
+              onCloseCreate()
+            }}
+          />
         </Modal>
       )}
       {editing && (
         <Modal onClose={onCloseEdit} title="Editar cuenta">
-          <AccountForm initial={editing} onCancel={onCloseEdit} onSubmit={(a) => { updateAccount(a as Partial<Account> & { id: string }); onCloseEdit() }} />
+          <AccountForm
+            initial={editing}
+            onCancel={onCloseEdit}
+            onSubmit={(a) => {
+              updateAccount(a as Partial<Account> & { id: string })
+              onCloseEdit()
+            }}
+          />
         </Modal>
       )}
       {deleting && (
-        <ConfirmDialog message={`¿Seguro que quieres borrar "${deleting.name}"?`} onCancel={onCloseDelete} onConfirm={() => { deleteAccount(deleting.id); onCloseDelete() }} title="Borrar cuenta" />
+        <ConfirmDialog
+          message={`¿Seguro que quieres borrar "${deleting.name}"?`}
+          onCancel={onCloseDelete}
+          onConfirm={() => {
+            deleteAccount(deleting.id)
+            onCloseDelete()
+          }}
+          title="Borrar cuenta"
+        />
       )}
       {blocked && (
         <Modal onClose={onCloseBlocked} title="No se puede borrar">
@@ -175,7 +288,9 @@ function AccountModals({ creating, editing, deleting, blocked, onCloseCreate, on
             Reasígnalos o bórralos antes de eliminarla.
           </p>
           <div className="form__actions">
-            <button className="btn-primary" onClick={onCloseBlocked} type="button">Entendido</button>
+            <button className="btn-primary" onClick={onCloseBlocked} type="button">
+              Entendido
+            </button>
           </div>
         </Modal>
       )}
@@ -183,7 +298,19 @@ function AccountModals({ creating, editing, deleting, blocked, onCloseCreate, on
   )
 }
 
-function GoalModals({ creating, editing, deleting, onCloseCreate, onCloseEdit, onCloseDelete, addGoal, updateGoal, deleteGoal, accounts, goals }: {
+function GoalModals({
+  creating,
+  editing,
+  deleting,
+  onCloseCreate,
+  onCloseEdit,
+  onCloseDelete,
+  addGoal,
+  updateGoal,
+  deleteGoal,
+  accounts,
+  goals,
+}: {
   creating: boolean
   editing: SavingsGoal | undefined
   deleting: SavingsGoal | undefined
@@ -200,16 +327,41 @@ function GoalModals({ creating, editing, deleting, onCloseCreate, onCloseEdit, o
     <>
       {creating && (
         <Modal onClose={onCloseCreate} title="Nuevo objetivo">
-          <SavingsGoalForm accounts={accounts} goals={goals} onCancel={onCloseCreate} onSubmit={(g) => { addGoal(g as Omit<SavingsGoal, 'id'>); onCloseCreate() }} />
+          <SavingsGoalForm
+            accounts={accounts}
+            goals={goals}
+            onCancel={onCloseCreate}
+            onSubmit={(g) => {
+              addGoal(g as Omit<SavingsGoal, 'id'>)
+              onCloseCreate()
+            }}
+          />
         </Modal>
       )}
       {editing && (
         <Modal onClose={onCloseEdit} title="Editar objetivo">
-          <SavingsGoalForm accounts={accounts} goals={goals} initial={editing} onCancel={onCloseEdit} onSubmit={(g) => { updateGoal(g as Partial<SavingsGoal> & { id: string }); onCloseEdit() }} />
+          <SavingsGoalForm
+            accounts={accounts}
+            goals={goals}
+            initial={editing}
+            onCancel={onCloseEdit}
+            onSubmit={(g) => {
+              updateGoal(g as Partial<SavingsGoal> & { id: string })
+              onCloseEdit()
+            }}
+          />
         </Modal>
       )}
       {deleting && (
-        <ConfirmDialog message={`¿Seguro que quieres borrar "${deleting.name}"?`} onCancel={onCloseDelete} onConfirm={() => { deleteGoal(deleting.id); onCloseDelete() }} title="Borrar objetivo" />
+        <ConfirmDialog
+          message={`¿Seguro que quieres borrar "${deleting.name}"?`}
+          onCancel={onCloseDelete}
+          onConfirm={() => {
+            deleteGoal(deleting.id)
+            onCloseDelete()
+          }}
+          title="Borrar objetivo"
+        />
       )}
     </>
   )
@@ -217,7 +369,16 @@ function GoalModals({ creating, editing, deleting, onCloseCreate, onCloseEdit, o
 
 function AccountsPage() {
   const state = useFinance()
-  const { transactions, savingsGoals, addAccount, updateAccount, deleteAccount, addSavingsGoal, updateSavingsGoal, deleteSavingsGoal } = state
+  const {
+    transactions,
+    savingsGoals,
+    addAccount,
+    updateAccount,
+    deleteAccount,
+    addSavingsGoal,
+    updateSavingsGoal,
+    deleteSavingsGoal,
+  } = state
   const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState<Account | undefined>(undefined)
   const [deleting, setDeleting] = useState<Account | undefined>(undefined)

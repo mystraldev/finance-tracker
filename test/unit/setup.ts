@@ -10,10 +10,16 @@ if (globalThis.localStorage === undefined) {
       const store = new Map<string, string>()
       return {
         getItem: (key: string) => store.get(key) ?? null,
-        setItem: (key: string, value: string) => { store.set(key, value) },
-        removeItem: (key: string) => { store.delete(key) },
+        setItem: (key: string, value: string) => {
+          store.set(key, value)
+        },
+        removeItem: (key: string) => {
+          store.delete(key)
+        },
         clear: () => store.clear(),
-        get length() { return store.size },
+        get length() {
+          return store.size
+        },
         // eslint-disable-next-line unicorn/prefer-iterator-to-array -- conflicting with prefer-spread; Iterator.from() not available in jsdom
         key: (index: number) => [...store.keys()][index] ?? null,
       }

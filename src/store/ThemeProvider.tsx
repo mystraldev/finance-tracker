@@ -1,16 +1,9 @@
-import type {Theme, ThemeMode} from './theme';
-import type {ReactNode} from 'react';
+import type { Theme, ThemeMode } from './theme'
+import type { ReactNode } from 'react'
 
-import {  useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
-import {
-  isThemeMode,
-  resolveTheme,
-  
-  THEME_MODES,
-  THEME_STORAGE_KEY
-  
-} from './theme'
+import { isThemeMode, resolveTheme, THEME_MODES, THEME_STORAGE_KEY } from './theme'
 import { ThemeContext } from './themeContext'
 
 function getSystemTheme(): Theme {

@@ -32,7 +32,9 @@ function Sparkline({
     return [x, y] as const
   })
 
-  const line = points.map(([x, y], index) => `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`).join(' ')
+  const line = points
+    .map(([x, y], index) => `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`)
+    .join(' ')
   const area = `${line} L ${points.at(-1)![0].toFixed(2)} ${height} L ${points[0][0].toFixed(2)} ${height} Z`
   const gradId = `spark-${id}`
 
