@@ -30,8 +30,8 @@ export default defineConfig([
       importX.flatConfigs.recommended,
       importX.flatConfigs.typescript,
       promise.configs['flat/recommended'],
-      regexp.configs['flat/recommended'],
-      unicorn.configs['flat/recommended'],
+      regexp.configs.recommended,
+      unicorn.configs.recommended,
       ...sonarRules,
     ],
     plugins: {
