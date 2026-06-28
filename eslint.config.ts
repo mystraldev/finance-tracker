@@ -51,7 +51,10 @@ export default defineConfig([
 
       // unused-imports — auto-fix
       'unused-imports/no-unused-imports': 'error',
-      'unused-imports/no-unused-vars': ['error', { vars: 'all', varsIgnorePattern: '^_', args: 'after-used', argsIgnorePattern: '^_' }],
+      'unused-imports/no-unused-vars': [
+        'error',
+        { vars: 'all', varsIgnorePattern: '^_', args: 'after-used', argsIgnorePattern: '^_' },
+      ],
 
       // perfectionist — auto-sort
       'perfectionist/sort-imports': [
@@ -77,6 +80,7 @@ export default defineConfig([
       // complexity — safety net
       'sonarjs/cognitive-complexity': ['error', 15],
       'max-depth': ['warn', { max: 4 }],
+      'max-len': ['warn', { code: 120, ignoreUrls: true, ignoreStrings: true, ignoreTemplateLiterals: true }],
       'max-lines': ['warn', { max: 300 }],
       'max-lines-per-function': ['warn', { max: 130 }],
     },
@@ -133,6 +137,7 @@ export default defineConfig([
     files: ['test/**/*.{ts,tsx}', '**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}'],
     rules: {
       'unicorn/no-null': 'off',
+      'max-len': 'off',
       'max-lines': 'off',
       'max-lines-per-function': 'off',
       'max-depth': 'off',
