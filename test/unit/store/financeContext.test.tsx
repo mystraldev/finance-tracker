@@ -28,7 +28,9 @@ const value = {
   resetToSeed: vi.fn(),
 }
 
-const wrapper = ({ children }: { children: ReactNode }) => <FinanceContext.Provider value={value}>{children}</FinanceContext.Provider>
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <FinanceContext.Provider value={value}>{children}</FinanceContext.Provider>
+)
 
 describe('useFinance', () => {
   it('returns the context value when used inside a provider', () => {

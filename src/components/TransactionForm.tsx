@@ -195,7 +195,9 @@ function TransactionForm({ accounts, categories, initial, onSubmit, onCancel }: 
   const [type, setType] = useState(isEditingIncome ? 'ingreso' : 'gasto')
   const [amount, setAmount] = useState(initial ? String(Math.abs(initial.amount)) : '')
   const [description, setDescription] = useState(initial?.description ?? '')
-  const [categoryId, setCategoryId] = useState(initial && !isEditingIncome ? initial.categoryId : (expenseCategories[0]?.id ?? ''))
+  const [categoryId, setCategoryId] = useState(
+    initial && !isEditingIncome ? initial.categoryId : (expenseCategories[0]?.id ?? ''),
+  )
   const [accountId, setAccountId] = useState(initial?.accountId ?? accounts[0]?.id ?? '')
   const [date, setDate] = useState(initial?.date ?? todayISO())
   const [error, setError] = useState('')

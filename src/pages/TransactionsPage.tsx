@@ -79,7 +79,12 @@ function useTransactionFilters() {
   }
 
   const hasFilters =
-    month !== 'all' || categoryId !== 'all' || accountId !== 'all' || type !== 'all' || sort !== 'date-desc' || search.trim() !== ''
+    month !== 'all' ||
+    categoryId !== 'all' ||
+    accountId !== 'all' ||
+    type !== 'all' ||
+    sort !== 'date-desc' ||
+    search.trim() !== ''
 
   let filterType: 'all' | 'income' | 'expense' = 'all'
   if (type === 'ingreso') filterType = 'income'
@@ -160,7 +165,12 @@ function TransactionFilters({
       </label>
 
       <div className="filters">
-        <select aria-label="Mes" className="filters__select" onChange={(event_) => setFilter(setMonth, event_.target.value)} value={month}>
+        <select
+          aria-label="Mes"
+          className="filters__select"
+          onChange={(event_) => setFilter(setMonth, event_.target.value)}
+          value={month}
+        >
           <option value="all">Todos los meses</option>
           {months.map((m) => (
             <option key={m} value={m}>
@@ -168,7 +178,12 @@ function TransactionFilters({
             </option>
           ))}
         </select>
-        <select aria-label="Tipo" className="filters__select" onChange={(event_) => setFilter(setType, event_.target.value)} value={type}>
+        <select
+          aria-label="Tipo"
+          className="filters__select"
+          onChange={(event_) => setFilter(setType, event_.target.value)}
+          value={type}
+        >
           <option value="all">Ingresos y gastos</option>
           <option value="gasto">Solo gastos</option>
           <option value="ingreso">Solo ingresos</option>
@@ -220,7 +235,17 @@ function TransactionFilters({
   )
 }
 
-function TransactionSummary({ count, income, expenses, net }: { count: number; income: number; expenses: number; net: number }) {
+function TransactionSummary({
+  count,
+  income,
+  expenses,
+  net,
+}: {
+  count: number
+  income: number
+  expenses: number
+  net: number
+}) {
   return (
     <div aria-label="Resumen filtrado" className="tx-summary-grid">
       <div className="tx-stat">
@@ -237,7 +262,9 @@ function TransactionSummary({ count, income, expenses, net }: { count: number; i
       </div>
       <div className="tx-stat">
         <span className="tx-stat__label">Neto</span>
-        <span className={`tx-stat__value tnum ${net >= 0 ? 'tx-stat__value--in' : ''}`}>{formatSignedCurrency(net)}</span>
+        <span className={`tx-stat__value tnum ${net >= 0 ? 'tx-stat__value--in' : ''}`}>
+          {formatSignedCurrency(net)}
+        </span>
       </div>
     </div>
   )
@@ -309,16 +336,26 @@ function TransactionGroups(properties: TransactionGroupsProperties) {
                   <div className="txrow__info">
                     <span className="txrow__desc">{t.description}</span>
                   </div>
-                  <span className="pill txrow__category" style={{ '--c': cat?.color ?? '#94a3b8' } as Record<string, string>}>
+                  <span
+                    className="pill txrow__category"
+                    style={{ '--c': cat?.color ?? '#94a3b8' } as Record<string, string>}
+                  >
                     {cat?.label ?? 'Sin categoría'}
                   </span>
                   <span className="txrow__account">{accumulatorById[t.accountId]?.name ?? 'Cuenta'}</span>
-                  <span className={`txrow__amount tnum ${isIncome ? 'is-in' : ''}`}>{formatSignedCurrency(t.amount)}</span>
+                  <span className={`txrow__amount tnum ${isIncome ? 'is-in' : ''}`}>
+                    {formatSignedCurrency(t.amount)}
+                  </span>
                   <div className="txrow__actions">
                     <button aria-label="Editar" className="icon-btn" onClick={() => onEdit(t)} type="button">
                       <Icon name="edit" size={16} />
                     </button>
-                    <button aria-label="Borrar" className="icon-btn icon-btn--danger" onClick={() => onDelete(t)} type="button">
+                    <button
+                      aria-label="Borrar"
+                      className="icon-btn icon-btn--danger"
+                      onClick={() => onDelete(t)}
+                      type="button"
+                    >
                       <Icon name="delete" size={16} />
                     </button>
                   </div>
@@ -394,7 +431,8 @@ function DeleteTransactionModal({
 }
 
 function TransactionsPage() {
-  const { categories, accounts, getTransactions, getAvailableMonths, updateTransaction, deleteTransaction } = useFinance()
+  const { categories, accounts, getTransactions, getAvailableMonths, updateTransaction, deleteTransaction } =
+    useFinance()
 
   const cats = categoryMap(categories)
   const accumulatorById = Object.fromEntries(accounts.map((a) => [a.id, a]))
@@ -492,7 +530,13 @@ function TransactionsPage() {
         />
       )}
 
-      {deleting && <DeleteTransactionModal onClose={() => setDeleting(undefined)} onConfirm={deleteTransaction} transaction={deleting} />}
+      {deleting && (
+        <DeleteTransactionModal
+          onClose={() => setDeleting(undefined)}
+          onConfirm={deleteTransaction}
+          transaction={deleting}
+        />
+      )}
     </>
   )
 }

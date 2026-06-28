@@ -126,7 +126,8 @@ function BackupDataCard({
         <div>
           <h2 className="card__title">Datos locales</h2>
           <p className="settings-card__copy">
-            {accountsLength} cuentas · {categoriesLength} categorías · {transactionsLength} movimientos · {savingsGoalsLength} objetivos
+            {accountsLength} cuentas · {categoriesLength} categorías · {transactionsLength} movimientos ·{' '}
+            {savingsGoalsLength} objetivos
           </p>
         </div>
       </div>
@@ -171,7 +172,7 @@ function SettingsPage() {
   const [status, setStatus] = useState<Status | undefined>(undefined)
   const [confirmingReset, setConfirmingReset] = useState(false)
   const [pendingImport, setPendingImport] = useState<FinanceData | undefined>(undefined)
-  const inputReference = useRef<HTMLInputElement | undefined>(undefined)
+  const inputReference = useRef<HTMLInputElement | null>(null)
 
   return (
     <>
@@ -203,7 +204,9 @@ function SettingsPage() {
           accept="application/json,.json"
           aria-label="Seleccionar backup JSON"
           className="sr-only"
-          onChange={(event) => void handleImport(event.target.files?.[0], setStatus, setPendingImport, inputReference.current)}
+          onChange={(event) =>
+            void handleImport(event.target.files?.[0], setStatus, setPendingImport, inputReference.current)
+          }
           ref={inputReference}
           type="file"
         />

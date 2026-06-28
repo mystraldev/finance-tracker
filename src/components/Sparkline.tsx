@@ -8,7 +8,15 @@ type SparklineProperties = {
   id: string
 }
 
-function Sparkline({ data, color = 'currentColor', width = 120, height = 36, strokeWidth = 2, fill = false, id }: SparklineProperties) {
+function Sparkline({
+  data,
+  color = 'currentColor',
+  width = 120,
+  height = 36,
+  strokeWidth = 2,
+  fill = false,
+  id,
+}: SparklineProperties) {
   if (!data || data.length < 2) return
 
   const min = Math.min(...data)
@@ -29,7 +37,14 @@ function Sparkline({ data, color = 'currentColor', width = 120, height = 36, str
   const gradId = `spark-${id}`
 
   return (
-    <svg aria-hidden className="sparkline" height={height} preserveAspectRatio="none" viewBox={`0 0 ${width} ${height}`} width={width}>
+    <svg
+      aria-hidden
+      className="sparkline"
+      height={height}
+      preserveAspectRatio="none"
+      viewBox={`0 0 ${width} ${height}`}
+      width={width}
+    >
       {fill && (
         <>
           <defs>
@@ -41,7 +56,14 @@ function Sparkline({ data, color = 'currentColor', width = 120, height = 36, str
           <path d={area} fill={`url(#${gradId})`} stroke="none" />
         </>
       )}
-      <path d={line} fill="none" stroke={color} strokeLinecap="round" strokeLinejoin="round" strokeWidth={strokeWidth} />
+      <path
+        d={line}
+        fill="none"
+        stroke={color}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={strokeWidth}
+      />
     </svg>
   )
 }

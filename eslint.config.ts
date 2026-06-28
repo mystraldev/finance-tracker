@@ -1,4 +1,4 @@
-import { fixupConfigRules } from '@eslint/compat'
+import { type FixupConfigArray, fixupConfigRules } from '@eslint/compat'
 import js from '@eslint/js'
 import importX from 'eslint-plugin-import-x'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
@@ -16,7 +16,7 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
-const sonarRules = fixupConfigRules([sonarjs.configs.recommended])
+const sonarRules = fixupConfigRules([sonarjs.configs!.recommended] as unknown as FixupConfigArray)
 
 export default defineConfig([
   globalIgnores(['dist', 'coverage', 'test/e2e/**']),

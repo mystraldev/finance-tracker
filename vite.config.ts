@@ -12,7 +12,15 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'text-summary', 'html'],
       include: ['src/**/*.{ts,tsx}'],
-      exclude: ['src/**/*.test.{ts,tsx}', 'src/test/**', 'src/types/**', 'src/vite-env.d.ts', 'src/main.tsx', 'src/data/**', 'test/**'],
+      exclude: [
+        'src/**/*.test.{ts,tsx}',
+        'src/test/**',
+        'src/types/**',
+        'src/vite-env.d.ts',
+        'src/main.tsx',
+        'src/data/**',
+        'test/**',
+      ],
       thresholds: {
         statements: 80,
         branches: 80,

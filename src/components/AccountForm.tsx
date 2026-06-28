@@ -117,7 +117,15 @@ function ColorSwatches({ accent, onAccentChange }: { accent: string; onAccentCha
   )
 }
 
-function IconPicker({ icon, onIconChange, accentColor }: { icon: string; onIconChange: (value: string) => void; accentColor: string }) {
+function IconPicker({
+  icon,
+  onIconChange,
+  accentColor,
+}: {
+  icon: string
+  onIconChange: (value: string) => void
+  accentColor: string
+}) {
   return (
     <div className="field">
       <span className="field__label">Icono</span>
@@ -146,7 +154,9 @@ function AccountForm({ initial, onSubmit, onCancel }: AccountFormProperties) {
   const [accent, setAccent] = useState(initial?.accent ?? 'indigo')
   const accentColor = getAccentColor(accent)
   const [openingBalance, setOpeningBalance] = useState(initial ? String(initial.openingBalance) : '')
-  const [interestRate, setInterestRate] = useState(initial?.interestRate === undefined ? '' : String(initial.interestRate * 100))
+  const [interestRate, setInterestRate] = useState(
+    initial?.interestRate === undefined ? '' : String(initial.interestRate * 100),
+  )
   const [error, setError] = useState('')
 
   function handleSubmit(event_: FormEvent) {

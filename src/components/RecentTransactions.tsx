@@ -38,7 +38,9 @@ function RecentTransactions({ transactions }: RecentTransactionsProperties) {
                 <span className="tx__cat">{tx.category}</span>
               </div>
               <time className="tx__date">{formatDate(tx.date)}</time>
-              <span className={`tx__amount tnum ${isIncome ? 'tx__amount--in' : ''}`}>{formatSignedCurrency(tx.amount)}</span>
+              <span className={`tx__amount tnum ${isIncome ? 'tx__amount--in' : ''}`}>
+                {formatSignedCurrency(tx.amount)}
+              </span>
             </li>
           )
         })}

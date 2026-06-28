@@ -52,7 +52,14 @@ function SummaryCards({ accounts }: SummaryCardsProperties) {
                 <span className="summary-card__note">este mes</span>
               )}
               <span className="summary-card__spark">
-                <Sparkline color={accentColor[account.accent]} data={account.history} fill height={30} id={account.id} width={84} />
+                <Sparkline
+                  color={accentColor[account.accent]}
+                  data={account.history}
+                  fill
+                  height={30}
+                  id={account.id}
+                  width={84}
+                />
               </span>
             </footer>
           </article>

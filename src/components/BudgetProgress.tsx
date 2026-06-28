@@ -36,7 +36,9 @@ function BudgetProgress({ budget, showBadge = true, showPercent = false }: Budge
         </span>
         <span className="budget-meter__status">
           {showPercent && <span className="budget-meter__pct tnum">{formatPercent(budget.pct)}</span>}
-          {showBadge && <span className={`budget-badge budget-badge--${budget.status}`}>{budgetStatusLabel[budget.status]}</span>}
+          {showBadge && (
+            <span className={`budget-badge budget-badge--${budget.status}`}>{budgetStatusLabel[budget.status]}</span>
+          )}
         </span>
       </div>
 

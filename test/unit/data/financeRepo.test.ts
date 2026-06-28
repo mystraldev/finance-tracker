@@ -198,7 +198,9 @@ describe('financeRepo validation', () => {
     })
     expect(parseFinanceData({ ...data, categories: undefined })).toBeUndefined()
     expect(parseFinanceData({ ...data, transactions: [{ ...data.transactions[0], amount: '10' }] })).toBeUndefined()
-    expect(parseFinanceData({ ...data, savingsGoals: [{ ...data.savingsGoals[0], savedAmount: '10' }] })).toBeUndefined()
+    expect(
+      parseFinanceData({ ...data, savingsGoals: [{ ...data.savingsGoals[0], savedAmount: '10' }] }),
+    ).toBeUndefined()
   })
 
   it('clones finance data without sharing array item references', () => {

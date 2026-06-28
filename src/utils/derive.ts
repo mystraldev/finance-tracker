@@ -79,7 +79,10 @@ export function availableMonths(transactions: Transaction[]): string[] {
   })
 }
 
-export function incomeExpenses(transactions: Transaction[], month: string): { income: number; expenses: number; saved: number } {
+export function incomeExpenses(
+  transactions: Transaction[],
+  month: string,
+): { income: number; expenses: number; saved: number } {
   const m = monthTransactions(transactions, month)
   const income = m.filter((t) => t.amount > 0).reduce((s, t) => s + t.amount, 0)
   const expenses = m.filter((t) => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0)
@@ -128,7 +131,11 @@ export function categoryMap(categories: Category[]): Record<string, Category> {
   return Object.fromEntries(categories.map((c) => [c.id, c]))
 }
 
-export function categoryBreakdown(transactions: Transaction[], categories: Category[], month: string): CategoryBreakdownItem[] {
+export function categoryBreakdown(
+  transactions: Transaction[],
+  categories: Category[],
+  month: string,
+): CategoryBreakdownItem[] {
   const totals = new Map<string, number>()
   const monthExpenses = monthTransactions(transactions, month).filter((t) => t.amount < 0)
   for (const t of monthExpenses) {

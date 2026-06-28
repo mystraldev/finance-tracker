@@ -41,7 +41,7 @@ function isAccount(value: unknown): value is Account {
   return (
     isString(value.id) &&
     isString(value.name) &&
-    (['cash', 'savings', 'investment'] as const).includes(value.type) &&
+    (['cash', 'savings', 'investment'] as const).includes(value.type as 'cash' | 'savings' | 'investment') &&
     isString(value.icon) &&
     isString(value.accent) &&
     isFiniteNumber(value.openingBalance) &&
@@ -150,7 +150,15 @@ function normaliseSearch(text: string): string {
 }
 
 export function listTransactions(data: FinanceData, query: TransactionQuery = {}): Transaction[] {
-  const { month = 'all', categoryId = 'all', accountId = 'all', type = 'all', sort = 'none', search = '', limit } = query
+  const {
+    month = 'all',
+    categoryId = 'all',
+    accountId = 'all',
+    type = 'all',
+    sort = 'none',
+    search = '',
+    limit,
+  } = query
 
   const needle = normaliseSearch(search)
   const categories = new Map(data.categories.map((c) => [c.id, c]))
@@ -166,7 +174,11 @@ export function listTransactions(data: FinanceData, query: TransactionQuery = {}
     })
     .filter((t) => {
       if (!needle) return true
-      const haystack = [t.description, categories.get(t.categoryId)?.label ?? '', accounts.get(t.accountId)?.name ?? ''].join(' ')
+      const haystack = [
+        t.description,
+        categories.get(t.categoryId)?.label ?? '',
+        accounts.get(t.accountId)?.name ?? '',
+      ].join(' ')
       return normaliseSearch(haystack).includes(needle)
     })
 

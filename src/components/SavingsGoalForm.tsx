@@ -8,7 +8,18 @@ import { parseDecimal } from '../utils/number'
 import Icon from './Icon'
 import { selectableIcons } from './iconCatalog'
 
-const PALETTE = ['#0a6ce0', '#8d66d9', '#ec4899', '#f43f5e', '#f59e0b', '#1ea35b', '#14b8a6', '#06b6d4', '#3b82f6', '#64748b']
+const PALETTE = [
+  '#0a6ce0',
+  '#8d66d9',
+  '#ec4899',
+  '#f43f5e',
+  '#f59e0b',
+  '#1ea35b',
+  '#14b8a6',
+  '#06b6d4',
+  '#3b82f6',
+  '#64748b',
+]
 
 function isCompleteTargetDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
@@ -32,7 +43,9 @@ function availableFor(
 ): number | undefined {
   const account = accounts.find((item) => item.id === nextAccountId)
   if (!account) return undefined
-  const reserved = goals.filter((g) => g.id !== initialId && g.accountId === nextAccountId).reduce((sum, g) => sum + g.savedAmount, 0)
+  const reserved = goals
+    .filter((g) => g.id !== initialId && g.accountId === nextAccountId)
+    .reduce((sum, g) => sum + g.savedAmount, 0)
   return account.balance - reserved
 }
 
@@ -42,7 +55,7 @@ function validateGoal(
   savedAmount: string,
   targetDate: string,
   availableForAccount: number | undefined,
-): string | null {
+): string | undefined {
   if (!name.trim()) return 'Ponle un nombre al objetivo.'
   const target = parseDecimal(targetAmount)
   if (!Number.isFinite(target) || target <= 0) {
@@ -61,6 +74,7 @@ function validateGoal(
   if (availableForAccount !== undefined && saved > availableForAccount) {
     return `Esta cuenta solo tiene ${formatCurrency(Math.max(availableForAccount, 0))} disponible para reservar.`
   }
+  return undefined
 }
 
 function Preview({ name, color, icon }: { name: string; color: string; icon: string }) {
@@ -184,7 +198,12 @@ function AccountDateFields({
 
       <label className="field">
         <span className="field__label">Fecha objetivo</span>
-        <input className="field__input" onChange={(event) => setTargetDate(event.target.value)} type="date" value={targetDate} />
+        <input
+          className="field__input"
+          onChange={(event) => setTargetDate(event.target.value)}
+          type="date"
+          value={targetDate}
+        />
       </label>
     </div>
   )
@@ -255,7 +274,8 @@ function useSavingsGoalFormState({
 
   const linkedAccount = useMemo(() => accounts.find((a) => a.id === accountId), [accounts, accountId])
   const otherReserved = useMemo(
-    () => goals.filter((g) => g.id !== initial?.id && g.accountId === accountId).reduce((sum, g) => sum + g.savedAmount, 0),
+    () =>
+      goals.filter((g) => g.id !== initial?.id && g.accountId === accountId).reduce((sum, g) => sum + g.savedAmount, 0),
     [accountId, goals, initial?.id],
   )
   const availableForAccount = linkedAccount ? linkedAccount.balance - otherReserved : undefined

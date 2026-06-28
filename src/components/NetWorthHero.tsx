@@ -42,7 +42,15 @@ function NetWorthHero({ accounts, history, month }: NetWorthHeroProperties) {
 
         <div className="hero__trend">
           <span className="hero__month">{month}</span>
-          <Sparkline color="#7fb4ff" data={history.map((h) => h.value)} fill height={64} id="networth" strokeWidth={2.5} width={200} />
+          <Sparkline
+            color="#7fb4ff"
+            data={history.map((h) => h.value)}
+            fill
+            height={64}
+            id="networth"
+            strokeWidth={2.5}
+            width={200}
+          />
         </div>
       </div>
 

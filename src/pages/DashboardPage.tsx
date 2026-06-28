@@ -34,7 +34,9 @@ export default function DashboardPage() {
   const { income, expenses } = incomeExpenses(state.transactions, month)
   const breakdown = categoryBreakdown(state.transactions, state.categories, month)
   const budgets = categoryBudgets(state.transactions, state.categories, month)
-  const priorityBudgets = budgets.toSorted((a, b) => budgetStatusRank[a.status] - budgetStatusRank[b.status] || b.pct - a.pct).slice(0, 5)
+  const priorityBudgets = budgets
+    .toSorted((a, b) => budgetStatusRank[a.status] - budgetStatusRank[b.status] || b.pct - a.pct)
+    .slice(0, 5)
   const recent = recentTransactions(state, 6)
 
   return (

@@ -36,7 +36,15 @@ function handleDelete(
   else onDeleting(cat)
 }
 
-function CreateModal({ open, onClose, onSave }: { open: boolean; onClose: () => void; onSave: (cat: Omit<Category, 'id'>) => void }) {
+function CreateModal({
+  open,
+  onClose,
+  onSave,
+}: {
+  open: boolean
+  onClose: () => void
+  onSave: (cat: Omit<Category, 'id'>) => void
+}) {
   if (!open) return
   return (
     <Modal onClose={onClose} title="Nueva categoría">
@@ -103,7 +111,8 @@ function BlockedModal({ category, onClose }: { category: Category | undefined; o
   return (
     <Modal onClose={onClose} title="No se puede borrar">
       <p className="confirm__message">
-        La categoría <strong>{category.label}</strong> tiene movimientos asociados. Reasigna o borra esos movimientos antes de eliminarla.
+        La categoría <strong>{category.label}</strong> tiene movimientos asociados. Reasigna o borra esos movimientos
+        antes de eliminarla.
       </p>
       <div className="form__actions">
         <button className="btn-primary" onClick={onClose} type="button">
@@ -115,7 +124,8 @@ function BlockedModal({ category, onClose }: { category: Category | undefined; o
 }
 
 function CategoriesPage() {
-  const { categories, transactions, selectedMonth, getTransactions, addCategory, updateCategory, deleteCategory } = useFinance()
+  const { categories, transactions, selectedMonth, getTransactions, addCategory, updateCategory, deleteCategory } =
+    useFinance()
 
   const selectedMonthTransactions = getTransactions({ month: selectedMonth })
 
@@ -201,7 +211,11 @@ function CategoriesPage() {
 
       <EditModal category={editing} onClose={() => setEditing(undefined)} onSave={(cat) => updateCategory(cat)} />
 
-      <DeleteConfirm category={deleting} onCancel={() => setDeleting(undefined)} onConfirm={(id) => deleteCategory(id)} />
+      <DeleteConfirm
+        category={deleting}
+        onCancel={() => setDeleting(undefined)}
+        onConfirm={(id) => deleteCategory(id)}
+      />
 
       <BlockedModal category={blocked} onClose={() => setBlocked(undefined)} />
     </>

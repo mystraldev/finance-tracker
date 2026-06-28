@@ -78,7 +78,10 @@ function CategoryBreakdown({ categories }: CategoryBreakdownProperties) {
               </span>
               <span className="breakdown__label">{arc.label}</span>
               <span className="breakdown__bar">
-                <span className="breakdown__bar-fill" style={{ width: `${arc.fraction * 100}%`, background: arc.color }} />
+                <span
+                  className="breakdown__bar-fill"
+                  style={{ width: `${arc.fraction * 100}%`, background: arc.color }}
+                />
               </span>
               <span className="breakdown__amount tnum">{formatCurrency(arc.amount)}</span>
               <span className="breakdown__pct tnum">{formatPercent(arc.fraction)}</span>

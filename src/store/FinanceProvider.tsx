@@ -150,17 +150,23 @@ export function FinanceProvider({ children }: FinanceProviderProperties) {
       ...state,
       getTransactions: (query?: TransactionQuery) => financeRepo.listTransactions(state, query),
       getAvailableMonths: () => financeRepo.availableMonths(state),
-      addTransaction: (tx: Omit<Transaction, 'id'>) => dispatch({ type: 'ADD_TRANSACTION', payload: { id: uid(), ...tx } }),
-      updateTransaction: (tx: Partial<Transaction> & { id: string }) => dispatch({ type: 'UPDATE_TRANSACTION', payload: tx }),
+      addTransaction: (tx: Omit<Transaction, 'id'>) =>
+        dispatch({ type: 'ADD_TRANSACTION', payload: { id: uid(), ...tx } }),
+      updateTransaction: (tx: Partial<Transaction> & { id: string }) =>
+        dispatch({ type: 'UPDATE_TRANSACTION', payload: tx }),
       deleteTransaction: (id: string) => dispatch({ type: 'DELETE_TRANSACTION', payload: id }),
       addCategory: (cat: Omit<Category, 'id'>) => dispatch({ type: 'ADD_CATEGORY', payload: { id: uid(), ...cat } }),
       updateCategory: (cat: Partial<Category> & { id: string }) => dispatch({ type: 'UPDATE_CATEGORY', payload: cat }),
       deleteCategory: (id: string) => dispatch({ type: 'DELETE_CATEGORY', payload: id }),
-      addAccount: (accumulator: Omit<Account, 'id'>) => dispatch({ type: 'ADD_ACCOUNT', payload: { id: uid(), ...accumulator } }),
-      updateAccount: (accumulator: Partial<Account> & { id: string }) => dispatch({ type: 'UPDATE_ACCOUNT', payload: accumulator }),
+      addAccount: (accumulator: Omit<Account, 'id'>) =>
+        dispatch({ type: 'ADD_ACCOUNT', payload: { id: uid(), ...accumulator } }),
+      updateAccount: (accumulator: Partial<Account> & { id: string }) =>
+        dispatch({ type: 'UPDATE_ACCOUNT', payload: accumulator }),
       deleteAccount: (id: string) => dispatch({ type: 'DELETE_ACCOUNT', payload: id }),
-      addSavingsGoal: (goal: Omit<SavingsGoal, 'id'>) => dispatch({ type: 'ADD_SAVINGS_GOAL', payload: { id: uid(), ...goal } }),
-      updateSavingsGoal: (goal: Partial<SavingsGoal> & { id: string }) => dispatch({ type: 'UPDATE_SAVINGS_GOAL', payload: goal }),
+      addSavingsGoal: (goal: Omit<SavingsGoal, 'id'>) =>
+        dispatch({ type: 'ADD_SAVINGS_GOAL', payload: { id: uid(), ...goal } }),
+      updateSavingsGoal: (goal: Partial<SavingsGoal> & { id: string }) =>
+        dispatch({ type: 'UPDATE_SAVINGS_GOAL', payload: goal }),
       deleteSavingsGoal: (id: string) => dispatch({ type: 'DELETE_SAVINGS_GOAL', payload: id }),
       setMonth: (m: string) => dispatch({ type: 'SET_MONTH', payload: m }),
       importData: (data: FinanceData) => dispatch({ type: 'IMPORT_DATA', payload: data }),
