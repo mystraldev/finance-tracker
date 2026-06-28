@@ -47,21 +47,12 @@ function SummaryCards({ accounts }: SummaryCardsProperties) {
                 {formatPercent(Math.abs(account.monthlyGrowthRate))}
               </span>
               {account.type === 'savings' && account.interestRate !== undefined ? (
-                <span className="summary-card__note tnum">
-                  {formatPercent(account.interestRate)} TAE
-                </span>
+                <span className="summary-card__note tnum">{formatPercent(account.interestRate)} TAE</span>
               ) : (
                 <span className="summary-card__note">este mes</span>
               )}
               <span className="summary-card__spark">
-                <Sparkline
-                  color={accentColor[account.accent]}
-                  data={account.history}
-                  fill
-                  height={30}
-                  id={account.id}
-                  width={84}
-                />
+                <Sparkline color={accentColor[account.accent]} data={account.history} fill height={30} id={account.id} width={84} />
               </span>
             </footer>
           </article>

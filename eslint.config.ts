@@ -51,10 +51,7 @@ export default defineConfig([
 
       // unused-imports — auto-fix
       'unused-imports/no-unused-imports': 'error',
-      'unused-imports/no-unused-vars': [
-        'error',
-        { vars: 'all', varsIgnorePattern: '^_', args: 'after-used', argsIgnorePattern: '^_' },
-      ],
+      'unused-imports/no-unused-vars': ['error', { vars: 'all', varsIgnorePattern: '^_', args: 'after-used', argsIgnorePattern: '^_' }],
 
       // perfectionist — auto-sort
       'perfectionist/sort-imports': [
@@ -62,13 +59,7 @@ export default defineConfig([
         {
           type: 'natural',
           order: 'asc',
-          groups: [
-            'type',
-            ['builtin', 'external'],
-            'internal',
-            ['parent', 'sibling', 'index'],
-            'style',
-          ],
+          groups: ['type', ['builtin', 'external'], 'internal', ['parent', 'sibling', 'index'], 'style'],
           newlinesBetween: 1,
           internalPattern: ['^@/.+'],
         },
@@ -122,11 +113,7 @@ export default defineConfig([
 
   // ── Overrides for files with co-located sub-components ──
   {
-    files: [
-      'src/components/SavingsGoalForm.tsx',
-      'src/pages/AccountsPage.tsx',
-      'src/pages/TransactionsPage.tsx',
-    ],
+    files: ['src/components/SavingsGoalForm.tsx', 'src/pages/AccountsPage.tsx', 'src/pages/TransactionsPage.tsx'],
     rules: {
       'max-lines': 'off',
     },

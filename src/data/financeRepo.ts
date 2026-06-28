@@ -1,11 +1,4 @@
-import type {
-  Account,
-  Category,
-  FinanceData,
-  SavingsGoal,
-  Transaction,
-  TransactionQuery,
-} from '../types/finance'
+import type { Account, Category, FinanceData, SavingsGoal, Transaction, TransactionQuery } from '../types/finance'
 
 import { seed } from './finance'
 
@@ -102,10 +95,7 @@ export function cloneFinanceData(data: FinanceData): FinanceData {
   }
 }
 
-export function createFinanceBackup(
-  data: FinanceData,
-  exportedAt = new Date().toISOString(),
-): FinanceBackup {
+export function createFinanceBackup(data: FinanceData, exportedAt = new Date().toISOString()): FinanceBackup {
   return {
     app: FINANCE_BACKUP_APP,
     version: FINANCE_BACKUP_VERSION,
@@ -116,11 +106,7 @@ export function createFinanceBackup(
 
 export function parseFinanceData(value: unknown): FinanceData | undefined {
   if (!isRecord(value)) return undefined
-  if (
-    !Array.isArray(value.accounts) ||
-    !Array.isArray(value.categories) ||
-    !Array.isArray(value.transactions)
-  ) {
+  if (!Array.isArray(value.accounts) || !Array.isArray(value.categories) || !Array.isArray(value.transactions)) {
     return undefined
   }
   const savingsGoals = value.savingsGoals
@@ -145,11 +131,7 @@ export function parseFinanceData(value: unknown): FinanceData | undefined {
 
 export function parseFinanceBackup(value: unknown): FinanceData | undefined {
   if (!isRecord(value)) return undefined
-  if (
-    value.app !== FINANCE_BACKUP_APP ||
-    value.version !== FINANCE_BACKUP_VERSION ||
-    !isString(value.exportedAt)
-  ) {
+  if (value.app !== FINANCE_BACKUP_APP || value.version !== FINANCE_BACKUP_VERSION || !isString(value.exportedAt)) {
     return undefined
   }
   return parseFinanceData(value.data)
@@ -168,15 +150,7 @@ function normaliseSearch(text: string): string {
 }
 
 export function listTransactions(data: FinanceData, query: TransactionQuery = {}): Transaction[] {
-  const {
-    month = 'all',
-    categoryId = 'all',
-    accountId = 'all',
-    type = 'all',
-    sort = 'none',
-    search = '',
-    limit,
-  } = query
+  const { month = 'all', categoryId = 'all', accountId = 'all', type = 'all', sort = 'none', search = '', limit } = query
 
   const needle = normaliseSearch(search)
   const categories = new Map(data.categories.map((c) => [c.id, c]))
@@ -192,11 +166,7 @@ export function listTransactions(data: FinanceData, query: TransactionQuery = {}
     })
     .filter((t) => {
       if (!needle) return true
-      const haystack = [
-        t.description,
-        categories.get(t.categoryId)?.label ?? '',
-        accounts.get(t.accountId)?.name ?? '',
-      ].join(' ')
+      const haystack = [t.description, categories.get(t.categoryId)?.label ?? '', accounts.get(t.accountId)?.name ?? ''].join(' ')
       return normaliseSearch(haystack).includes(needle)
     })
 

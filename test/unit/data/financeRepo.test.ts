@@ -197,12 +197,8 @@ describe('financeRepo validation', () => {
       savingsGoals: [],
     })
     expect(parseFinanceData({ ...data, categories: undefined })).toBeUndefined()
-    expect(
-      parseFinanceData({ ...data, transactions: [{ ...data.transactions[0], amount: '10' }] }),
-    ).toBeUndefined()
-    expect(
-      parseFinanceData({ ...data, savingsGoals: [{ ...data.savingsGoals[0], savedAmount: '10' }] }),
-    ).toBeUndefined()
+    expect(parseFinanceData({ ...data, transactions: [{ ...data.transactions[0], amount: '10' }] })).toBeUndefined()
+    expect(parseFinanceData({ ...data, savingsGoals: [{ ...data.savingsGoals[0], savedAmount: '10' }] })).toBeUndefined()
   })
 
   it('clones finance data without sharing array item references', () => {
@@ -251,15 +247,8 @@ describe('financeRepo transaction queries', () => {
   })
 
   it('sorts and limits transactions', () => {
-    expect(listTransactions(data, { sort: 'date-desc', limit: 3 }).map((t) => t.id)).toEqual([
-      't7',
-      't6',
-      't5',
-    ])
-    expect(listTransactions(data, { sort: 'date-asc', limit: 2 }).map((t) => t.id)).toEqual([
-      't1',
-      't2',
-    ])
+    expect(listTransactions(data, { sort: 'date-desc', limit: 3 }).map((t) => t.id)).toEqual(['t7', 't6', 't5'])
+    expect(listTransactions(data, { sort: 'date-asc', limit: 2 }).map((t) => t.id)).toEqual(['t1', 't2'])
   })
 
   it('searches transactions by description, category label and account name', () => {
@@ -280,14 +269,7 @@ describe('financeRepo transaction queries', () => {
   })
 
   it('sorts transactions by absolute amount', () => {
-    expect(listTransactions(data, { sort: 'amount-desc', limit: 3 }).map((t) => t.id)).toEqual([
-      't1',
-      't3',
-      't4',
-    ])
-    expect(listTransactions(data, { sort: 'amount-asc', limit: 2 }).map((t) => t.id)).toEqual([
-      't6',
-      't7',
-    ])
+    expect(listTransactions(data, { sort: 'amount-desc', limit: 3 }).map((t) => t.id)).toEqual(['t1', 't3', 't4'])
+    expect(listTransactions(data, { sort: 'amount-asc', limit: 2 }).map((t) => t.id)).toEqual(['t6', 't7'])
   })
 })

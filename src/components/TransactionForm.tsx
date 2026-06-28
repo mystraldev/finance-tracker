@@ -10,9 +10,7 @@ const INCOME_CATEGORY_ID = 'income'
 
 function todayISO(): string {
   const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
-    d.getDate(),
-  ).padStart(2, '0')}`
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 type TransactionFormProperties = {
@@ -149,11 +147,7 @@ function CategoryField({ value, onChange, categories }: CategoryFieldProperties)
   return (
     <label className="field">
       <span className="field__label">Categoría</span>
-      <select
-        className="field__input"
-        onChange={(event) => onChange(event.target.value)}
-        value={value}
-      >
+      <select className="field__input" onChange={(event) => onChange(event.target.value)} value={value}>
         {categories.map((c) => (
           <option key={c.id} value={c.id}>
             {c.label}
@@ -174,11 +168,7 @@ function AccountField({ value, onChange, accounts }: AccountFieldProperties) {
   return (
     <label className="field">
       <span className="field__label">Cuenta</span>
-      <select
-        className="field__input"
-        onChange={(event) => onChange(event.target.value)}
-        value={value}
-      >
+      <select className="field__input" onChange={(event) => onChange(event.target.value)} value={value}>
         {accounts.map((a) => (
           <option key={a.id} value={a.id}>
             {a.name}
@@ -193,32 +183,19 @@ function DateField({ value, onChange }: FieldProperties) {
   return (
     <label className="field">
       <span className="field__label">Fecha</span>
-      <input
-        className="field__input"
-        onChange={(event) => onChange(event.target.value)}
-        type="date"
-        value={value}
-      />
+      <input className="field__input" onChange={(event) => onChange(event.target.value)} type="date" value={value} />
     </label>
   )
 }
 
-function TransactionForm({
-  accounts,
-  categories,
-  initial,
-  onSubmit,
-  onCancel,
-}: TransactionFormProperties) {
+function TransactionForm({ accounts, categories, initial, onSubmit, onCancel }: TransactionFormProperties) {
   const expenseCategories = categories.filter((c) => c.id !== INCOME_CATEGORY_ID)
   const isEditingIncome = initial ? initial.amount > 0 : false
 
   const [type, setType] = useState(isEditingIncome ? 'ingreso' : 'gasto')
   const [amount, setAmount] = useState(initial ? String(Math.abs(initial.amount)) : '')
   const [description, setDescription] = useState(initial?.description ?? '')
-  const [categoryId, setCategoryId] = useState(
-    initial && !isEditingIncome ? initial.categoryId : (expenseCategories[0]?.id ?? ''),
-  )
+  const [categoryId, setCategoryId] = useState(initial && !isEditingIncome ? initial.categoryId : (expenseCategories[0]?.id ?? ''))
   const [accountId, setAccountId] = useState(initial?.accountId ?? accounts[0]?.id ?? '')
   const [date, setDate] = useState(initial?.date ?? todayISO())
   const [error, setError] = useState('')
@@ -237,9 +214,7 @@ function TransactionForm({
       <TypeSelector onChange={setType} type={type} />
       <AmountField onChange={setAmount} value={amount} />
       <DescriptionField onChange={setDescription} value={description} />
-      {type === 'gasto' && (
-        <CategoryField categories={expenseCategories} onChange={setCategoryId} value={categoryId} />
-      )}
+      {type === 'gasto' && <CategoryField categories={expenseCategories} onChange={setCategoryId} value={categoryId} />}
       <div className="field-row">
         <AccountField accounts={accounts} onChange={setAccountId} value={accountId} />
         <DateField onChange={setDate} value={date} />

@@ -68,9 +68,7 @@ const value: FinanceContextValue = {
   savingsGoals: [],
   selectedMonth: '2026-06',
   getTransactions: vi.fn(),
-  getAvailableMonths: vi
-    .fn()
-    .mockReturnValue(['2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06']),
+  getAvailableMonths: vi.fn().mockReturnValue(['2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06']),
   addTransaction: vi.fn(),
   updateTransaction: vi.fn(),
   deleteTransaction: vi.fn(),

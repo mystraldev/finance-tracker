@@ -36,15 +36,7 @@ function handleDelete(
   else onDeleting(cat)
 }
 
-function CreateModal({
-  open,
-  onClose,
-  onSave,
-}: {
-  open: boolean
-  onClose: () => void
-  onSave: (cat: Omit<Category, 'id'>) => void
-}) {
+function CreateModal({ open, onClose, onSave }: { open: boolean; onClose: () => void; onSave: (cat: Omit<Category, 'id'>) => void }) {
   if (!open) return
   return (
     <Modal onClose={onClose} title="Nueva categoría">
@@ -106,19 +98,12 @@ function DeleteConfirm({
   )
 }
 
-function BlockedModal({
-  category,
-  onClose,
-}: {
-  category: Category | undefined
-  onClose: () => void
-}) {
+function BlockedModal({ category, onClose }: { category: Category | undefined; onClose: () => void }) {
   if (!category) return
   return (
     <Modal onClose={onClose} title="No se puede borrar">
       <p className="confirm__message">
-        La categoría <strong>{category.label}</strong> tiene movimientos asociados. Reasigna o borra
-        esos movimientos antes de eliminarla.
+        La categoría <strong>{category.label}</strong> tiene movimientos asociados. Reasigna o borra esos movimientos antes de eliminarla.
       </p>
       <div className="form__actions">
         <button className="btn-primary" onClick={onClose} type="button">
@@ -130,21 +115,11 @@ function BlockedModal({
 }
 
 function CategoriesPage() {
-  const {
-    categories,
-    transactions,
-    selectedMonth,
-    getTransactions,
-    addCategory,
-    updateCategory,
-    deleteCategory,
-  } = useFinance()
+  const { categories, transactions, selectedMonth, getTransactions, addCategory, updateCategory, deleteCategory } = useFinance()
 
   const selectedMonthTransactions = getTransactions({ month: selectedMonth })
 
-  const budgetById = new Map(
-    categoryBudgets(transactions, categories, selectedMonth).map((b) => [b.id, b]),
-  )
+  const budgetById = new Map(categoryBudgets(transactions, categories, selectedMonth).map((b) => [b.id, b]))
 
   const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState<Category | undefined>(undefined)
@@ -205,12 +180,7 @@ function CategoriesPage() {
                 )}
               </div>
               <div className="cat-card__actions">
-                <button
-                  aria-label="Editar"
-                  className="icon-btn"
-                  onClick={() => setEditing(c)}
-                  type="button"
-                >
+                <button aria-label="Editar" className="icon-btn" onClick={() => setEditing(c)} type="button">
                   <Icon name="edit" size={16} />
                 </button>
                 <button
@@ -227,23 +197,11 @@ function CategoriesPage() {
         })}
       </div>
 
-      <CreateModal
-        onClose={() => setCreating(false)}
-        onSave={(cat) => addCategory(cat)}
-        open={creating}
-      />
+      <CreateModal onClose={() => setCreating(false)} onSave={(cat) => addCategory(cat)} open={creating} />
 
-      <EditModal
-        category={editing}
-        onClose={() => setEditing(undefined)}
-        onSave={(cat) => updateCategory(cat)}
-      />
+      <EditModal category={editing} onClose={() => setEditing(undefined)} onSave={(cat) => updateCategory(cat)} />
 
-      <DeleteConfirm
-        category={deleting}
-        onCancel={() => setDeleting(undefined)}
-        onConfirm={(id) => deleteCategory(id)}
-      />
+      <DeleteConfirm category={deleting} onCancel={() => setDeleting(undefined)} onConfirm={(id) => deleteCategory(id)} />
 
       <BlockedModal category={blocked} onClose={() => setBlocked(undefined)} />
     </>

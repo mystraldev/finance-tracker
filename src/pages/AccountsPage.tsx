@@ -45,20 +45,10 @@ function GoalCard({
           <Icon name={goal.icon} size={20} />
         </span>
         <div className="cat-card__actions">
-          <button
-            aria-label={`Editar objetivo ${goal.name}`}
-            className="icon-btn"
-            onClick={onEdit}
-            type="button"
-          >
+          <button aria-label={`Editar objetivo ${goal.name}`} className="icon-btn" onClick={onEdit} type="button">
             <Icon name="edit" size={16} />
           </button>
-          <button
-            aria-label={`Borrar objetivo ${goal.name}`}
-            className="icon-btn icon-btn--danger"
-            onClick={onDelete}
-            type="button"
-          >
+          <button aria-label={`Borrar objetivo ${goal.name}`} className="icon-btn icon-btn--danger" onClick={onDelete} type="button">
             <Icon name="delete" size={16} />
           </button>
         </div>
@@ -137,13 +127,7 @@ function SavingsGoalsSection({
       {goals.length > 0 ? (
         <div className="goals-grid">
           {goals.map((goal) => (
-            <GoalCard
-              accountById={accountById}
-              goal={goal}
-              key={goal.id}
-              onDelete={() => onDelete(goal)}
-              onEdit={() => onEdit(goal)}
-            />
+            <GoalCard accountById={accountById} goal={goal} key={goal.id} onDelete={() => onDelete(goal)} onEdit={() => onEdit(goal)} />
           ))}
         </div>
       ) : (
@@ -186,20 +170,10 @@ function AccountsGrid({
               <Icon name={a.icon} size={20} />
             </span>
             <div className="cat-card__actions">
-              <button
-                aria-label="Editar"
-                className="icon-btn"
-                onClick={() => onEdit(a)}
-                type="button"
-              >
+              <button aria-label="Editar" className="icon-btn" onClick={() => onEdit(a)} type="button">
                 <Icon name="edit" size={16} />
               </button>
-              <button
-                aria-label="Borrar"
-                className="icon-btn icon-btn--danger"
-                onClick={() => onDelete(a)}
-                type="button"
-              >
+              <button aria-label="Borrar" className="icon-btn icon-btn--danger" onClick={() => onDelete(a)} type="button">
                 <Icon name="delete" size={16} />
               </button>
             </div>
@@ -208,9 +182,7 @@ function AccountsGrid({
           <span className="account-card__balance tnum">{formatCurrency(a.balance)}</span>
           <span className="account-card__meta">
             {TYPE_LABEL[a.type] ?? a.type}
-            {a.type === 'savings' &&
-              a.interestRate !== undefined &&
-              ` · ${formatPercent(a.interestRate)} TAE`}
+            {a.type === 'savings' && a.interestRate !== undefined && ` · ${formatPercent(a.interestRate)} TAE`}
             {` · ${usageCount(a.id)} mov.`}
             {goalUsageCount(a.id) > 0 && ` · ${goalUsageCount(a.id)} obj.`}
           </span>
@@ -284,8 +256,7 @@ function AccountModals({
       {blocked && (
         <Modal onClose={onCloseBlocked} title="No se puede borrar">
           <p className="confirm__message">
-            La cuenta <strong>{blocked.name}</strong> tiene movimientos u objetivos asociados.
-            Reasígnalos o bórralos antes de eliminarla.
+            La cuenta <strong>{blocked.name}</strong> tiene movimientos u objetivos asociados. Reasígnalos o bórralos antes de eliminarla.
           </p>
           <div className="form__actions">
             <button className="btn-primary" onClick={onCloseBlocked} type="button">
@@ -369,16 +340,8 @@ function GoalModals({
 
 function AccountsPage() {
   const state = useFinance()
-  const {
-    transactions,
-    savingsGoals,
-    addAccount,
-    updateAccount,
-    deleteAccount,
-    addSavingsGoal,
-    updateSavingsGoal,
-    deleteSavingsGoal,
-  } = state
+  const { transactions, savingsGoals, addAccount, updateAccount, deleteAccount, addSavingsGoal, updateSavingsGoal, deleteSavingsGoal } =
+    state
   const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState<Account | undefined>(undefined)
   const [deleting, setDeleting] = useState<Account | undefined>(undefined)

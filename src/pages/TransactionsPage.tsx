@@ -49,9 +49,7 @@ function groupTransactions(transactions: Transaction[], sort: TransactionSort): 
     })
     .map(([month, items]) => {
       const income = items.filter((tx) => tx.amount > 0).reduce((sum, tx) => sum + tx.amount, 0)
-      const expenses = items
-        .filter((tx) => tx.amount < 0)
-        .reduce((sum, tx) => sum + Math.abs(tx.amount), 0)
+      const expenses = items.filter((tx) => tx.amount < 0).reduce((sum, tx) => sum + Math.abs(tx.amount), 0)
       return { month, items, income, expenses, net: income - expenses }
     })
 }
@@ -81,12 +79,7 @@ function useTransactionFilters() {
   }
 
   const hasFilters =
-    month !== 'all' ||
-    categoryId !== 'all' ||
-    accountId !== 'all' ||
-    type !== 'all' ||
-    sort !== 'date-desc' ||
-    search.trim() !== ''
+    month !== 'all' || categoryId !== 'all' || accountId !== 'all' || type !== 'all' || sort !== 'date-desc' || search.trim() !== ''
 
   let filterType: 'all' | 'income' | 'expense' = 'all'
   if (type === 'ingreso') filterType = 'income'
@@ -167,12 +160,7 @@ function TransactionFilters({
       </label>
 
       <div className="filters">
-        <select
-          aria-label="Mes"
-          className="filters__select"
-          onChange={(event_) => setFilter(setMonth, event_.target.value)}
-          value={month}
-        >
+        <select aria-label="Mes" className="filters__select" onChange={(event_) => setFilter(setMonth, event_.target.value)} value={month}>
           <option value="all">Todos los meses</option>
           {months.map((m) => (
             <option key={m} value={m}>
@@ -180,12 +168,7 @@ function TransactionFilters({
             </option>
           ))}
         </select>
-        <select
-          aria-label="Tipo"
-          className="filters__select"
-          onChange={(event_) => setFilter(setType, event_.target.value)}
-          value={type}
-        >
+        <select aria-label="Tipo" className="filters__select" onChange={(event_) => setFilter(setType, event_.target.value)} value={type}>
           <option value="all">Ingresos y gastos</option>
           <option value="gasto">Solo gastos</option>
           <option value="ingreso">Solo ingresos</option>
@@ -237,17 +220,7 @@ function TransactionFilters({
   )
 }
 
-function TransactionSummary({
-  count,
-  income,
-  expenses,
-  net,
-}: {
-  count: number
-  income: number
-  expenses: number
-  net: number
-}) {
+function TransactionSummary({ count, income, expenses, net }: { count: number; income: number; expenses: number; net: number }) {
   return (
     <div aria-label="Resumen filtrado" className="tx-summary-grid">
       <div className="tx-stat">
@@ -264,9 +237,7 @@ function TransactionSummary({
       </div>
       <div className="tx-stat">
         <span className="tx-stat__label">Neto</span>
-        <span className={`tx-stat__value tnum ${net >= 0 ? 'tx-stat__value--in' : ''}`}>
-          {formatSignedCurrency(net)}
-        </span>
+        <span className={`tx-stat__value tnum ${net >= 0 ? 'tx-stat__value--in' : ''}`}>{formatSignedCurrency(net)}</span>
       </div>
     </div>
   )
@@ -290,11 +261,7 @@ function TransactionGroups(properties: TransactionGroupsProperties) {
     return (
       <div className="card empty">
         <Icon name="transactions" size={28} />
-        <p>
-          {hasTransactions
-            ? 'No hay movimientos con estos filtros.'
-            : 'Todavía no hay movimientos.'}
-        </p>
+        <p>{hasTransactions ? 'No hay movimientos con estos filtros.' : 'Todavía no hay movimientos.'}</p>
         {hasFilters && (
           <button className="filters__clear" onClick={resetFilters} type="button">
             Limpiar filtros
@@ -320,9 +287,7 @@ function TransactionGroups(properties: TransactionGroupsProperties) {
               </div>
               <div>
                 <dt>Neto</dt>
-                <dd className={`tnum ${g.net >= 0 ? 'is-in' : ''}`}>
-                  {formatSignedCurrency(g.net)}
-                </dd>
+                <dd className={`tnum ${g.net >= 0 ? 'is-in' : ''}`}>{formatSignedCurrency(g.net)}</dd>
               </div>
             </dl>
           </header>
@@ -337,45 +302,23 @@ function TransactionGroups(properties: TransactionGroupsProperties) {
                   </time>
                   <span
                     className="txrow__icon"
-                    style={
-                      { '--c': isIncome ? '#10b981' : (cat?.color ?? '#94a3b8') } as Record<
-                        string,
-                        string
-                      >
-                    }
+                    style={{ '--c': isIncome ? '#10b981' : (cat?.color ?? '#94a3b8') } as Record<string, string>}
                   >
                     <Icon name={cat?.icon ?? 'package'} size={18} />
                   </span>
                   <div className="txrow__info">
                     <span className="txrow__desc">{t.description}</span>
                   </div>
-                  <span
-                    className="pill txrow__category"
-                    style={{ '--c': cat?.color ?? '#94a3b8' } as Record<string, string>}
-                  >
+                  <span className="pill txrow__category" style={{ '--c': cat?.color ?? '#94a3b8' } as Record<string, string>}>
                     {cat?.label ?? 'Sin categoría'}
                   </span>
-                  <span className="txrow__account">
-                    {accumulatorById[t.accountId]?.name ?? 'Cuenta'}
-                  </span>
-                  <span className={`txrow__amount tnum ${isIncome ? 'is-in' : ''}`}>
-                    {formatSignedCurrency(t.amount)}
-                  </span>
+                  <span className="txrow__account">{accumulatorById[t.accountId]?.name ?? 'Cuenta'}</span>
+                  <span className={`txrow__amount tnum ${isIncome ? 'is-in' : ''}`}>{formatSignedCurrency(t.amount)}</span>
                   <div className="txrow__actions">
-                    <button
-                      aria-label="Editar"
-                      className="icon-btn"
-                      onClick={() => onEdit(t)}
-                      type="button"
-                    >
+                    <button aria-label="Editar" className="icon-btn" onClick={() => onEdit(t)} type="button">
                       <Icon name="edit" size={16} />
                     </button>
-                    <button
-                      aria-label="Borrar"
-                      className="icon-btn icon-btn--danger"
-                      onClick={() => onDelete(t)}
-                      type="button"
-                    >
+                    <button aria-label="Borrar" className="icon-btn icon-btn--danger" onClick={() => onDelete(t)} type="button">
                       <Icon name="delete" size={16} />
                     </button>
                   </div>
@@ -451,14 +394,7 @@ function DeleteTransactionModal({
 }
 
 function TransactionsPage() {
-  const {
-    categories,
-    accounts,
-    getTransactions,
-    getAvailableMonths,
-    updateTransaction,
-    deleteTransaction,
-  } = useFinance()
+  const { categories, accounts, getTransactions, getAvailableMonths, updateTransaction, deleteTransaction } = useFinance()
 
   const cats = categoryMap(categories)
   const accumulatorById = Object.fromEntries(accounts.map((a) => [a.id, a]))
@@ -556,13 +492,7 @@ function TransactionsPage() {
         />
       )}
 
-      {deleting && (
-        <DeleteTransactionModal
-          onClose={() => setDeleting(undefined)}
-          onConfirm={deleteTransaction}
-          transaction={deleting}
-        />
-      )}
+      {deleting && <DeleteTransactionModal onClose={() => setDeleting(undefined)} onConfirm={deleteTransaction} transaction={deleting} />}
     </>
   )
 }

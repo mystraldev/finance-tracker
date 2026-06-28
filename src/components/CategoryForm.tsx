@@ -68,10 +68,7 @@ function CategoryForm({ initial, onSubmit, onCancel }: CategoryFormProperties) {
   return (
     <form className="form" onSubmit={handleSubmit}>
       <div className="cat-preview">
-        <span
-          className="icon-tile"
-          style={{ color, background: `color-mix(in srgb, ${color} 14%, transparent)` }}
-        >
+        <span className="icon-tile" style={{ color, background: `color-mix(in srgb, ${color} 14%, transparent)` }}>
           <Icon name={icon} size={22} />
         </span>
         <span className="cat-preview__name">{label.trim() || 'Nueva categoría'}</span>

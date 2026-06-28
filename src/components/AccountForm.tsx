@@ -30,15 +30,7 @@ function getAccentColor(accent: string): string {
   return ACCENTS.find((a) => a.value === accent)?.color ?? '#0a6ce0'
 }
 
-function AccountPreview({
-  accentColor,
-  icon,
-  name,
-}: {
-  accentColor: string
-  icon: string
-  name: string
-}) {
+function AccountPreview({ accentColor, icon, name }: { accentColor: string; icon: string; name: string }) {
   return (
     <div className="cat-preview">
       <span
@@ -103,13 +95,7 @@ function BalanceFields({
   )
 }
 
-function ColorSwatches({
-  accent,
-  onAccentChange,
-}: {
-  accent: string
-  onAccentChange: (value: string) => void
-}) {
+function ColorSwatches({ accent, onAccentChange }: { accent: string; onAccentChange: (value: string) => void }) {
   return (
     <div className="field">
       <span className="field__label">Color</span>
@@ -131,15 +117,7 @@ function ColorSwatches({
   )
 }
 
-function IconPicker({
-  icon,
-  onIconChange,
-  accentColor,
-}: {
-  icon: string
-  onIconChange: (value: string) => void
-  accentColor: string
-}) {
+function IconPicker({ icon, onIconChange, accentColor }: { icon: string; onIconChange: (value: string) => void; accentColor: string }) {
   return (
     <div className="field">
       <span className="field__label">Icono</span>
@@ -167,12 +145,8 @@ function AccountForm({ initial, onSubmit, onCancel }: AccountFormProperties) {
   const [icon, setIcon] = useState(initial?.icon ?? 'wallet')
   const [accent, setAccent] = useState(initial?.accent ?? 'indigo')
   const accentColor = getAccentColor(accent)
-  const [openingBalance, setOpeningBalance] = useState(
-    initial ? String(initial.openingBalance) : '',
-  )
-  const [interestRate, setInterestRate] = useState(
-    initial?.interestRate === undefined ? '' : String(initial.interestRate * 100),
-  )
+  const [openingBalance, setOpeningBalance] = useState(initial ? String(initial.openingBalance) : '')
+  const [interestRate, setInterestRate] = useState(initial?.interestRate === undefined ? '' : String(initial.interestRate * 100))
   const [error, setError] = useState('')
 
   function handleSubmit(event_: FormEvent) {

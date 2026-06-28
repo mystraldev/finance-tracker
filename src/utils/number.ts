@@ -11,8 +11,7 @@ export function parseDecimal(text: string): number {
   let normalised: string
   if (lastComma !== -1 && lastDot !== -1) {
     // Both separators present: the last one is the decimal separator.
-    normalised =
-      lastComma > lastDot ? raw.replaceAll('.', '').replace(',', '.') : raw.replaceAll(',', '')
+    normalised = lastComma > lastDot ? raw.replaceAll('.', '').replace(',', '.') : raw.replaceAll(',', '')
   } else if (lastComma !== -1) {
     normalised = raw.replace(',', '.')
   } else if (lastDot !== -1 && /^-?\d{1,3}(?:\.\d{3})+$/.test(raw)) {

@@ -11,9 +11,7 @@ const value = {
   cycleMode: vi.fn(),
 }
 
-const wrapper = ({ children }: { children: ReactNode }) => (
-  <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
-)
+const wrapper = ({ children }: { children: ReactNode }) => <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 
 describe('useTheme', () => {
   it('returns the context value when used inside a provider', () => {

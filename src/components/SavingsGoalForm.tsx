@@ -8,18 +8,7 @@ import { parseDecimal } from '../utils/number'
 import Icon from './Icon'
 import { selectableIcons } from './iconCatalog'
 
-const PALETTE = [
-  '#0a6ce0',
-  '#8d66d9',
-  '#ec4899',
-  '#f43f5e',
-  '#f59e0b',
-  '#1ea35b',
-  '#14b8a6',
-  '#06b6d4',
-  '#3b82f6',
-  '#64748b',
-]
+const PALETTE = ['#0a6ce0', '#8d66d9', '#ec4899', '#f43f5e', '#f59e0b', '#1ea35b', '#14b8a6', '#06b6d4', '#3b82f6', '#64748b']
 
 function isCompleteTargetDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
@@ -43,9 +32,7 @@ function availableFor(
 ): number | undefined {
   const account = accounts.find((item) => item.id === nextAccountId)
   if (!account) return undefined
-  const reserved = goals
-    .filter((g) => g.id !== initialId && g.accountId === nextAccountId)
-    .reduce((sum, g) => sum + g.savedAmount, 0)
+  const reserved = goals.filter((g) => g.id !== initialId && g.accountId === nextAccountId).reduce((sum, g) => sum + g.savedAmount, 0)
   return account.balance - reserved
 }
 
@@ -79,10 +66,7 @@ function validateGoal(
 function Preview({ name, color, icon }: { name: string; color: string; icon: string }) {
   return (
     <div className="cat-preview">
-      <span
-        className="icon-tile"
-        style={{ color, background: `color-mix(in srgb, ${color} 14%, transparent)` }}
-      >
+      <span className="icon-tile" style={{ color, background: `color-mix(in srgb, ${color} 14%, transparent)` }}>
         <Icon name={icon} size={22} />
       </span>
       <span className="cat-preview__name">{name.trim() || 'Nuevo objetivo'}</span>
@@ -184,9 +168,7 @@ function AccountDateFields({
             const next = event.target.value
             setAccountId(next)
             if (!savedTouched) {
-              setSavedAmount(
-                autoSavedAmount(availableFor(next, accounts, goals, initial?.id), targetAmount),
-              )
+              setSavedAmount(autoSavedAmount(availableFor(next, accounts, goals, initial?.id), targetAmount))
             }
           }}
           value={accountId}
@@ -202,12 +184,7 @@ function AccountDateFields({
 
       <label className="field">
         <span className="field__label">Fecha objetivo</span>
-        <input
-          className="field__input"
-          onChange={(event) => setTargetDate(event.target.value)}
-          type="date"
-          value={targetDate}
-        />
+        <input className="field__input" onChange={(event) => setTargetDate(event.target.value)} type="date" value={targetDate} />
       </label>
     </div>
   )
@@ -235,15 +212,7 @@ function ColorSwatches({ color, setColor }: { color: string; setColor: (v: strin
   )
 }
 
-function IconPicker({
-  icon,
-  setIcon,
-  color,
-}: {
-  icon: string
-  setIcon: (v: string) => void
-  color: string
-}) {
+function IconPicker({ icon, setIcon, color }: { icon: string; setIcon: (v: string) => void; color: string }) {
   return (
     <div className="field">
       <span className="field__label">Icono</span>
@@ -284,15 +253,9 @@ function useSavingsGoalFormState({
   const [icon, setIcon] = useState(initial?.icon ?? 'piggy')
   const [error, setError] = useState('')
 
-  const linkedAccount = useMemo(
-    () => accounts.find((a) => a.id === accountId),
-    [accounts, accountId],
-  )
+  const linkedAccount = useMemo(() => accounts.find((a) => a.id === accountId), [accounts, accountId])
   const otherReserved = useMemo(
-    () =>
-      goals
-        .filter((g) => g.id !== initial?.id && g.accountId === accountId)
-        .reduce((sum, g) => sum + g.savedAmount, 0),
+    () => goals.filter((g) => g.id !== initial?.id && g.accountId === accountId).reduce((sum, g) => sum + g.savedAmount, 0),
     [accountId, goals, initial?.id],
   )
   const availableForAccount = linkedAccount ? linkedAccount.balance - otherReserved : undefined
@@ -329,13 +292,7 @@ type SavingsGoalFormProperties = {
   onCancel: () => void
 }
 
-function SavingsGoalForm({
-  accounts,
-  goals,
-  initial,
-  onSubmit,
-  onCancel,
-}: SavingsGoalFormProperties) {
+function SavingsGoalForm({ accounts, goals, initial, onSubmit, onCancel }: SavingsGoalFormProperties) {
   const {
     name,
     setName,
@@ -361,13 +318,7 @@ function SavingsGoalForm({
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    const validationError = validateGoal(
-      name,
-      targetAmount,
-      savedAmount,
-      targetDate,
-      availableForAccount,
-    )
+    const validationError = validateGoal(name, targetAmount, savedAmount, targetDate, availableForAccount)
     if (validationError) {
       setError(validationError)
       return

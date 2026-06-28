@@ -58,9 +58,7 @@ function BudgetsCard({ budgets, totalCount = budgets.length }: BudgetsCardProper
               <div className="budget-row__main">
                 <div className="budget-row__top">
                   <span className="budget-row__label">{b.label}</span>
-                  <span className={`budget-badge budget-badge--${b.status}`}>
-                    {budgetStatusLabel[b.status]}
-                  </span>
+                  <span className={`budget-badge budget-badge--${b.status}`}>{budgetStatusLabel[b.status]}</span>
                 </div>
 
                 <BudgetProgress budget={b} showBadge={false} showPercent />

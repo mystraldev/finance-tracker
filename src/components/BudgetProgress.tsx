@@ -10,11 +10,7 @@ type BudgetProgressProperties = {
   showPercent?: boolean
 }
 
-function BudgetProgress({
-  budget,
-  showBadge = true,
-  showPercent = false,
-}: BudgetProgressProperties) {
+function BudgetProgress({ budget, showBadge = true, showPercent = false }: BudgetProgressProperties) {
   return (
     <div className="budget-meter">
       <div
@@ -39,14 +35,8 @@ function BudgetProgress({
           {formatCurrency(budget.spent)} / {formatCurrency(budget.budget)}
         </span>
         <span className="budget-meter__status">
-          {showPercent && (
-            <span className="budget-meter__pct tnum">{formatPercent(budget.pct)}</span>
-          )}
-          {showBadge && (
-            <span className={`budget-badge budget-badge--${budget.status}`}>
-              {budgetStatusLabel[budget.status]}
-            </span>
-          )}
+          {showPercent && <span className="budget-meter__pct tnum">{formatPercent(budget.pct)}</span>}
+          {showBadge && <span className={`budget-badge budget-badge--${budget.status}`}>{budgetStatusLabel[budget.status]}</span>}
         </span>
       </div>
 

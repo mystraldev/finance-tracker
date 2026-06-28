@@ -119,9 +119,7 @@ describe('AccountsPage', () => {
     fireEvent.change(screen.getByLabelText('Cuenta asociada'), { target: { value: 'checking' } })
     fireEvent.click(screen.getByRole('button', { name: 'Crear objetivo' }))
 
-    expect(
-      screen.getByText(/Esta cuenta solo tiene 1000,00\s€ disponible para reservar\./),
-    ).toBeInTheDocument()
+    expect(screen.getByText(/Esta cuenta solo tiene 1000,00\s€ disponible para reservar\./)).toBeInTheDocument()
     expect(value.addSavingsGoal).not.toHaveBeenCalled()
   })
 

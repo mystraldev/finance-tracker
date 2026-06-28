@@ -21,10 +21,7 @@ describe('BudgetProgress', () => {
   it('renders meter, status badge and over-budget copy', () => {
     render(<BudgetProgress budget={budget} />)
 
-    expect(screen.getByRole('meter', { name: /Alimentación/i })).toHaveAttribute(
-      'aria-valuenow',
-      '250',
-    )
+    expect(screen.getByRole('meter', { name: /Alimentación/i })).toHaveAttribute('aria-valuenow', '250')
     expect(screen.getByText('Superado')).toBeInTheDocument()
     expect(screen.getByText(/por encima/)).toBeInTheDocument()
   })

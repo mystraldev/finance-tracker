@@ -7,14 +7,7 @@ describe('ConfirmDialog', () => {
   it('renders the message and wires confirm / cancel', () => {
     const onConfirm = vi.fn()
     const onCancel = vi.fn()
-    render(
-      <ConfirmDialog
-        confirmLabel="Borrar"
-        message="¿Borrar esto?"
-        onCancel={onCancel}
-        onConfirm={onConfirm}
-      />,
-    )
+    render(<ConfirmDialog confirmLabel="Borrar" message="¿Borrar esto?" onCancel={onCancel} onConfirm={onConfirm} />)
 
     expect(screen.getByText('¿Borrar esto?')).toBeInTheDocument()
 

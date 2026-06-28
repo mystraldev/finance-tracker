@@ -8,9 +8,7 @@ import { FINANCE_STORAGE_KEY } from '../../../src/data/financeRepo'
 import { useFinance } from '../../../src/store/financeContext'
 import { FinanceProvider } from '../../../src/store/FinanceProvider'
 
-const wrapper = ({ children }: { children: ReactNode }) => (
-  <FinanceProvider>{children}</FinanceProvider>
-)
+const wrapper = ({ children }: { children: ReactNode }) => <FinanceProvider>{children}</FinanceProvider>
 
 function setup() {
   return renderHook(() => useFinance(), { wrapper })
@@ -62,10 +60,7 @@ describe('FinanceProvider store', () => {
   it('initialises to the current month when it has transactions', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-06-09T00:00:00.000Z'))
-    const data = createFinanceData([
-      transaction('june', '2026-06-09'),
-      transaction('future', '2026-07-01'),
-    ])
+    const data = createFinanceData([transaction('june', '2026-06-09'), transaction('future', '2026-07-01')])
     localStorage.setItem(FINANCE_STORAGE_KEY, JSON.stringify(data))
 
     const { result } = setup()
@@ -76,10 +71,7 @@ describe('FinanceProvider store', () => {
   it('initialises to the latest available month when the current month is empty', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-07-09T00:00:00.000Z'))
-    const data = createFinanceData([
-      transaction('may', '2026-05-09'),
-      transaction('june', '2026-06-09'),
-    ])
+    const data = createFinanceData([transaction('may', '2026-05-09'), transaction('june', '2026-06-09')])
     localStorage.setItem(FINANCE_STORAGE_KEY, JSON.stringify(data))
 
     const { result } = setup()

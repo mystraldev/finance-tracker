@@ -91,8 +91,6 @@ describe('AddTransactionButton', () => {
     const submitButton = screen.getByRole('dialog').querySelector('button[type="submit"]')!
     fireEvent.click(submitButton)
 
-    expect(value.addTransaction).toHaveBeenCalledWith(
-      expect.objectContaining({ amount: -100, description: 'Test' }),
-    )
+    expect(value.addTransaction).toHaveBeenCalledWith(expect.objectContaining({ amount: -100, description: 'Test' }))
   })
 })

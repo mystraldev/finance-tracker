@@ -126,8 +126,7 @@ function BackupDataCard({
         <div>
           <h2 className="card__title">Datos locales</h2>
           <p className="settings-card__copy">
-            {accountsLength} cuentas · {categoriesLength} categorías · {transactionsLength}{' '}
-            movimientos · {savingsGoalsLength} objetivos
+            {accountsLength} cuentas · {categoriesLength} categorías · {transactionsLength} movimientos · {savingsGoalsLength} objetivos
           </p>
         </div>
       </div>
@@ -180,9 +179,7 @@ function SettingsPage() {
         <div>
           <p className="page-header__greeting">Preferencias</p>
           <h1 className="page-header__title">Ajustes</h1>
-          <p className="page-header__description">
-            Tema actual: {getThemeLabel(mode, systemTheme)}
-          </p>
+          <p className="page-header__description">Tema actual: {getThemeLabel(mode, systemTheme)}</p>
         </div>
       </header>
 
@@ -196,9 +193,7 @@ function SettingsPage() {
         <BackupDataCard
           accountsLength={accounts.length}
           categoriesLength={categories.length}
-          onExport={() =>
-            handleExport({ accounts, categories, transactions, savingsGoals }, setStatus)
-          }
+          onExport={() => handleExport({ accounts, categories, transactions, savingsGoals }, setStatus)}
           onImport={() => inputReference.current?.click()}
           savingsGoalsLength={savingsGoals.length}
           transactionsLength={transactions.length}
@@ -208,14 +203,7 @@ function SettingsPage() {
           accept="application/json,.json"
           aria-label="Seleccionar backup JSON"
           className="sr-only"
-          onChange={(event) =>
-            void handleImport(
-              event.target.files?.[0],
-              setStatus,
-              setPendingImport,
-              inputReference.current,
-            )
-          }
+          onChange={(event) => void handleImport(event.target.files?.[0], setStatus, setPendingImport, inputReference.current)}
           ref={inputReference}
           type="file"
         />
@@ -227,9 +215,7 @@ function SettingsPage() {
             </span>
             <div>
               <h2 className="card__title">Tema</h2>
-              <p className="settings-card__copy">
-                Interfaz {theme === 'dark' ? 'oscura' : 'clara'}
-              </p>
+              <p className="settings-card__copy">Interfaz {theme === 'dark' ? 'oscura' : 'clara'}</p>
             </div>
           </div>
 
@@ -256,9 +242,7 @@ function SettingsPage() {
             </span>
             <div>
               <h2 className="card__title">Reiniciar datos</h2>
-              <p className="settings-card__copy">
-                Restaura las cuentas, categorías y movimientos demo.
-              </p>
+              <p className="settings-card__copy">Restaura las cuentas, categorías y movimientos demo.</p>
             </div>
           </div>
 
@@ -272,9 +256,7 @@ function SettingsPage() {
       {pendingImport && (
         <ImportConfirmDialog
           onCancel={() => setPendingImport(undefined)}
-          onConfirm={() =>
-            handleConfirmImport(pendingImport, importData, setPendingImport, setStatus)
-          }
+          onConfirm={() => handleConfirmImport(pendingImport, importData, setPendingImport, setStatus)}
           pendingImport={pendingImport}
         />
       )}

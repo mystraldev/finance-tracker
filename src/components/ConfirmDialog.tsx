@@ -9,13 +9,7 @@ type ConfirmDialogProperties = {
   onCancel: () => void
 }
 
-function ConfirmDialog({
-  title = '¿Estás seguro?',
-  message,
-  confirmLabel = 'Borrar',
-  onConfirm,
-  onCancel,
-}: ConfirmDialogProperties) {
+function ConfirmDialog({ title = '¿Estás seguro?', message, confirmLabel = 'Borrar', onConfirm, onCancel }: ConfirmDialogProperties) {
   return (
     <Modal onClose={onCancel} title={title}>
       <p className="confirm__message">{message}</p>
