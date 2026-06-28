@@ -8,5 +8,6 @@ RUN pnpm run build
 FROM node:24-alpine AS production
 RUN corepack enable && pnpm install -g serve
 COPY --from=build /app/dist /app/dist
+USER node
 EXPOSE 3000
 CMD ["serve", "/app/dist", "-l", "3000"]
