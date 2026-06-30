@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 
+import { useAuth } from '../store/authContext'
 import { useTheme } from '../store/themeContext'
 import Icon from './Icon'
 
@@ -8,12 +9,15 @@ const navItems = [
   { id: 'transactions', label: 'Movimientos', icon: 'transactions', to: '/movimientos' },
   { id: 'categories', label: 'Categorías', icon: 'categories', to: '/categorias' },
   { id: 'accounts', label: 'Cuentas', icon: 'accounts', to: '/cuentas' },
+  { id: 'import', label: 'Importar', icon: 'upload', to: '/importar' },
   { id: 'investments', label: 'Inversiones', icon: 'investments' },
   { id: 'settings', label: 'Ajustes', icon: 'settings', to: '/ajustes' },
 ]
 
 export default function Sidebar() {
   const { mode, theme, cycleMode } = useTheme()
+  const { user, signOut } = useAuth()
+  const userInitial = (user?.email ?? '?').charAt(0).toUpperCase()
 
   function getNextLabel(): string {
     if (mode === 'system') return 'Forzar claro'
@@ -90,10 +94,18 @@ export default function Sidebar() {
         </button>
 
         <div className="user-chip">
-          <span className="user-chip__avatar">F</span>
+          <span className="user-chip__avatar">{userInitial}</span>
           <div className="user-chip__info">
-            <span className="user-chip__name">Ferran</span>
-            <span className="user-chip__plan">Plan personal</span>
+            <span className="user-chip__name" title={user?.email ?? undefined}>
+              {user?.email ?? 'Invitado'}
+            </span>
+            <button
+              className="user-chip__signout"
+              onClick={() => void signOut()}
+              type="button"
+            >
+              Cerrar sesión
+            </button>
           </div>
         </div>
       </div>

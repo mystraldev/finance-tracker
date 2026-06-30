@@ -12,8 +12,6 @@ import { useFinance } from '../store/financeContext'
 import { categoryBudgets, monthLabel } from '../utils/derive'
 import { formatCurrency } from '../utils/format'
 
-const INCOME_CATEGORY_ID = 'income'
-
 function monthlyUsage(id: string, transactions: { categoryId: string; amount: number }[]) {
   const txs = transactions.filter((t) => t.categoryId === id)
   return {
@@ -144,7 +142,7 @@ function CategoriesPage() {
   const [deleting, setDeleting] = useState<Category | undefined>(undefined)
   const [blocked, setBlocked] = useState<Category | undefined>(undefined)
 
-  const managed = categories.filter((c) => c.id !== INCOME_CATEGORY_ID)
+  const managed = categories
 
   return (
     <>

@@ -19,7 +19,6 @@ const data: FinanceData = {
     },
   ],
   categories: [
-    { id: 'income', label: 'Ingresos', color: '#22c55e', icon: 'salary' },
     { id: 'home', label: 'Vivienda', color: '#6366f1', icon: 'home', budget: 700 },
     { id: 'health', label: 'Salud', color: '#06b6d4', icon: 'health' },
   ],

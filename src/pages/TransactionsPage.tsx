@@ -8,6 +8,7 @@ import Icon from '../components/Icon'
 import Modal from '../components/Modal'
 import TransactionForm from '../components/TransactionForm'
 import { useFinance } from '../store/financeContext'
+import { sameDescriptionTransactions } from '../utils/categorize'
 import {
   categoryMap,
   monthKey,
@@ -396,6 +397,33 @@ function DeleteTransactionModal({
   )
 }
 
+type PendingBulk = { description: string; categoryId: string; ids: string[] }
+
+/** Offer to apply a just-changed category to other transactions with the same description. */
+function useBulkRecategorize(
+  allTransactions: Transaction[],
+  updateTransaction: (tx: Partial<Transaction> & { id: string }) => void,
+) {
+  const [pending, setPending] = useState<PendingBulk | undefined>(undefined)
+
+  function offer(original: Transaction | undefined, tx: Partial<Transaction> & { id: string }) {
+    if (!original || tx.categoryId === undefined || tx.categoryId === original.categoryId) return
+    const description = tx.description ?? original.description
+    const targets = sameDescriptionTransactions(allTransactions, tx.id, description, tx.categoryId)
+    if (targets.length > 0) {
+      setPending({ description, categoryId: tx.categoryId, ids: targets.map((t) => t.id) })
+    }
+  }
+
+  function apply() {
+    if (!pending) return
+    for (const id of pending.ids) updateTransaction({ id, categoryId: pending.categoryId })
+    setPending(undefined)
+  }
+
+  return { pending, offer, apply, dismiss: () => setPending(undefined) }
+}
+
 function TransactionsPage() {
   const { categories, accounts, getTransactions, getAvailableMonths, updateTransaction, deleteTransaction } =
     useFinance()
@@ -427,6 +455,12 @@ function TransactionsPage() {
 
   const [editing, setEditing] = useState<Transaction | undefined>(undefined)
   const [deleting, setDeleting] = useState<Transaction | undefined>(undefined)
+  const bulk = useBulkRecategorize(allTransactions, updateTransaction)
+
+  function handleSaveEdit(tx: Partial<Transaction> & { id: string }) {
+    updateTransaction(tx)
+    bulk.offer(editing, tx)
+  }
 
   return (
     <>
@@ -480,8 +514,18 @@ function TransactionsPage() {
           accounts={accounts}
           categories={categories}
           onClose={() => setEditing(undefined)}
-          onSave={updateTransaction}
+          onSave={handleSaveEdit}
           transaction={editing}
+        />
+      )}
+
+      {bulk.pending && (
+        <ConfirmDialog
+          confirmLabel={`Aplicar a ${bulk.pending.ids.length}`}
+          message={`Tienes ${bulk.pending.ids.length} movimiento(s) más con la descripción "${bulk.pending.description}". ¿Aplicarles también la categoría "${cats[bulk.pending.categoryId]?.label ?? ''}"?`}
+          onCancel={bulk.dismiss}
+          onConfirm={bulk.apply}
+          title="Aplicar a movimientos similares"
         />
       )}
 

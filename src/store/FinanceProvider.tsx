@@ -1,135 +1,131 @@
 import type { Account, Category, FinanceAction, FinanceData, FinanceState, SavingsGoal, Transaction, TransactionQuery } from '../types/finance'
-import type {ReactNode} from 'react';
+import type { ReactNode } from 'react'
 
-import {  useEffect, useMemo, useReducer } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
 
 import { financeRepo } from '../data/financeRepo'
-import { currentMonth } from '../utils/derive'
+import * as supabaseRepo from '../data/supabaseFinanceRepo'
+import { useAuth } from './authContext'
 import { FinanceContext } from './financeContext'
+import { initEmpty, reducer } from './financeReducer'
 
-function uid(): string {
-  if (typeof globalThis.crypto?.randomUUID === 'function') {
-    try {
-      return crypto.randomUUID()
-    } catch {
-      /* fallback */
-    }
+type LoadStatus = 'loading' | 'ready' | 'error'
+
+type Dispatch = (action: FinanceAction) => void
+type Persist = (operation: () => Promise<void>) => void
+
+// Serialise writes so dependent rows (e.g. an account then a transaction that
+// references it) reach the database in call order, avoiding FK races.
+function makeWriteQueue() {
+  let tail: Promise<void> = Promise.resolve()
+  return (operation: () => Promise<void>, onError: (error: unknown) => void): void => {
+    tail = runNext(tail, operation, onError)
   }
-  // eslint-disable-next-line sonarjs/pseudo-random -- crypto.randomUUID fallback; IDs not security-critical
-  return `id-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 }
 
-function init(): FinanceState {
-  return createState(financeRepo.load())
-}
-
-function createState(data: FinanceData): FinanceState {
-  return { ...data, selectedMonth: selectInitialMonth(data) }
-}
-
-function selectInitialMonth(data: FinanceData): string {
-  const month = currentMonth()
-  const months = financeRepo.availableMonths(data)
-  return months.includes(month) ? month : months[0] ?? month
-}
-
-function reducer(state: FinanceState, action: FinanceAction): FinanceState {
-  switch (action.type) {
-    case 'ADD_TRANSACTION': {
-      return { ...state, transactions: [...state.transactions, action.payload] }
-    }
-    case 'UPDATE_TRANSACTION': {
-      return {
-        ...state,
-        transactions: state.transactions.map((t) =>
-          t.id === action.payload.id ? { ...t, ...action.payload } : t,
-        ),
-      }
-    }
-    case 'DELETE_TRANSACTION': {
-      return {
-        ...state,
-        transactions: state.transactions.filter((t) => t.id !== action.payload),
-      }
-    }
-
-    case 'ADD_CATEGORY': {
-      return { ...state, categories: [...state.categories, action.payload] }
-    }
-    case 'UPDATE_CATEGORY': {
-      return {
-        ...state,
-        categories: state.categories.map((c) =>
-          c.id === action.payload.id ? { ...c, ...action.payload } : c,
-        ),
-      }
-    }
-    case 'DELETE_CATEGORY': {
-      if (state.transactions.some((t) => t.categoryId === action.payload)) {
-        return state
-      }
-      return {
-        ...state,
-        categories: state.categories.filter((c) => c.id !== action.payload),
-      }
-    }
-
-    case 'ADD_ACCOUNT': {
-      return { ...state, accounts: [...state.accounts, action.payload] }
-    }
-    case 'UPDATE_ACCOUNT': {
-      return {
-        ...state,
-        accounts: state.accounts.map((a) =>
-          a.id === action.payload.id ? { ...a, ...action.payload } : a,
-        ),
-      }
-    }
-    case 'DELETE_ACCOUNT': {
-      if (
-        state.transactions.some((t) => t.accountId === action.payload) ||
-        state.savingsGoals.some((g) => g.accountId === action.payload)
-      ) {
-        return state
-      }
-      return {
-        ...state,
-        accounts: state.accounts.filter((a) => a.id !== action.payload),
-      }
-    }
-
-    case 'ADD_SAVINGS_GOAL': {
-      return { ...state, savingsGoals: [...state.savingsGoals, action.payload] }
-    }
-    case 'UPDATE_SAVINGS_GOAL': {
-      return {
-        ...state,
-        savingsGoals: state.savingsGoals.map((g) =>
-          g.id === action.payload.id ? { ...g, ...action.payload } : g,
-        ),
-      }
-    }
-    case 'DELETE_SAVINGS_GOAL': {
-      return {
-        ...state,
-        savingsGoals: state.savingsGoals.filter((g) => g.id !== action.payload),
-      }
-    }
-
-    case 'SET_MONTH': {
-      return { ...state, selectedMonth: action.payload }
-    }
-    case 'IMPORT_DATA': {
-      return createState(action.payload)
-    }
-    case 'RESET': {
-      return createState(financeRepo.seed())
-    }
-
-    default: {
-      return state
-    }
+async function runNext(
+  previous: Promise<void>,
+  operation: () => Promise<void>,
+  onError: (error: unknown) => void,
+): Promise<void> {
+  await previous
+  try {
+    await operation()
+  } catch (error) {
+    onError(error)
   }
+}
+
+function createFinanceActions(state: FinanceState, userId: string | undefined, dispatch: Dispatch, persist: Persist) {
+  return {
+    getTransactions: (query?: TransactionQuery) => financeRepo.listTransactions(state, query),
+    getAvailableMonths: () => financeRepo.availableMonths(state),
+    addTransaction: (tx: Omit<Transaction, 'id'>) => {
+      const entity: Transaction = { id: supabaseRepo.newId(), ...tx }
+      dispatch({ type: 'ADD_TRANSACTION', payload: entity })
+      if (userId) persist(() => supabaseRepo.upsertTransaction(userId, entity))
+    },
+    updateTransaction: (tx: Partial<Transaction> & { id: string }) => {
+      dispatch({ type: 'UPDATE_TRANSACTION', payload: tx })
+      const current = state.transactions.find((t) => t.id === tx.id)
+      if (current && userId) persist(() => supabaseRepo.upsertTransaction(userId, { ...current, ...tx }))
+    },
+    deleteTransaction: (id: string) => {
+      dispatch({ type: 'DELETE_TRANSACTION', payload: id })
+      persist(() => supabaseRepo.deleteTransaction(id))
+    },
+    addCategory: (cat: Omit<Category, 'id'>) => {
+      const entity: Category = { id: supabaseRepo.newId(), ...cat }
+      dispatch({ type: 'ADD_CATEGORY', payload: entity })
+      if (userId) persist(() => supabaseRepo.upsertCategory(userId, entity))
+    },
+    updateCategory: (cat: Partial<Category> & { id: string }) => {
+      dispatch({ type: 'UPDATE_CATEGORY', payload: cat })
+      const current = state.categories.find((c) => c.id === cat.id)
+      if (current && userId) persist(() => supabaseRepo.upsertCategory(userId, { ...current, ...cat }))
+    },
+    deleteCategory: (id: string) => {
+      dispatch({ type: 'DELETE_CATEGORY', payload: id })
+      if (state.transactions.every((t) => t.categoryId !== id)) {
+        persist(() => supabaseRepo.deleteCategory(id))
+      }
+    },
+    addAccount: (account: Omit<Account, 'id'>) => {
+      const entity: Account = { id: supabaseRepo.newId(), ...account }
+      dispatch({ type: 'ADD_ACCOUNT', payload: entity })
+      if (userId) persist(() => supabaseRepo.upsertAccount(userId, entity))
+    },
+    updateAccount: (account: Partial<Account> & { id: string }) => {
+      dispatch({ type: 'UPDATE_ACCOUNT', payload: account })
+      const current = state.accounts.find((a) => a.id === account.id)
+      if (current && userId) persist(() => supabaseRepo.upsertAccount(userId, { ...current, ...account }))
+    },
+    deleteAccount: (id: string) => {
+      dispatch({ type: 'DELETE_ACCOUNT', payload: id })
+      const referenced =
+        state.transactions.some((t) => t.accountId === id) ||
+        state.savingsGoals.some((g) => g.accountId === id)
+      if (!referenced) persist(() => supabaseRepo.deleteAccount(id))
+    },
+    addSavingsGoal: (goal: Omit<SavingsGoal, 'id'>) => {
+      const entity: SavingsGoal = { id: supabaseRepo.newId(), ...goal }
+      dispatch({ type: 'ADD_SAVINGS_GOAL', payload: entity })
+      if (userId) persist(() => supabaseRepo.upsertSavingsGoal(userId, entity))
+    },
+    updateSavingsGoal: (goal: Partial<SavingsGoal> & { id: string }) => {
+      dispatch({ type: 'UPDATE_SAVINGS_GOAL', payload: goal })
+      const current = state.savingsGoals.find((g) => g.id === goal.id)
+      if (current && userId) persist(() => supabaseRepo.upsertSavingsGoal(userId, { ...current, ...goal }))
+    },
+    deleteSavingsGoal: (id: string) => {
+      dispatch({ type: 'DELETE_SAVINGS_GOAL', payload: id })
+      persist(() => supabaseRepo.deleteSavingsGoal(id))
+    },
+    setMonth: (m: string) => dispatch({ type: 'SET_MONTH', payload: m }),
+    importData: (data: FinanceData) => {
+      const remapped = supabaseRepo.remapFinanceData(data)
+      dispatch({ type: 'IMPORT_DATA', payload: remapped })
+      if (userId) persist(() => supabaseRepo.replaceAllData(userId, remapped))
+    },
+    reset: () => {
+      dispatch({ type: 'RESET' })
+      persist(() => supabaseRepo.clearAllData())
+    },
+  }
+}
+
+function FinanceStatus({ status, onRetry }: { status: LoadStatus; onRetry: () => void }) {
+  if (status === 'error') {
+    return (
+      <div className="app-status app-status--error">
+        <p>No se pudieron cargar tus datos.</p>
+        <button className="btn-primary" onClick={onRetry} type="button">
+          Reintentar
+        </button>
+      </div>
+    )
+  }
+  return <div className="app-status">Cargando tus datos…</div>
 }
 
 type FinanceProviderProperties = {
@@ -137,46 +133,83 @@ type FinanceProviderProperties = {
 }
 
 export function FinanceProvider({ children }: FinanceProviderProperties) {
-  const [state, dispatch] = useReducer(reducer, undefined, init)
-  const { accounts, categories, transactions, savingsGoals } = state
+  const { user } = useAuth()
+  const userId = user?.id
+  const [state, dispatch] = useReducer(reducer, undefined, initEmpty)
+  const [status, setStatus] = useState<LoadStatus>('loading')
+  const [enqueueWrite] = useState(makeWriteQueue)
+  const [saveError, setSaveError] = useState(false)
 
-  useEffect(() => {
-    financeRepo.save({ accounts, categories, transactions, savingsGoals })
-  }, [accounts, categories, savingsGoals, transactions])
+  const reload = useCallback(async () => {
+    try {
+      const data = await supabaseRepo.fetchFinanceData()
+      dispatch({ type: 'SET_DATA', payload: data })
+      setStatus('ready')
+    } catch (error) {
+      // eslint-disable-next-line no-console -- surface persistence failures while debugging
+      console.error('[finance] failed to reload data', error)
+      setStatus('error')
+    }
+  }, [])
 
-  const value = useMemo(
-    () => ({
-      ...state,
-      getTransactions: (query?: TransactionQuery) =>
-        financeRepo.listTransactions(state, query),
-      getAvailableMonths: () => financeRepo.availableMonths(state),
-      addTransaction: (tx: Omit<Transaction, 'id'>) =>
-        dispatch({ type: 'ADD_TRANSACTION', payload: { id: uid(), ...tx } }),
-      updateTransaction: (tx: Partial<Transaction> & { id: string }) =>
-        dispatch({ type: 'UPDATE_TRANSACTION', payload: tx }),
-      deleteTransaction: (id: string) => dispatch({ type: 'DELETE_TRANSACTION', payload: id }),
-      addCategory: (cat: Omit<Category, 'id'>) =>
-        dispatch({ type: 'ADD_CATEGORY', payload: { id: uid(), ...cat } }),
-      updateCategory: (cat: Partial<Category> & { id: string }) =>
-        dispatch({ type: 'UPDATE_CATEGORY', payload: cat }),
-      deleteCategory: (id: string) => dispatch({ type: 'DELETE_CATEGORY', payload: id }),
-      addAccount: (accumulator: Omit<Account, 'id'>) =>
-        dispatch({ type: 'ADD_ACCOUNT', payload: { id: uid(), ...accumulator } }),
-      updateAccount: (accumulator: Partial<Account> & { id: string }) =>
-        dispatch({ type: 'UPDATE_ACCOUNT', payload: accumulator }),
-      deleteAccount: (id: string) => dispatch({ type: 'DELETE_ACCOUNT', payload: id }),
-      addSavingsGoal: (goal: Omit<SavingsGoal, 'id'>) =>
-        dispatch({ type: 'ADD_SAVINGS_GOAL', payload: { id: uid(), ...goal } }),
-      updateSavingsGoal: (goal: Partial<SavingsGoal> & { id: string }) =>
-        dispatch({ type: 'UPDATE_SAVINGS_GOAL', payload: goal }),
-      deleteSavingsGoal: (id: string) =>
-        dispatch({ type: 'DELETE_SAVINGS_GOAL', payload: id }),
-      setMonth: (m: string) => dispatch({ type: 'SET_MONTH', payload: m }),
-      importData: (data: FinanceData) => dispatch({ type: 'IMPORT_DATA', payload: data }),
-      reset: () => dispatch({ type: 'RESET' }),
-    }),
-    [state],
+  const persist = useCallback<Persist>(
+    (operation) => {
+      enqueueWrite(
+        async () => {
+          await operation()
+          setSaveError(false)
+        },
+        (error) => {
+          // eslint-disable-next-line no-console -- surface persistence failures while debugging
+          console.error('[finance] failed to save change', error)
+          setSaveError(true)
+          void reload()
+        },
+      )
+    },
+    [enqueueWrite, reload],
   )
 
-  return <FinanceContext.Provider value={value}>{children}</FinanceContext.Provider>
+  useEffect(() => {
+    if (!userId) return
+    let isActive = true
+
+    async function load() {
+      try {
+        const data = await supabaseRepo.fetchFinanceData()
+        if (!isActive) return
+        dispatch({ type: 'SET_DATA', payload: data })
+        setStatus('ready')
+      } catch (error) {
+        if (!isActive) return
+        // eslint-disable-next-line no-console -- surface persistence failures while debugging
+        console.error('[finance] failed to load data', error)
+        setStatus('error')
+      }
+    }
+    void load()
+
+    return () => {
+      isActive = false
+    }
+  }, [userId])
+
+  const value = useMemo(
+    () => ({ ...state, ...createFinanceActions(state, userId, dispatch, persist) }),
+    [state, userId, persist],
+  )
+
+  return (
+    <FinanceContext.Provider value={value}>
+      {saveError && (
+        <div className="save-error" role="alert">
+          <span>No se ha podido guardar tu último cambio. Revisa tu conexión.</span>
+          <button aria-label="Cerrar" className="save-error__close" onClick={() => setSaveError(false)} type="button">
+            ✕
+          </button>
+        </div>
+      )}
+      {status === 'ready' ? children : <FinanceStatus onRetry={() => void reload()} status={status} />}
+    </FinanceContext.Provider>
+  )
 }

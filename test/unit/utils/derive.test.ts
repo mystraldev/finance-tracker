@@ -21,6 +21,7 @@ import {
   netWorthAsOf,
   netWorthSeries,
   recentTransactions,
+  savingsSummary,
   shortMonthLabel,
 } from '../../../src/utils/derive'
 
@@ -211,5 +212,31 @@ describe('categoryBudgets', () => {
   it('treats a month with no spend as ok', () => {
     const result = categoryBudgets(transactions, budgeted, '2026-04')
     expect(result.every((b) => b.status === 'ok' && b.spent === 0)).toBe(true)
+  })
+})
+
+describe('savingsSummary', () => {
+  const cats: Category[] = [
+    { id: 'salary', label: 'Nómina', icon: 'salary', color: '#000', isIncome: true },
+    { id: 'rent', label: 'Alquiler', icon: 'home', color: '#000' },
+    { id: 'reimburse', label: 'Reembolsos', icon: 'package', color: '#000' },
+  ]
+  const txs: Transaction[] = [
+    { id: '1', date: '2026-06-01', amount: 2000, description: 'Nómina', accountId: 'a', categoryId: 'salary' },
+    { id: '2', date: '2026-06-02', amount: -1000, description: 'Alquiler', accountId: 'a', categoryId: 'rent' },
+    { id: '3', date: '2026-06-03', amount: 500, description: 'Bizum mitad alquiler', accountId: 'a', categoryId: 'reimburse' },
+  ]
+
+  it('ties income to income categories and nets reimbursements against expenses', () => {
+    const summary = savingsSummary(txs, cats, '2026-06')
+    expect(summary.salary).toBe(2000)
+    expect(summary.netExpenses).toBe(500)
+    expect(summary.saved).toBe(1500)
+    expect(summary.configured).toBe(true)
+  })
+
+  it('is not configured when no category is marked as income', () => {
+    const noIncome = cats.map((c) => ({ ...c, isIncome: false }))
+    expect(savingsSummary(txs, noIncome, '2026-06').configured).toBe(false)
   })
 })

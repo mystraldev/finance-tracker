@@ -1,333 +1,327 @@
-import type { FinanceData, Transaction } from '../../../src/types/finance'
-import type { ReactNode } from 'react'
+import type { FinanceData } from '../../../src/types/finance'
 
-import { act, renderHook } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { act, render, renderHook, screen, waitFor } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { FINANCE_STORAGE_KEY } from '../../../src/data/financeRepo'
 import { useFinance } from '../../../src/store/financeContext'
 import { FinanceProvider } from '../../../src/store/FinanceProvider'
 
-const wrapper = ({ children }: { children: ReactNode }) => (
-  <FinanceProvider>{children}</FinanceProvider>
-)
+const mocks = vi.hoisted(() => ({
+  fetchFinanceData: vi.fn(),
+  upsertAccount: vi.fn(),
+  upsertCategory: vi.fn(),
+  upsertTransaction: vi.fn(),
+  upsertSavingsGoal: vi.fn(),
+  deleteAccount: vi.fn(),
+  deleteCategory: vi.fn(),
+  deleteTransaction: vi.fn(),
+  deleteSavingsGoal: vi.fn(),
+  clearAllData: vi.fn(),
+  replaceAllData: vi.fn(),
+}))
 
-function setup() {
-  return renderHook(() => useFinance(), { wrapper })
+vi.mock('../../../src/store/authContext', () => ({
+  useAuth: () => ({
+    user: { id: 'user-1', email: 'dev@example.com' },
+    session: { user: { id: 'user-1' } },
+    loading: false,
+    signIn: vi.fn(),
+    signUp: vi.fn(),
+    signOut: vi.fn(),
+  }),
+}))
+
+vi.mock('../../../src/data/supabaseFinanceRepo', () => ({
+  newId: () => 'generated-id',
+  fetchFinanceData: mocks.fetchFinanceData,
+  upsertAccount: mocks.upsertAccount,
+  upsertCategory: mocks.upsertCategory,
+  upsertTransaction: mocks.upsertTransaction,
+  upsertSavingsGoal: mocks.upsertSavingsGoal,
+  deleteAccount: mocks.deleteAccount,
+  deleteCategory: mocks.deleteCategory,
+  deleteTransaction: mocks.deleteTransaction,
+  deleteSavingsGoal: mocks.deleteSavingsGoal,
+  clearAllData: mocks.clearAllData,
+  replaceAllData: mocks.replaceAllData,
+  remapFinanceData: (data: FinanceData) => data,
+}))
+
+const seed: FinanceData = {
+  accounts: [
+    { id: 'acc-1', name: 'Cash', type: 'cash', icon: 'wallet', accent: 'indigo', openingBalance: 100 },
+  ],
+  categories: [
+    { id: 'cat-income', label: 'Income', color: '#22c55e', icon: 'salary' },
+    { id: 'cat-food', label: 'Food', color: '#10b981', icon: 'cart' },
+  ],
+  transactions: [
+    { id: 'tx-1', date: '2026-06-10', amount: 200, description: 'Salary', accountId: 'acc-1', categoryId: 'cat-income' },
+  ],
+  savingsGoals: [],
 }
 
-function createFinanceData(transactions: Transaction[]): FinanceData {
-  return {
-    accounts: [
-      {
-        id: 'cash',
-        name: 'Cash',
-        type: 'cash',
-        icon: 'wallet',
-        accent: 'indigo',
-        openingBalance: 0,
-      },
-    ],
-    categories: [{ id: 'income', label: 'Income', color: '#22c55e', icon: 'salary' }],
-    transactions,
-    savingsGoals: [],
-  }
-}
+beforeEach(() => {
+  vi.clearAllMocks()
+  mocks.fetchFinanceData.mockResolvedValue(structuredClone(seed))
+})
 
-function transaction(id: string, date: string): Transaction {
-  return {
-    id,
-    date,
-    amount: 25,
-    description: 'Income',
-    accountId: 'cash',
-    categoryId: 'income',
-  }
+afterEach(() => {
+  vi.restoreAllMocks()
+})
+
+async function setupReady() {
+  const view = renderHook(() => useFinance(), { wrapper: FinanceProvider })
+  await waitFor(() => expect(view.result.current?.accounts.length).toBeGreaterThan(0))
+  return view
 }
 
 describe('FinanceProvider store', () => {
-  beforeEach(() => {
-    vi.useRealTimers()
-    localStorage.clear()
-  })
-
-  it('initialises from the seed', () => {
-    const { result } = setup()
-    expect(result.current.accounts.length).toBeGreaterThan(0)
-    expect(result.current.categories.length).toBeGreaterThan(0)
-    expect(result.current.transactions.length).toBeGreaterThan(0)
+  it('loads finance data from Supabase on mount', async () => {
+    const { result } = await setupReady()
+    expect(result.current.accounts).toHaveLength(1)
+    expect(result.current.categories).toHaveLength(2)
+    expect(result.current.transactions).toHaveLength(1)
     expect(result.current.selectedMonth).toMatch(/^\d{4}-\d{2}$/)
+    expect(mocks.fetchFinanceData).toHaveBeenCalled()
   })
 
-  it('initialises to the current month when it has transactions', () => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date('2026-06-09T00:00:00.000Z'))
-    const data = createFinanceData([
-      transaction('june', '2026-06-09'),
-      transaction('future', '2026-07-01'),
-    ])
-    localStorage.setItem(FINANCE_STORAGE_KEY, JSON.stringify(data))
-
-    const { result } = setup()
-
-    expect(result.current.selectedMonth).toBe('2026-06')
+  it('exposes repository-backed queries', async () => {
+    const { result } = await setupReady()
+    expect(
+      result.current.getTransactions({ month: '2026-06', type: 'income' }),
+    ).toHaveLength(1)
+    expect(result.current.getAvailableMonths()).toContain('2026-06')
   })
 
-  it('initialises to the latest available month when the current month is empty', () => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date('2026-07-09T00:00:00.000Z'))
-    const data = createFinanceData([
-      transaction('may', '2026-05-09'),
-      transaction('june', '2026-06-09'),
-    ])
-    localStorage.setItem(FINANCE_STORAGE_KEY, JSON.stringify(data))
-
-    const { result } = setup()
-
-    expect(result.current.selectedMonth).toBe('2026-06')
-  })
-
-  it('keeps the current month when there are no transactions', () => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date('2026-07-09T00:00:00.000Z'))
-    localStorage.setItem(FINANCE_STORAGE_KEY, JSON.stringify(createFinanceData([])))
-
-    const { result } = setup()
-
-    expect(result.current.selectedMonth).toBe('2026-07')
-  })
-
-  it('adds a transaction with a generated id', () => {
-    const { result } = setup()
-    const before = result.current.transactions.length
+  it('adds a transaction optimistically and persists it', async () => {
+    const { result } = await setupReady()
     act(() => {
       result.current.addTransaction({
         date: '2026-06-15',
         amount: -10,
         description: 'Test',
-        accountId: result.current.accounts[0].id,
-        categoryId: result.current.categories[1].id,
+        accountId: 'acc-1',
+        categoryId: 'cat-food',
       })
     })
-    expect(result.current.transactions).toHaveLength(before + 1)
-    const added = result.current.transactions.at(-1)
-    expect(added?.id).toBeTruthy()
-    expect(added?.amount).toBe(-10)
+    expect(result.current.transactions).toHaveLength(2)
+    await waitFor(() =>
+      expect(mocks.upsertTransaction).toHaveBeenCalledWith(
+        'user-1',
+        expect.objectContaining({ id: 'generated-id', amount: -10 }),
+      ),
+    )
   })
 
-  it('exposes repository-backed transaction queries', () => {
-    const { result } = setup()
-
-    expect(
-      result.current.getTransactions({
-        month: '2026-06',
-        type: 'income',
-        sort: 'date-desc',
-      }),
-    ).toHaveLength(1)
-    expect(result.current.getAvailableMonths()[0]).toBe('2026-06')
+  it('updates a transaction and persists the merged entity', async () => {
+    const { result } = await setupReady()
+    act(() => {
+      result.current.updateTransaction({ id: 'tx-1', amount: 999 })
+    })
+    expect(result.current.transactions[0].amount).toBe(999)
+    await waitFor(() =>
+      expect(mocks.upsertTransaction).toHaveBeenCalledWith(
+        'user-1',
+        expect.objectContaining({ id: 'tx-1', amount: 999, description: 'Salary' }),
+      ),
+    )
   })
 
-  it('deletes an unused category', () => {
-    const { result } = setup()
+  it('deletes a transaction and persists the deletion', async () => {
+    const { result } = await setupReady()
     act(() => {
-      result.current.addCategory({
-        label: 'Unused',
-        color: '#6366f1',
-        icon: 'home',
-      })
+      result.current.deleteTransaction('tx-1')
     })
-    const id = result.current.categories.at(-1)?.id
-
-    expect(id).toBeTruthy()
-
-    act(() => {
-      result.current.deleteCategory(id ?? '')
-    })
-    expect(result.current.categories.some((c) => c.id === id)).toBe(false)
+    expect(result.current.transactions).toHaveLength(0)
+    await waitFor(() => expect(mocks.deleteTransaction).toHaveBeenCalledWith('tx-1'))
   })
 
-  it('keeps categories referenced by transactions', () => {
-    const { result } = setup()
-    const id = result.current.transactions[0].categoryId
+  it('adds and deletes an unused category', async () => {
+    const { result } = await setupReady()
+    act(() => {
+      result.current.addCategory({ label: 'Unused', color: '#6366f1', icon: 'home' })
+    })
+    await waitFor(() => expect(mocks.upsertCategory).toHaveBeenCalled())
 
     act(() => {
-      result.current.deleteCategory(id)
+      result.current.deleteCategory('generated-id')
     })
-
-    expect(result.current.categories.some((c) => c.id === id)).toBe(true)
+    expect(result.current.categories.some((c) => c.id === 'generated-id')).toBe(false)
+    await waitFor(() => expect(mocks.deleteCategory).toHaveBeenCalledWith('generated-id'))
   })
 
-  it('keeps accounts referenced by transactions', () => {
-    const { result } = setup()
-    const id = result.current.transactions[0].accountId
-
+  it('keeps a category referenced by a transaction and does not persist deletion', async () => {
+    const { result } = await setupReady()
     act(() => {
-      result.current.deleteAccount(id)
+      result.current.deleteCategory('cat-income')
     })
-
-    expect(result.current.accounts.some((a) => a.id === id)).toBe(true)
+    expect(result.current.categories.some((c) => c.id === 'cat-income')).toBe(true)
+    expect(mocks.deleteCategory).not.toHaveBeenCalled()
   })
 
-  it('deletes an unused account', () => {
-    const { result } = setup()
+  it('keeps an account referenced by a transaction and does not persist deletion', async () => {
+    const { result } = await setupReady()
     act(() => {
-      result.current.addAccount({
-        name: 'Unused',
-        type: 'cash',
-        icon: 'wallet',
-        accent: 'indigo',
-        openingBalance: 0,
-      })
+      result.current.deleteAccount('acc-1')
     })
-    const id = result.current.accounts.at(-1)?.id
-
-    expect(id).toBeTruthy()
-
-    act(() => {
-      result.current.deleteAccount(id ?? '')
-    })
-    expect(result.current.accounts.some((a) => a.id === id)).toBe(false)
+    expect(result.current.accounts.some((a) => a.id === 'acc-1')).toBe(true)
+    expect(mocks.deleteAccount).not.toHaveBeenCalled()
   })
 
-  it('creates, updates and deletes a savings goal', () => {
-    const { result } = setup()
-
+  it('adds, updates and deletes a savings goal', async () => {
+    const { result } = await setupReady()
     act(() => {
       result.current.addSavingsGoal({
-        name: 'Emergency fund',
+        name: 'Emergency',
         targetAmount: 1000,
         savedAmount: 100,
         icon: 'piggy',
         color: '#10b981',
-        accountId: result.current.accounts[0].id,
       })
     })
-
-    const added = result.current.savingsGoals.at(-1)
-    expect(added).toEqual(expect.objectContaining({
-      name: 'Emergency fund',
-      savedAmount: 100,
-    }))
+    await waitFor(() => expect(mocks.upsertSavingsGoal).toHaveBeenCalled())
 
     act(() => {
-      result.current.updateSavingsGoal({ id: added?.id ?? '', savedAmount: 250 })
+      result.current.updateSavingsGoal({ id: 'generated-id', savedAmount: 250 })
     })
-    expect(result.current.savingsGoals.find((goal) => goal.id === added?.id)?.savedAmount).toBe(250)
+    expect(result.current.savingsGoals.at(-1)?.savedAmount).toBe(250)
 
     act(() => {
-      result.current.deleteSavingsGoal(added?.id ?? '')
+      result.current.deleteSavingsGoal('generated-id')
     })
-    expect(result.current.savingsGoals.some((goal) => goal.id === added?.id)).toBe(false)
+    expect(result.current.savingsGoals).toHaveLength(0)
+    await waitFor(() => expect(mocks.deleteSavingsGoal).toHaveBeenCalledWith('generated-id'))
   })
 
-  it('keeps accounts referenced by savings goals', () => {
-    const { result } = setup()
+  it('updates an account and a category and persists the merged entities', async () => {
+    const { result } = await setupReady()
     act(() => {
-      result.current.addAccount({
-        name: 'Goal account',
-        type: 'cash',
-        icon: 'wallet',
-        accent: 'indigo',
-        openingBalance: 100,
-      })
+      result.current.updateAccount({ id: 'acc-1', name: 'Renamed' })
     })
-    const id = result.current.accounts.at(-1)?.id ?? ''
+    expect(result.current.accounts[0].name).toBe('Renamed')
+    await waitFor(() =>
+      expect(mocks.upsertAccount).toHaveBeenCalledWith(
+        'user-1',
+        expect.objectContaining({ id: 'acc-1', name: 'Renamed', openingBalance: 100 }),
+      ),
+    )
 
+    act(() => {
+      result.current.updateCategory({ id: 'cat-food', label: 'Groceries' })
+    })
+    expect(result.current.categories.find((c) => c.id === 'cat-food')?.label).toBe('Groceries')
+    await waitFor(() =>
+      expect(mocks.upsertCategory).toHaveBeenCalledWith(
+        'user-1',
+        expect.objectContaining({ id: 'cat-food', label: 'Groceries' }),
+      ),
+    )
+  })
+
+  it('adds and deletes an unused account', async () => {
+    const { result } = await setupReady()
+    act(() => {
+      result.current.addAccount({ name: 'Savings', type: 'savings', icon: 'piggy', accent: 'emerald', openingBalance: 0 })
+    })
+    await waitFor(() => expect(mocks.upsertAccount).toHaveBeenCalled())
+
+    act(() => {
+      result.current.deleteAccount('generated-id')
+    })
+    expect(result.current.accounts.some((a) => a.id === 'generated-id')).toBe(false)
+    await waitFor(() => expect(mocks.deleteAccount).toHaveBeenCalledWith('generated-id'))
+  })
+
+  it('keeps an account referenced only by a savings goal', async () => {
+    const { result } = await setupReady()
+    // New account ('generated-id') with no transactions, referenced by a goal.
+    act(() => {
+      result.current.addAccount({ name: 'Goal', type: 'cash', icon: 'wallet', accent: 'indigo', openingBalance: 0 })
+    })
     act(() => {
       result.current.addSavingsGoal({
-        name: 'Linked goal',
-        targetAmount: 100,
-        savedAmount: 50,
-        icon: 'piggy',
-        color: '#10b981',
-        accountId: id,
+        name: 'Trip',
+        targetAmount: 500,
+        savedAmount: 0,
+        icon: 'plane',
+        color: '#3b82f6',
+        accountId: 'generated-id',
       })
     })
     act(() => {
-      result.current.deleteAccount(id)
+      result.current.deleteAccount('generated-id')
     })
-
-    expect(result.current.accounts.some((account) => account.id === id)).toBe(true)
+    expect(result.current.accounts.some((a) => a.id === 'generated-id')).toBe(true)
+    expect(mocks.deleteAccount).not.toHaveBeenCalled()
   })
 
-  it('sets the selected month', () => {
-    const { result } = setup()
+  it('sets the selected month', async () => {
+    const { result } = await setupReady()
     act(() => {
       result.current.setMonth('2025-01')
     })
     expect(result.current.selectedMonth).toBe('2025-01')
   })
 
-  it('imports validated finance data and persists it', () => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date('2026-07-09T00:00:00.000Z'))
-    const { result } = setup()
-    const imported = {
-      accounts: [
-        {
-          id: 'cash',
-          name: 'Cash',
-          type: 'cash' as const,
-          icon: 'wallet',
-          accent: 'indigo',
-          openingBalance: 25,
-        },
-      ],
-      categories: [{ id: 'income', label: 'Income', color: '#22c55e', icon: 'salary' }],
-      transactions: [
-        {
-          id: 't-imported',
-          date: '2026-06-09',
-          amount: 25,
-          description: 'Imported',
-          accountId: 'cash',
-          categoryId: 'income',
-        },
-      ],
-      savingsGoals: [
-        {
-          id: 'goal-imported',
-          name: 'Imported goal',
-          targetAmount: 100,
-          savedAmount: 25,
-          icon: 'piggy',
-          color: '#10b981',
-          accountId: 'cash',
-        },
-      ],
-    }
-
-    act(() => {
-      result.current.importData(imported)
-    })
-
-    expect(result.current.accounts).toEqual(imported.accounts)
-    expect(result.current.transactions).toEqual(imported.transactions)
-    expect(result.current.savingsGoals).toEqual(imported.savingsGoals)
-    expect(result.current.selectedMonth).toBe('2026-06')
-
-    const raw = localStorage.getItem(FINANCE_STORAGE_KEY)
-    expect(JSON.parse(raw ?? '{}')).toEqual(imported)
-  })
-
-  it('resets to the seed and persists to localStorage', () => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date('2026-07-09T00:00:00.000Z'))
-    const { result } = setup()
-    act(() => {
-      result.current.deleteTransaction(result.current.transactions[0].id)
-    })
-    const reduced = result.current.transactions.length
+  it('clears all data on reset', async () => {
+    const { result } = await setupReady()
     act(() => {
       result.current.reset()
     })
-    expect(result.current.transactions.length).toBeGreaterThan(reduced)
-    expect(result.current.selectedMonth).toBe('2026-06')
+    expect(result.current.transactions).toHaveLength(0)
+    expect(result.current.accounts).toHaveLength(0)
+    await waitFor(() => expect(mocks.clearAllData).toHaveBeenCalled())
+  })
 
-    const raw = localStorage.getItem(FINANCE_STORAGE_KEY)
-    expect(raw).not.toBeNull()
-    const persisted = JSON.parse(raw ?? '{}') as { transactions: unknown[] }
-    expect(Array.isArray(persisted.transactions)).toBe(true)
+  it('imports data and replaces it in the database', async () => {
+    const { result } = await setupReady()
+    const imported: FinanceData = {
+      accounts: [{ id: 'a', name: 'X', type: 'cash', icon: 'wallet', accent: 'indigo', openingBalance: 5 }],
+      categories: [{ id: 'c', label: 'Y', color: '#000', icon: 'home' }],
+      transactions: [],
+      savingsGoals: [],
+    }
+    act(() => {
+      result.current.importData(imported)
+    })
+    expect(result.current.accounts).toEqual(imported.accounts)
+    await waitFor(() => expect(mocks.replaceAllData).toHaveBeenCalledWith('user-1', imported))
+  })
+
+  it('shows a save-error banner when a write fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {
+      // swallow the expected persistence error log
+    })
+    mocks.upsertTransaction.mockRejectedValue(new Error('network'))
+    const { result } = await setupReady()
+
+    act(() => {
+      result.current.addTransaction({
+        date: '2026-06-15',
+        amount: -10,
+        description: 'x',
+        accountId: 'acc-1',
+        categoryId: 'cat-food',
+      })
+    })
+
+    expect(await screen.findByText(/No se ha podido guardar/)).toBeInTheDocument()
+  })
+
+  it('shows an error state when the initial load fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {
+      // swallow the expected error log
+    })
+    mocks.fetchFinanceData.mockRejectedValue(new Error('boom'))
+
+    render(
+      <FinanceProvider>
+        <span>protected child</span>
+      </FinanceProvider>,
+    )
+
+    expect(await screen.findByText('No se pudieron cargar tus datos.')).toBeInTheDocument()
+    expect(screen.queryByText('protected child')).not.toBeInTheDocument()
   })
 })

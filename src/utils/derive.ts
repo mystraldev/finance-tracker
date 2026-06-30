@@ -75,6 +75,41 @@ export function incomeExpenses(transactions: Transaction[], month: string): { in
   return { income, expenses, saved: income - expenses }
 }
 
+export type SavingsSummary = {
+  /** Real income (transactions in income-flagged categories). */
+  salary: number
+  /** Spending minus reimbursements (non-income money coming in). */
+  netExpenses: number
+  saved: number
+  /** Whether any category is marked as income. */
+  configured: boolean
+}
+
+/**
+ * Savings relative to real income. Non-income positive amounts (Bizum, shared
+ * rent, ...) are treated as reimbursements that offset expenses rather than as
+ * income, so the rate is tied to the salary and the figures reconcile.
+ */
+export function savingsSummary(transactions: Transaction[], categories: Category[], month: string): SavingsSummary {
+  const incomeCategoryIds = new Set(categories.filter((c) => c.isIncome).map((c) => c.id))
+  let salary = 0
+  let grossExpenses = 0
+  let reimbursements = 0
+
+  for (const t of monthTransactions(transactions, month)) {
+    if (t.amount < 0) {
+      grossExpenses += Math.abs(t.amount)
+    } else if (incomeCategoryIds.has(t.categoryId)) {
+      salary += t.amount
+    } else {
+      reimbursements += t.amount
+    }
+  }
+
+  const netExpenses = grossExpenses - reimbursements
+  return { salary, netExpenses, saved: salary - netExpenses, configured: incomeCategoryIds.size > 0 }
+}
+
 export function accountBalanceAsOf(account: Account, transactions: Transaction[], month?: string): number {
   const sum = transactions
     .filter((t) => t.accountId === account.id && (!month || monthKey(t.date) <= month))

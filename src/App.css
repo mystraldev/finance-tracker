@@ -636,6 +636,30 @@
   font-size: 0.8rem;
   color: var(--text-faint);
 }
+.savings__setup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem 0.25rem 0.5rem;
+}
+.savings__setup-text {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.field--check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+}
+.field__check {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--indigo);
+  flex-shrink: 0;
+}
 
 .badge {
   font-size: 0.74rem;
@@ -1060,6 +1084,145 @@
 @keyframes pop {
   from { opacity: 0; transform: translateY(8px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---------------- Autenticación ---------------- */
+.auth {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: var(--bg);
+}
+.auth__card {
+  width: 100%;
+  max-width: 380px;
+  padding: 2rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 16px);
+  box-shadow: var(--shadow-md, 0 10px 30px rgba(0, 0, 0, 0.08));
+}
+.auth__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+.auth__logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  background: var(--primary-bg);
+  color: var(--primary-text);
+  font-weight: 700;
+}
+.auth__name {
+  font-weight: 700;
+  color: var(--text);
+}
+.auth__title {
+  margin: 0 0 0.25rem;
+  font-size: 1.4rem;
+  color: var(--text);
+}
+.auth__subtitle {
+  margin: 0 0 1.5rem;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}
+.auth__submit {
+  width: 100%;
+  justify-content: center;
+  margin-top: 0.25rem;
+}
+.auth__notice {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--success-text);
+  background: var(--success-bg);
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius-sm);
+}
+.auth__switch {
+  display: block;
+  width: 100%;
+  margin-top: 1.25rem;
+  background: none;
+  border: none;
+  color: var(--indigo);
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+.auth-loading {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-soft);
+}
+.app-status {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100dvh;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-soft);
+}
+.save-error {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: min(90vw, 520px);
+  padding: 0.7rem 1rem;
+  background: var(--danger-text);
+  color: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg, 0 10px 30px rgba(0, 0, 0, 0.2));
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.save-error__close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.85;
+}
+.save-error__close:hover {
+  opacity: 1;
+}
+.user-chip__signout {
+  align-self: flex-start;
+  margin-top: 0.1rem;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.16s;
+}
+.user-chip__signout:hover {
+  color: var(--danger-text);
 }
 
 /* ---------------- Formularios ---------------- */
@@ -2330,5 +2493,140 @@ select.field__input {
 @media (max-width: 430px) {
   .theme-segmented {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ---------------- Importar extracto ---------------- */
+.import-card {
+  padding: 1.75rem;
+}
+.import-drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2.5rem 1.5rem;
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius-lg, 16px);
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: border-color 0.16s, background 0.16s;
+}
+.import-drop:hover {
+  border-color: var(--indigo);
+  background: var(--bg-glow);
+}
+.import-drop__title {
+  font-weight: 600;
+  color: var(--text);
+}
+.import-drop__hint {
+  font-size: 0.82rem;
+  color: var(--text-faint);
+}
+.import-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 1rem;
+  color: var(--text-soft);
+}
+.import-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.import-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.85rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.import-stat__value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.import-stat__label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-faint);
+}
+.import-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.import-table th,
+.import-table td {
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.import-table th {
+  color: var(--text-faint);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.import-table td.is-expense {
+  color: var(--danger-text);
+  font-weight: 600;
+}
+.import-table td.is-income {
+  color: var(--success-text);
+  font-weight: 600;
+}
+.import-more {
+  margin: 0.75rem 0 0;
+  color: var(--text-faint);
+  font-size: 0.82rem;
+}
+.import-accounts {
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.import-account {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0.8rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+}
+.import-account__name {
+  font-weight: 600;
+  color: var(--text);
+}
+.import-account__balance {
+  font-weight: 700;
+  color: var(--text-soft);
+}
+.import-account__tag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--success-text);
+  background: var(--success-bg);
+  padding: 0.1rem 0.4rem;
+  border-radius: 6px;
+  margin-left: 0.4rem;
+}
+@media (max-width: 560px) {
+  .import-stats {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

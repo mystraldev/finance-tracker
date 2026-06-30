@@ -2,16 +2,20 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
 import './index.css'
+import './lib/streamPolyfill'
 import App from './App'
-import { FinanceProvider } from './store/FinanceProvider'
+import ErrorBoundary from './components/ErrorBoundary'
+import { AuthProvider } from './store/AuthProvider'
 import { ThemeProvider } from './store/ThemeProvider'
 
 createRoot(document.querySelector('#root')!).render(
   <StrictMode>
-    <ThemeProvider>
-      <FinanceProvider>
-        <App />
-      </FinanceProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

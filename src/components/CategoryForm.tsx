@@ -38,6 +38,7 @@ function CategoryForm({ initial, onSubmit, onCancel }: CategoryFormProperties) {
   const [color, setColor] = useState(initial?.color ?? PALETTE[0])
   const [icon, setIcon] = useState(initial?.icon ?? 'package')
   const [budget, setBudget] = useState(initial?.budget === undefined ? '' : String(initial.budget))
+  const [isIncome, setIsIncome] = useState(initial?.isIncome ?? false)
   const [error, setError] = useState('')
 
   function handleSubmit(event_: FormEvent) {
@@ -51,6 +52,7 @@ function CategoryForm({ initial, onSubmit, onCancel }: CategoryFormProperties) {
       color,
       icon,
       budget: parsedBudget,
+      isIncome,
     })
   }
 
@@ -86,6 +88,16 @@ function CategoryForm({ initial, onSubmit, onCancel }: CategoryFormProperties) {
           />
           <span className="field__suffix">€</span>
         </div>
+      </label>
+
+      <label className="field field--check">
+        <input
+          checked={isIncome}
+          className="field__check"
+          onChange={(event_) => setIsIncome(event_.target.checked)}
+          type="checkbox"
+        />
+        <span className="field__label">Contar como ingreso (nómina) para la tasa de ahorro</span>
       </label>
 
       <div className="field">

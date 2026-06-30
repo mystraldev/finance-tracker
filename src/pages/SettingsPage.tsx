@@ -102,7 +102,7 @@ function handleReset(
 ) {
   reset()
   setConfirmingReset(false)
-  setStatus({ type: 'success', message: 'Datos restaurados al estado demo.' })
+  setStatus({ type: 'success', message: 'Se han borrado todos tus datos.' })
 }
 
 function BackupDataCard({
@@ -127,7 +127,7 @@ function BackupDataCard({
           <Icon name="database" size={20} />
         </span>
         <div>
-          <h2 className="card__title">Datos locales</h2>
+          <h2 className="card__title">Tus datos</h2>
           <p className="settings-card__copy">
             {accountsLength} cuentas · {categoriesLength} categorías · {transactionsLength}{' '}
             movimientos · {savingsGoalsLength} objetivos
@@ -247,14 +247,14 @@ function SettingsPage() {
               <Icon name="reset" size={20} />
             </span>
             <div>
-              <h2 className="card__title">Reiniciar datos</h2>
-              <p className="settings-card__copy">Restaura las cuentas, categorías y movimientos demo.</p>
+              <h2 className="card__title">Borrar todos los datos</h2>
+              <p className="settings-card__copy">Borra todas tus cuentas, categorías, movimientos y objetivos.</p>
             </div>
           </div>
 
           <button className="btn-danger" onClick={() => setConfirmingReset(true)} type="button">
             <Icon name="reset" size={18} strokeWidth={2.2} />
-            Reiniciar demo
+            Borrar todo
           </button>
         </article>
       </section>
@@ -269,11 +269,11 @@ function SettingsPage() {
 
       {confirmingReset && (
         <ConfirmDialog
-          confirmLabel="Reiniciar"
-          message="Se reemplazarán tus datos locales por los datos demo incluidos en la app."
+          confirmLabel="Sí, borrar"
+          message="Se borrarán todas tus cuentas, categorías, movimientos y objetivos de forma permanente."
           onCancel={() => setConfirmingReset(false)}
           onConfirm={() => handleReset(reset, setConfirmingReset, setStatus)}
-          title="Reiniciar datos"
+          title="Borrar todos los datos"
         />
       )}
     </>

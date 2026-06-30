@@ -10,6 +10,9 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+
+# Bank statements / personal financial documents — never commit
+*.pdf
 coverage
 *.local
 .env
