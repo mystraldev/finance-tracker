@@ -50,4 +50,25 @@ describe('parseRevolutStatement', () => {
   it('ignores noise lines without throwing', () => {
     expect(parseRevolutStatement(['', 'random text', 'Página 3 de 72']).accounts).toEqual([])
   })
+
+  it('captures savings and investment balances, skipping zero and current accounts', () => {
+    const summary = [
+      'Cuenta personal (EUR)',
+      'Saldo de apertura 2.736,11€ Saldo de cierre 3.215,63€',
+      'Ahorros (EUR)',
+      'Saldo de apertura 10.025,33€ Saldo de cierre 11.017,37€ Saldo máximo 13.003,45€',
+      'Investment Services Resúmenes',
+      'Saldo de apertura 0,00€ Saldo de cierre 0,00€',
+      'Saldo de apertura 1.183,52€ Saldo de cierre 835,24€',
+      'Crypto Resúmenes',
+      'Saldo de cierre 672,50€',
+      'Fondos Monetarios Flexibles (EUR)',
+      'Saldo de cierre 0,00€',
+    ]
+    expect(parseRevolutStatement(summary).balanceAccounts).toEqual([
+      { name: 'Ahorros', type: 'savings', balance: 11_017.37 },
+      { name: 'Inversiones', type: 'investment', balance: 835.24 },
+      { name: 'Crypto', type: 'investment', balance: 672.5 },
+    ])
+  })
 })

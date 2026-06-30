@@ -22,6 +22,7 @@ const statement: ParsedStatement = {
       ],
     },
   ],
+  balanceAccounts: [],
 }
 
 const empty: Pick<FinanceData, 'accounts' | 'categories' | 'transactions'> = {
@@ -63,6 +64,37 @@ describe('buildImportPlan', () => {
     const plan = buildImportPlan(statement, existing, ids())
     expect(plan.newAccounts).toHaveLength(0)
     expect(plan.newTransactions.every((t) => t.accountId === 'acc-x')).toBe(true)
+  })
+
+  it('creates savings and investment accounts from balances (no transactions)', () => {
+    const withBalances: ParsedStatement = {
+      accounts: [],
+      balanceAccounts: [
+        { name: 'Ahorros', type: 'savings', balance: 11_017.37 },
+        { name: 'Inversiones', type: 'investment', balance: 835.24 },
+      ],
+    }
+    const plan = buildImportPlan(withBalances, empty, ids())
+
+    expect(plan.newAccounts).toEqual([
+      expect.objectContaining({ name: 'Ahorros', type: 'savings', openingBalance: 11_017.37 }),
+      expect.objectContaining({ name: 'Inversiones', type: 'investment', openingBalance: 835.24 }),
+    ])
+    expect(plan.newTransactions).toHaveLength(0)
+  })
+
+  it('does not duplicate a balance account that already exists', () => {
+    const withBalances: ParsedStatement = {
+      accounts: [],
+      balanceAccounts: [{ name: 'Ahorros', type: 'savings', balance: 11_017.37 }],
+    }
+    const existing = {
+      accounts: [{ id: 'acc-a', name: 'Ahorros', type: 'savings' as const, icon: 'piggy', accent: 'emerald', openingBalance: 0 }],
+      categories: [],
+      transactions: [],
+    }
+
+    expect(buildImportPlan(withBalances, existing, ids()).newAccounts).toHaveLength(0)
   })
 
   it('de-dupes transactions already stored for the account', () => {

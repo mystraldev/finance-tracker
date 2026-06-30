@@ -66,6 +66,17 @@ function Preview({ plan, accountName, categoryLabel, onConfirm, onCancel }: Prev
         <Stat label="duplicados omitidos" value={plan.duplicates} />
       </div>
 
+      {plan.newAccounts.length > 0 && (
+        <ul className="import-accounts">
+          {plan.newAccounts.map((account) => (
+            <li className="import-account" key={account.id}>
+              <span className="import-account__name">{account.name}</span>
+              <span className="import-account__balance">{formatCurrency(account.openingBalance)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
       {sample.length > 0 && (
         <table className="import-table">
           <thead>

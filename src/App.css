@@ -2532,6 +2532,33 @@ select.field__input {
   color: var(--text-faint);
   font-size: 0.82rem;
 }
+.import-accounts {
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.import-account {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0.8rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+}
+.import-account__name {
+  font-weight: 600;
+  color: var(--text);
+}
+.import-account__balance {
+  font-weight: 700;
+  color: var(--text-soft);
+}
 @media (max-width: 560px) {
   .import-stats {
     grid-template-columns: repeat(2, 1fr);

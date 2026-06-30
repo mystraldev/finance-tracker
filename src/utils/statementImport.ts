@@ -1,5 +1,5 @@
 import type { Account, Category, FinanceData, Transaction } from '../types/finance'
-import type { ParsedStatement } from './statementParser'
+import type { BalanceAccount, ParsedStatement } from './statementParser'
 
 import { randomUUID } from './uuid'
 
@@ -41,6 +41,11 @@ function transactionKey(date: string, amount: number, description: string): stri
 
 function defaultIdFactory(): string {
   return randomUUID()
+}
+
+const ACCOUNT_STYLE: Record<BalanceAccount['type'], { icon: string; accent: string }> = {
+  savings: { icon: 'piggy', accent: 'emerald' },
+  investment: { icon: 'trending', accent: 'violet' },
 }
 
 export function buildImportPlan(
@@ -105,6 +110,21 @@ export function buildImportPlan(
         })
       }
     }
+  }
+
+  for (const balanceAccount of statement.balanceAccounts) {
+    if (accountIdByName.has(balanceAccount.name)) continue
+    const style = ACCOUNT_STYLE[balanceAccount.type]
+    const id = idFactory()
+    newAccounts.push({
+      id,
+      name: balanceAccount.name,
+      type: balanceAccount.type,
+      icon: style.icon,
+      accent: style.accent,
+      openingBalance: balanceAccount.balance,
+    })
+    accountIdByName.set(balanceAccount.name, id)
   }
 
   return { newAccounts, newCategories, newTransactions, duplicates, totalParsed }

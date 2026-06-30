@@ -31,8 +31,17 @@ export type ParsedAccount = {
   transactions: ParsedTransaction[]
 }
 
+export type BalanceAccount = {
+  name: string
+  type: 'savings' | 'investment'
+  /** Current value (the statement's closing balance). */
+  balance: number
+}
+
 export type ParsedStatement = {
   accounts: ParsedAccount[]
+  /** Savings/investment accounts captured as a single balance (no transactions). */
+  balanceAccounts: BalanceAccount[]
 }
 
 const MONTHS: Record<string, string> = {
@@ -46,6 +55,16 @@ const ACCOUNT_HEADER = /^([^()]*)\(([A-Z]{3})\)\s*$/
 const DATE_PREFIX = /^(\d{1,2})\s+(\p{L}+)\.?\s+(\d{4})\s+(\S.*)$/u
 // A signed money value followed by `€` (the symbol may be split off by pdf.js).
 const MONEY = /(-?\d{1,3}(?:\.\d{3})*,\d{2})\s*€/g
+// `Saldo de cierre ... 11.017,37€` — the closing balance amount on a summary line.
+const CLOSING_BALANCE = /Saldo de cierre\D*(\d{1,3}(?:\.\d{3})*,\d{2})\s*€/
+
+// Non-current EUR sections to capture as a single balance (savings / investment).
+const BALANCE_SECTIONS: { match: RegExp; name: string; type: BalanceAccount['type'] }[] = [
+  { match: /^Ahorros\b/, name: 'Ahorros', type: 'savings' },
+  { match: /^Investment Services\b/, name: 'Inversiones', type: 'investment' },
+  { match: /^Crypto\b/, name: 'Crypto', type: 'investment' },
+  { match: /^Fondos Monetarios\b/, name: 'Fondos', type: 'investment' },
+]
 
 function parseAmount(raw: string): number {
   return Number(raw.replaceAll('.', '').replace(',', '.'))
@@ -90,6 +109,42 @@ function parseRow(line: string): ParsedTransaction | undefined {
   }
 }
 
+function parseBalanceAccounts(lines: string[]): BalanceAccount[] {
+  const byName = new Map<string, { type: BalanceAccount['type']; balance: number }>()
+  let current: { name: string; type: BalanceAccount['type'] } | undefined
+
+  for (const line of lines) {
+    const trimmed = line.trim()
+    const section = BALANCE_SECTIONS.find((candidate) => candidate.match.test(trimmed))
+    if (section) {
+      current = { name: section.name, type: section.type }
+      continue
+    }
+    // A current-account header (e.g. "Cuenta personal (EUR)") ends the section.
+    if (ACCOUNT_HEADER.test(trimmed)) {
+      current = undefined
+      continue
+    }
+    if (!current) continue
+
+    const match = CLOSING_BALANCE.exec(line)
+    if (!match) continue
+    // Keep the largest closing balance per section (an account may list a 0 cash
+    // sub-balance alongside the real holdings value).
+    const balance = parseAmount(match[1])
+    const previous = byName.get(current.name)
+    if (!previous || balance > previous.balance) {
+      byName.set(current.name, { type: current.type, balance })
+    }
+  }
+
+  const result: BalanceAccount[] = []
+  for (const [name, { type, balance }] of byName) {
+    if (balance > 0) result.push({ name, type, balance })
+  }
+  return result
+}
+
 export function parseRevolutStatement(lines: string[]): ParsedStatement {
   const order: ParsedAccount[] = []
   const byName = new Map<string, ParsedAccount>()
@@ -118,5 +173,5 @@ export function parseRevolutStatement(lines: string[]): ParsedStatement {
     account.transactions.push(tx)
   }
 
-  return { accounts: order }
+  return { accounts: order, balanceAccounts: parseBalanceAccounts(lines) }
 }
