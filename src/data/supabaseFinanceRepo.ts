@@ -15,8 +15,6 @@ export function newId(): string {
   return randomUUID()
 }
 
-// Row shapes (snake_case, as stored in Postgres)
-
 type AccountRow = {
   id: string
   name: string
@@ -55,8 +53,6 @@ type SavingsGoalRow = {
   account_id: string | null
   target_date: string | null
 }
-
-// Row -> model
 
 function toNumber(value: number | string): number {
   return typeof value === 'number' ? value : Number(value)
@@ -121,10 +117,6 @@ function toSavingsGoal(row: SavingsGoalRow): SavingsGoal {
   return goal
 }
 
-// ---------------------------------------------------------------------------
-// Model -> insert/upsert row (optional fields omitted when absent)
-// ---------------------------------------------------------------------------
-
 function accountRow(userId: string, account: Account): Record<string, unknown> {
   const row: Record<string, unknown> = {
     id: account.id,
@@ -179,14 +171,22 @@ function savingsGoalRow(userId: string, goal: SavingsGoal): Record<string, unkno
   return row
 }
 
-// ---------------------------------------------------------------------------
-// Reads
-// ---------------------------------------------------------------------------
+// PostgREST caps a response at ~1000 rows, so page through `.range()` until a
+// short page is returned to load every row (accounts can have >1000 transactions).
+const PAGE_SIZE = 1000
 
 async function selectAll<T>(table: string): Promise<T[]> {
-  const { data, error } = await supabase.from(table).select('*')
-  if (error) throw error
-  return (data ?? []) as T[]
+  const rows: T[] = []
+  let from = 0
+  let batch: T[]
+  do {
+    const { data, error } = await supabase.from(table).select('*').range(from, from + PAGE_SIZE - 1)
+    if (error) throw error
+    batch = (data ?? []) as T[]
+    rows.push(...batch)
+    from += PAGE_SIZE
+  } while (batch.length === PAGE_SIZE)
+  return rows
 }
 
 export async function fetchFinanceData(): Promise<FinanceData> {
@@ -203,10 +203,6 @@ export async function fetchFinanceData(): Promise<FinanceData> {
     savingsGoals: savingsGoals.map((row) => toSavingsGoal(row)),
   }
 }
-
-// ---------------------------------------------------------------------------
-// Writes (one entity)
-// ---------------------------------------------------------------------------
 
 async function upsert(table: string, row: Record<string, unknown>): Promise<void> {
   const { error } = await supabase.from(table).upsert(row)
@@ -231,10 +227,6 @@ export const deleteAccount = (id: string) => remove('accounts', id)
 export const deleteCategory = (id: string) => remove('categories', id)
 export const deleteTransaction = (id: string) => remove('transactions', id)
 export const deleteSavingsGoal = (id: string) => remove('savings_goals', id)
-
-// ---------------------------------------------------------------------------
-// Bulk operations (clear all, import)
-// ---------------------------------------------------------------------------
 
 async function clearTable(table: string): Promise<void> {
   const { error } = await supabase.from(table).delete().neq('id', NIL_UUID)
