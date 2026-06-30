@@ -117,6 +117,32 @@ describe('buildImportPlan', () => {
     expect(plan.updatedAccounts).toHaveLength(0)
   })
 
+  it('reuses the category of an existing transaction with the same description', () => {
+    const statement: ParsedStatement = {
+      accounts: [
+        {
+          name: 'Cuenta personal',
+          openingBalance: 100,
+          transactions: [
+            { date: '2026-02-01', description: 'Mercadona', category: 'Comercio', amount: -20, balance: 80 },
+          ],
+        },
+      ],
+      balanceAccounts: [],
+    }
+    const existing = {
+      accounts: [{ id: 'acc-x', name: 'Cuenta personal', type: 'cash' as const, icon: 'wallet', accent: 'indigo', openingBalance: 100 }],
+      categories: [{ id: 'cat-food', label: 'Alimentación', icon: 'cart', color: '#000' }],
+      transactions: [
+        { id: 't0', date: '2026-01-15', amount: -18, description: 'Mercadona', accountId: 'acc-x', categoryId: 'cat-food' },
+      ],
+    }
+
+    const plan = buildImportPlan(statement, existing, ids())
+    expect(plan.newTransactions[0].categoryId).toBe('cat-food')
+    expect(plan.newCategories).toHaveLength(0)
+  })
+
   it('de-dupes transactions already stored for the account', () => {
     const existing = {
       accounts: [{ id: 'acc-x', name: 'Cuenta personal', type: 'cash' as const, icon: 'wallet', accent: 'indigo', openingBalance: 0 }],

@@ -1,6 +1,7 @@
 import type { Account, Category, FinanceData, Transaction } from '../types/finance'
 import type { BalanceAccount, ParsedStatement } from './statementParser'
 
+import { categoryRulesFrom, normalizeDescription } from './categorize'
 import { randomUUID } from './uuid'
 
 /**
@@ -88,6 +89,8 @@ export function buildImportPlan(
 
   const categoryIdByLabel = new Map(existing.categories.map((c) => [c.label, c.id]))
   const accountIdByName = new Map(existing.accounts.map((a) => [a.name, a.id]))
+  // Learned rules: reuse the category the user already gave to this description.
+  const rules = categoryRulesFrom(existing.transactions)
 
   function ensureCategory(revolutCategory: string): string {
     const style = mapCategory(revolutCategory)
@@ -133,7 +136,7 @@ export function buildImportPlan(
           amount: tx.amount,
           description: tx.description,
           accountId,
-          categoryId: ensureCategory(tx.category),
+          categoryId: rules.get(normalizeDescription(tx.description)) ?? ensureCategory(tx.category),
         })
       }
     }
