@@ -138,6 +138,7 @@ export function FinanceProvider({ children }: FinanceProviderProperties) {
   const [state, dispatch] = useReducer(reducer, undefined, initEmpty)
   const [status, setStatus] = useState<LoadStatus>('loading')
   const [enqueueWrite] = useState(makeWriteQueue)
+  const [saveError, setSaveError] = useState(false)
 
   const reload = useCallback(async () => {
     try {
@@ -153,11 +154,18 @@ export function FinanceProvider({ children }: FinanceProviderProperties) {
 
   const persist = useCallback<Persist>(
     (operation) => {
-      enqueueWrite(operation, (error) => {
-        // eslint-disable-next-line no-console -- surface persistence failures while debugging
-        console.error('[finance] failed to save change', error)
-        void reload()
-      })
+      enqueueWrite(
+        async () => {
+          await operation()
+          setSaveError(false)
+        },
+        (error) => {
+          // eslint-disable-next-line no-console -- surface persistence failures while debugging
+          console.error('[finance] failed to save change', error)
+          setSaveError(true)
+          void reload()
+        },
+      )
     },
     [enqueueWrite, reload],
   )
@@ -193,6 +201,14 @@ export function FinanceProvider({ children }: FinanceProviderProperties) {
 
   return (
     <FinanceContext.Provider value={value}>
+      {saveError && (
+        <div className="save-error" role="alert">
+          <span>No se ha podido guardar tu último cambio. Revisa tu conexión.</span>
+          <button aria-label="Cerrar" className="save-error__close" onClick={() => setSaveError(false)} type="button">
+            ✕
+          </button>
+        </div>
+      )}
       {status === 'ready' ? children : <FinanceStatus onRetry={() => void reload()} status={status} />}
     </FinanceContext.Provider>
   )

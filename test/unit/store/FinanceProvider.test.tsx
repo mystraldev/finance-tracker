@@ -289,6 +289,26 @@ describe('FinanceProvider store', () => {
     await waitFor(() => expect(mocks.replaceAllData).toHaveBeenCalledWith('user-1', imported))
   })
 
+  it('shows a save-error banner when a write fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {
+      // swallow the expected persistence error log
+    })
+    mocks.upsertTransaction.mockRejectedValue(new Error('network'))
+    const { result } = await setupReady()
+
+    act(() => {
+      result.current.addTransaction({
+        date: '2026-06-15',
+        amount: -10,
+        description: 'x',
+        accountId: 'acc-1',
+        categoryId: 'cat-food',
+      })
+    })
+
+    expect(await screen.findByText(/No se ha podido guardar/)).toBeInTheDocument()
+  })
+
   it('shows an error state when the initial load fails', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {
       // swallow the expected error log

@@ -4,15 +4,18 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import './lib/streamPolyfill'
 import App from './App'
+import ErrorBoundary from './components/ErrorBoundary'
 import { AuthProvider } from './store/AuthProvider'
 import { ThemeProvider } from './store/ThemeProvider'
 
 createRoot(document.querySelector('#root')!).render(
   <StrictMode>
-    <ThemeProvider>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )
