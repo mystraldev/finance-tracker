@@ -1062,6 +1062,104 @@
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* ---------------- Autenticación ---------------- */
+.auth {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: var(--bg);
+}
+.auth__card {
+  width: 100%;
+  max-width: 380px;
+  padding: 2rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 16px);
+  box-shadow: var(--shadow-md, 0 10px 30px rgba(0, 0, 0, 0.08));
+}
+.auth__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+.auth__logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  background: var(--primary-bg);
+  color: var(--primary-text);
+  font-weight: 700;
+}
+.auth__name {
+  font-weight: 700;
+  color: var(--text);
+}
+.auth__title {
+  margin: 0 0 0.25rem;
+  font-size: 1.4rem;
+  color: var(--text);
+}
+.auth__subtitle {
+  margin: 0 0 1.5rem;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}
+.auth__submit {
+  width: 100%;
+  justify-content: center;
+  margin-top: 0.25rem;
+}
+.auth__notice {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--success-text);
+  background: var(--success-bg);
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius-sm);
+}
+.auth__switch {
+  display: block;
+  width: 100%;
+  margin-top: 1.25rem;
+  background: none;
+  border: none;
+  color: var(--indigo);
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+.auth-loading {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-soft);
+}
+.user-chip__signout {
+  align-self: flex-start;
+  margin-top: 0.1rem;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.16s;
+}
+.user-chip__signout:hover {
+  color: var(--danger-text);
+}
+
 /* ---------------- Formularios ---------------- */
 .form {
   display: flex;

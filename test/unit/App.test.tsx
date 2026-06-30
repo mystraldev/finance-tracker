@@ -1,9 +1,20 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import App from '../../src/App'
 import { FinanceProvider } from '../../src/store/FinanceProvider'
 import { ThemeProvider } from '../../src/store/ThemeProvider'
+
+vi.mock('../../src/store/authContext', () => ({
+  useAuth: () => ({
+    user: { id: '1', email: 'dev@example.com' },
+    session: { user: { id: '1' } },
+    loading: false,
+    signIn: vi.fn(),
+    signUp: vi.fn(),
+    signOut: vi.fn(),
+  }),
+}))
 
 function renderApp() {
   return render(
