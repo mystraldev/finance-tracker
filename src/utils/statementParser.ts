@@ -58,12 +58,13 @@ const MONEY = /(-?\d{1,3}(?:\.\d{3})*,\d{2})\s*€/g
 // `Saldo de cierre ... 11.017,37€` — the closing balance amount on a summary line.
 const CLOSING_BALANCE = /Saldo de cierre\D*(\d{1,3}(?:\.\d{3})*,\d{2})\s*€/
 
-// Non-current EUR sections to capture as a single balance (savings / investment).
+// Non-current EUR sections to capture as a single cash balance.
+// Only the savings account ("Ahorros") has an unambiguous, withdrawable balance.
+// The investment/crypto sections report holdings and flows, not a cash balance,
+// and money taken out of them already shows up as income in the current account,
+// so importing them would double-count. They are intentionally excluded.
 const BALANCE_SECTIONS: { match: RegExp; name: string; type: BalanceAccount['type'] }[] = [
   { match: /^Ahorros\b/, name: 'Ahorros', type: 'savings' },
-  { match: /^Investment Services\b/, name: 'Inversiones', type: 'investment' },
-  { match: /^Crypto\b/, name: 'Crypto', type: 'investment' },
-  { match: /^Fondos Monetarios\b/, name: 'Fondos', type: 'investment' },
 ]
 
 function parseAmount(raw: string): number {
