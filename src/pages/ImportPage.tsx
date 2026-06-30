@@ -66,11 +66,19 @@ function Preview({ plan, accountName, categoryLabel, onConfirm, onCancel }: Prev
         <Stat label="duplicados omitidos" value={plan.duplicates} />
       </div>
 
-      {plan.newAccounts.length > 0 && (
+      {(plan.newAccounts.length > 0 || plan.updatedAccounts.length > 0) && (
         <ul className="import-accounts">
           {plan.newAccounts.map((account) => (
             <li className="import-account" key={account.id}>
               <span className="import-account__name">{account.name}</span>
+              <span className="import-account__balance">{formatCurrency(account.openingBalance)}</span>
+            </li>
+          ))}
+          {plan.updatedAccounts.map((account) => (
+            <li className="import-account" key={account.id}>
+              <span className="import-account__name">
+                {account.name} <span className="import-account__tag">saldo actualizado</span>
+              </span>
               <span className="import-account__balance">{formatCurrency(account.openingBalance)}</span>
             </li>
           ))}
@@ -200,13 +208,15 @@ export default function ImportPage() {
 
   async function handleConfirm() {
     if (!plan || !user) return
+    const userId = user.id
     setPhase('importing')
     try {
-      await supabaseRepo.bulkInsert(user.id, {
+      await supabaseRepo.bulkInsert(userId, {
         accounts: plan.newAccounts,
         categories: plan.newCategories,
         transactions: plan.newTransactions,
       })
+      await Promise.all(plan.updatedAccounts.map((account) => supabaseRepo.upsertAccount(userId, account)))
       setPhase('done')
     } catch {
       setError('No se han podido guardar los movimientos.')

@@ -10,7 +10,10 @@ vi.mock('../../../src/store/authContext', () => ({ useAuth: () => ({ user: { id:
 vi.mock('../../../src/store/financeContext', () => ({
   useFinance: () => ({ accounts: [], categories: [], transactions: [] }),
 }))
-vi.mock('../../../src/data/supabaseFinanceRepo', () => ({ bulkInsert: mocks.bulkInsert }))
+vi.mock('../../../src/data/supabaseFinanceRepo', () => ({
+  bulkInsert: mocks.bulkInsert,
+  upsertAccount: vi.fn(),
+}))
 
 const lines = [
   'Cuenta personal (EUR)',

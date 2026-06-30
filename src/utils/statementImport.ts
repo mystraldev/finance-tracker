@@ -11,6 +11,8 @@ import { randomUUID } from './uuid'
 
 export type ImportPlan = {
   newAccounts: Account[]
+  /** Existing savings/investment accounts whose balance changed in this statement. */
+  updatedAccounts: Account[]
   newCategories: Category[]
   newTransactions: Transaction[]
   /** Parsed rows skipped because they already exist in the app. */
@@ -48,12 +50,37 @@ const ACCOUNT_STYLE: Record<BalanceAccount['type'], { icon: string; accent: stri
   investment: { icon: 'trending', accent: 'violet' },
 }
 
+/** Decide whether a savings/investment account should be created or have its balance refreshed. */
+function planBalanceAccount(
+  balanceAccount: BalanceAccount,
+  existingAccounts: Account[],
+  idFactory: () => string,
+): { created?: Account; updated?: Account } {
+  const current = existingAccounts.find((a) => a.name === balanceAccount.name)
+  if (current) {
+    if (current.openingBalance === balanceAccount.balance) return {}
+    return { updated: { ...current, openingBalance: balanceAccount.balance } }
+  }
+  const style = ACCOUNT_STYLE[balanceAccount.type]
+  return {
+    created: {
+      id: idFactory(),
+      name: balanceAccount.name,
+      type: balanceAccount.type,
+      icon: style.icon,
+      accent: style.accent,
+      openingBalance: balanceAccount.balance,
+    },
+  }
+}
+
 export function buildImportPlan(
   statement: ParsedStatement,
   existing: Pick<FinanceData, 'accounts' | 'categories' | 'transactions'>,
   idFactory: () => string = defaultIdFactory,
 ): ImportPlan {
   const newAccounts: Account[] = []
+  const updatedAccounts: Account[] = []
   const newCategories: Category[] = []
   const newTransactions: Transaction[] = []
   let duplicates = 0
@@ -113,19 +140,10 @@ export function buildImportPlan(
   }
 
   for (const balanceAccount of statement.balanceAccounts) {
-    if (accountIdByName.has(balanceAccount.name)) continue
-    const style = ACCOUNT_STYLE[balanceAccount.type]
-    const id = idFactory()
-    newAccounts.push({
-      id,
-      name: balanceAccount.name,
-      type: balanceAccount.type,
-      icon: style.icon,
-      accent: style.accent,
-      openingBalance: balanceAccount.balance,
-    })
-    accountIdByName.set(balanceAccount.name, id)
+    const { created, updated } = planBalanceAccount(balanceAccount, existing.accounts, idFactory)
+    if (created) newAccounts.push(created)
+    if (updated) updatedAccounts.push(updated)
   }
 
-  return { newAccounts, newCategories, newTransactions, duplicates, totalParsed }
+  return { newAccounts, updatedAccounts, newCategories, newTransactions, duplicates, totalParsed }
 }

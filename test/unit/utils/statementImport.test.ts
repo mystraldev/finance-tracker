@@ -83,18 +83,38 @@ describe('buildImportPlan', () => {
     expect(plan.newTransactions).toHaveLength(0)
   })
 
-  it('does not duplicate a balance account that already exists', () => {
+  it('updates an existing balance account instead of duplicating it', () => {
     const withBalances: ParsedStatement = {
       accounts: [],
       balanceAccounts: [{ name: 'Ahorros', type: 'savings', balance: 11_017.37 }],
     }
     const existing = {
-      accounts: [{ id: 'acc-a', name: 'Ahorros', type: 'savings' as const, icon: 'piggy', accent: 'emerald', openingBalance: 0 }],
+      accounts: [{ id: 'acc-a', name: 'Ahorros', type: 'savings' as const, icon: 'piggy', accent: 'emerald', openingBalance: 9000 }],
       categories: [],
       transactions: [],
     }
 
-    expect(buildImportPlan(withBalances, existing, ids()).newAccounts).toHaveLength(0)
+    const plan = buildImportPlan(withBalances, existing, ids())
+    expect(plan.newAccounts).toHaveLength(0)
+    expect(plan.updatedAccounts).toEqual([
+      expect.objectContaining({ id: 'acc-a', name: 'Ahorros', openingBalance: 11_017.37 }),
+    ])
+  })
+
+  it('does not update a balance account whose value is unchanged', () => {
+    const withBalances: ParsedStatement = {
+      accounts: [],
+      balanceAccounts: [{ name: 'Ahorros', type: 'savings', balance: 11_017.37 }],
+    }
+    const existing = {
+      accounts: [{ id: 'acc-a', name: 'Ahorros', type: 'savings' as const, icon: 'piggy', accent: 'emerald', openingBalance: 11_017.37 }],
+      categories: [],
+      transactions: [],
+    }
+
+    const plan = buildImportPlan(withBalances, existing, ids())
+    expect(plan.newAccounts).toHaveLength(0)
+    expect(plan.updatedAccounts).toHaveLength(0)
   })
 
   it('de-dupes transactions already stored for the account', () => {
