@@ -4,6 +4,8 @@ import { describe, expect, it, vi } from 'vitest'
 import App from '../../src/App'
 import { ThemeProvider } from '../../src/store/ThemeProvider'
 
+vi.mock('../../src/lib/pdfText', () => ({ extractPdfLines: vi.fn() }))
+
 vi.mock('../../src/store/authContext', () => ({
   useAuth: () => ({
     user: { id: '1', email: 'dev@example.com' },

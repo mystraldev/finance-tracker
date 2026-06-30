@@ -9,6 +9,7 @@ const navItems = [
   { id: 'transactions', label: 'Movimientos', icon: 'transactions', to: '/movimientos' },
   { id: 'categories', label: 'Categorías', icon: 'categories', to: '/categorias' },
   { id: 'accounts', label: 'Cuentas', icon: 'accounts', to: '/cuentas' },
+  { id: 'import', label: 'Importar', icon: 'upload', to: '/importar' },
   { id: 'investments', label: 'Inversiones', icon: 'investments' },
   { id: 'settings', label: 'Ajustes', icon: 'settings', to: '/ajustes' },
 ]

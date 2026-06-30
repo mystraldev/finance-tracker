@@ -3,12 +3,9 @@ import type { Account, Category, FinanceData, SavingsGoal, Transaction } from '.
 import { supabase } from '../lib/supabase'
 
 /**
- * Supabase-backed persistence for finance data.
- *
- * Reads are scoped to the authenticated user by Row Level Security, so no
- * user filter is needed on selects. Writes must set `user_id` to satisfy the
- * RLS `with check` policy. Money is stored as `numeric` and may come back as a
- * string, so numeric fields are coerced.
+ * Supabase-backed persistence. Reads are RLS-scoped to the user; writes set
+ * `user_id` for the RLS `with check` policy. Numeric columns may come back as
+ * strings, so they are coerced.
  */
 
 const NIL_UUID = '00000000-0000-0000-0000-000000000000'
@@ -261,10 +258,18 @@ export async function clearAllData(): Promise<void> {
 /** Replace all of the user's data with `data` (assumes valid UUID ids). */
 export async function replaceAllData(userId: string, data: FinanceData): Promise<void> {
   await clearAllData()
+  await bulkInsert(userId, data)
+  await insertMany('savings_goals', data.savingsGoals.map((g) => savingsGoalRow(userId, g)))
+}
+
+/** Append accounts, categories and transactions (FK-safe order). For imports. */
+export async function bulkInsert(
+  userId: string,
+  data: { accounts: Account[]; categories: Category[]; transactions: Transaction[] },
+): Promise<void> {
   await insertMany('accounts', data.accounts.map((a) => accountRow(userId, a)))
   await insertMany('categories', data.categories.map((c) => categoryRow(userId, c)))
   await insertMany('transactions', data.transactions.map((t) => transactionRow(userId, t)))
-  await insertMany('savings_goals', data.savingsGoals.map((g) => savingsGoalRow(userId, g)))
 }
 
 /**
