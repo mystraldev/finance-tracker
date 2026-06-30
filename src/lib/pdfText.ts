@@ -1,12 +1,12 @@
 import type { TextSpan } from '../utils/pdfLines'
 
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist'
-// eslint-disable-next-line import-x/default -- Vite resolves `?url` to the worker asset URL
-import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
+// eslint-disable-next-line import-x/default -- Vite `?worker` virtual module (module worker)
+import PdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?worker'
 
 import { reconstructLines } from '../utils/pdfLines'
 
-GlobalWorkerOptions.workerSrc = workerUrl
+GlobalWorkerOptions.workerPort = new PdfWorker()
 
 /**
  * Extracts a PDF's text as reading-order lines, entirely in the browser.

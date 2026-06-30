@@ -179,8 +179,10 @@ export default function ImportPage() {
       }
       setPlan(buildImportPlan(statement, { accounts, categories, transactions }))
       setPhase('preview')
-    } catch {
-      setError('No se ha podido leer el PDF.')
+    } catch (error) {
+      setError(
+        error instanceof Error ? `No se ha podido leer el PDF: ${error.message}` : 'No se ha podido leer el PDF.',
+      )
       setPhase('error')
     }
   }
