@@ -149,15 +149,15 @@ describe('SettingsPage', () => {
     expect(theme.setMode).toHaveBeenCalledWith('dark')
   })
 
-  it('confirms before resetting demo data', () => {
+  it('confirms before clearing all data', () => {
     const finance = createFinanceValue()
     renderPage({ finance })
 
-    fireEvent.click(screen.getByRole('button', { name: 'Reiniciar demo' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Reiniciar' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Borrar todo' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Sí, borrar' }))
 
     expect(finance.reset).toHaveBeenCalled()
-    expect(screen.getByText('Datos restaurados al estado demo.')).toBeInTheDocument()
+    expect(screen.getByText('Se han borrado todos tus datos.')).toBeInTheDocument()
   })
 
   it('rejects import when JSON file is invalid', async () => {

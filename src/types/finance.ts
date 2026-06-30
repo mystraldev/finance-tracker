@@ -108,6 +108,7 @@ export type FinanceAction =
   | { type: 'UPDATE_SAVINGS_GOAL'; payload: Partial<SavingsGoal> & { id: string } }
   | { type: 'DELETE_SAVINGS_GOAL'; payload: string }
   | { type: 'SET_MONTH'; payload: string }
+  | { type: 'SET_DATA'; payload: FinanceData }
   | { type: 'IMPORT_DATA'; payload: FinanceData }
   | { type: 'RESET' }
 

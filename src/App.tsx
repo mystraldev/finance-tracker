@@ -9,6 +9,7 @@ import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
 import SettingsPage from './pages/SettingsPage'
 import TransactionsPage from './pages/TransactionsPage'
+import { FinanceProvider } from './store/FinanceProvider'
 
 export default function App() {
   return (
@@ -18,7 +19,9 @@ export default function App() {
         <Route
           element={
             <ProtectedRoute>
-              <Layout />
+              <FinanceProvider>
+                <Layout />
+              </FinanceProvider>
             </ProtectedRoute>
           }
         >
