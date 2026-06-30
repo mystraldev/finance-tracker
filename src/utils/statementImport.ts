@@ -1,6 +1,8 @@
 import type { Account, Category, FinanceData, Transaction } from '../types/finance'
 import type { ParsedStatement } from './statementParser'
 
+import { randomUUID } from './uuid'
+
 /**
  * Turns a parsed statement into a concrete set of inserts for the app:
  * new accounts, new categories and de-duplicated transactions, mapping
@@ -38,7 +40,7 @@ function transactionKey(date: string, amount: number, description: string): stri
 }
 
 function defaultIdFactory(): string {
-  return crypto.randomUUID()
+  return randomUUID()
 }
 
 export function buildImportPlan(

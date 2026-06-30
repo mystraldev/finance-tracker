@@ -1,6 +1,7 @@
 import type { Account, Category, FinanceData, SavingsGoal, Transaction } from '../types/finance'
 
 import { supabase } from '../lib/supabase'
+import { randomUUID } from '../utils/uuid'
 
 /**
  * Supabase-backed persistence. Reads are RLS-scoped to the user; writes set
@@ -11,7 +12,7 @@ import { supabase } from '../lib/supabase'
 const NIL_UUID = '00000000-0000-0000-0000-000000000000'
 
 export function newId(): string {
-  return crypto.randomUUID()
+  return randomUUID()
 }
 
 // ---------------------------------------------------------------------------
