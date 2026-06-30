@@ -25,7 +25,7 @@ export interface FinanceRepo {
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== undefined
+  return typeof value === 'object' && value !== null
 }
 
 function isString(value: unknown): value is string {

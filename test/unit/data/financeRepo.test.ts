@@ -152,6 +152,13 @@ describe('financeRepo validation', () => {
     expect(parseFinanceData({ ...data, savingsGoals: [{ ...data.savingsGoals[0], savedAmount: '10' }] })).toBeUndefined()
   })
 
+  it('rejects null payloads and null array items without throwing', () => {
+    expect(parseFinanceData(null)).toBeUndefined()
+    expect(parseFinanceData({ ...data, accounts: [null] })).toBeUndefined()
+    expect(parseFinanceData({ ...data, savingsGoals: [null] })).toBeUndefined()
+    expect(parseFinanceBackup(null)).toBeUndefined()
+  })
+
   it('clones finance data without sharing array item references', () => {
     const clone = cloneFinanceData(data)
     clone.categories[0].label = 'Changed'
