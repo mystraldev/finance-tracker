@@ -6,8 +6,6 @@ import {  useState } from 'react'
 import { parseDecimal } from '../utils/number'
 import Icon from './Icon'
 
-const INCOME_CATEGORY_ID = 'income'
-
 function todayISO(): string {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
@@ -25,7 +23,7 @@ type TransactionFormProperties = {
 
 type ValidationResult = { valid: true } | { valid: false; error: string }
 
-function validateForm(amount: string, description: string, accountId: string, type: string, categoryId: string, date: string): ValidationResult {
+function validateForm(amount: string, description: string, accountId: string, categoryId: string, date: string): ValidationResult {
   const value = parseDecimal(amount)
   if (!Number.isFinite(value) || value <= 0) {
     return { valid: false, error: 'Introduce un importe válido mayor que 0.' }
@@ -36,7 +34,7 @@ function validateForm(amount: string, description: string, accountId: string, ty
   if (!accountId) {
     return { valid: false, error: 'Selecciona una cuenta.' }
   }
-  if (type === 'gasto' && !categoryId) {
+  if (!categoryId) {
     return { valid: false, error: 'Selecciona una categoría.' }
   }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -51,7 +49,7 @@ function toPayload(amount: string, description: string, accountId: string, type:
   return {
     ...(initial?.id && { id: initial.id }),
     accountId,
-    categoryId: type === 'ingreso' ? INCOME_CATEGORY_ID : categoryId,
+    categoryId,
     description: description.trim(),
     date,
     amount: signed,
@@ -189,24 +187,17 @@ function DateField({ value, onChange }: FieldProperties) {
 }
 
 function TransactionForm({ accounts, categories, initial, onSubmit, onCancel }: TransactionFormProperties) {
-  const expenseCategories = categories.filter((c) => c.id !== INCOME_CATEGORY_ID)
-  const isEditingIncome = initial ? initial.amount > 0 : false
-
-  const [type, setType] = useState(isEditingIncome ? 'ingreso' : 'gasto')
+  const [type, setType] = useState(initial && initial.amount > 0 ? 'ingreso' : 'gasto')
   const [amount, setAmount] = useState(initial ? String(Math.abs(initial.amount)) : '')
   const [description, setDescription] = useState(initial?.description ?? '')
-  const [categoryId, setCategoryId] = useState(
-    initial && !isEditingIncome
-      ? initial.categoryId
-      : (expenseCategories[0]?.id ?? ''),
-  )
+  const [categoryId, setCategoryId] = useState(initial?.categoryId ?? categories[0]?.id ?? '')
   const [accountId, setAccountId] = useState(initial?.accountId ?? accounts[0]?.id ?? '')
   const [date, setDate] = useState(initial?.date ?? todayISO())
   const [error, setError] = useState('')
 
   function handleSubmit(event_: FormEvent) {
     event_.preventDefault()
-    const result = validateForm(amount, description, accountId, type, categoryId, date)
+    const result = validateForm(amount, description, accountId, categoryId, date)
     if (!result.valid) {
       return setError(result.error)
     }
@@ -218,7 +209,7 @@ function TransactionForm({ accounts, categories, initial, onSubmit, onCancel }: 
       <TypeSelector onChange={setType} type={type} />
       <AmountField onChange={setAmount} value={amount} />
       <DescriptionField onChange={setDescription} value={description} />
-      {type === 'gasto' && <CategoryField categories={expenseCategories} onChange={setCategoryId} value={categoryId} />}
+      <CategoryField categories={categories} onChange={setCategoryId} value={categoryId} />
       <div className="field-row">
         <AccountField accounts={accounts} onChange={setAccountId} value={accountId} />
         <DateField onChange={setDate} value={date} />

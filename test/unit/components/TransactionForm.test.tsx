@@ -131,7 +131,7 @@ describe('TransactionForm', () => {
     expect(screen.getByText('Selecciona una cuenta.')).toBeInTheDocument()
   })
 
-  it('hides the category field when income is selected', () => {
+  it('shows the category field for income as well as expenses', () => {
     render(
       <TransactionForm
         accounts={accounts}
@@ -142,7 +142,7 @@ describe('TransactionForm', () => {
     )
     expect(screen.getByText('Categoría')).toBeInTheDocument()
     fireEvent.click(screen.getByText('Ingreso'))
-    expect(screen.queryByText('Categoría')).not.toBeInTheDocument()
+    expect(screen.getByText('Categoría')).toBeInTheDocument()
   })
 
   it('pre-fills fields when editing a transaction', () => {
