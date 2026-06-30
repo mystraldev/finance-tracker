@@ -184,9 +184,20 @@ function savingsGoalRow(userId: string, goal: SavingsGoal): Record<string, unkno
 // ---------------------------------------------------------------------------
 
 async function selectAll<T>(table: string): Promise<T[]> {
-  const { data, error } = await supabase.from(table).select('*')
-  if (error) throw error
-  return (data ?? []) as T[]
+  const PAGE_SIZE = 1000
+  const rows: T[] = []
+  let from = 0
+  while (true) {
+    const { data, error } = await supabase
+      .from(table)
+      .select('*')
+      .range(from, from + PAGE_SIZE - 1)
+    if (error) throw error
+    rows.push(...((data ?? []) as T[]))
+    if ((data ?? []).length < PAGE_SIZE) break
+    from += PAGE_SIZE
+  }
+  return rows
 }
 
 export async function fetchFinanceData(): Promise<FinanceData> {
