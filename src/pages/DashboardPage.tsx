@@ -13,11 +13,11 @@ import {
   accountsWithBalance,
   categoryBreakdown,
   categoryBudgets,
-  incomeExpenses,
   monthLabel,
   monthlyGrowthRate,
   netWorthSeries,
   recentTransactions,
+  savingsSummary,
 } from '../utils/derive'
 
 export default function DashboardPage() {
@@ -31,7 +31,7 @@ export default function DashboardPage() {
   }))
 
   const history = netWorthSeries(state, 7, month)
-  const { income, expenses } = incomeExpenses(state.transactions, month)
+  const savings = savingsSummary(state.transactions, state.categories, month)
   const breakdown = categoryBreakdown(state.transactions, state.categories, month)
   const budgets = categoryBudgets(state.transactions, state.categories, month)
   const priorityBudgets = budgets
@@ -57,7 +57,12 @@ export default function DashboardPage() {
       <SummaryCards accounts={accounts} />
 
       <div className="grid-two">
-        <SavingsRate expenses={expenses} income={income} />
+        <SavingsRate
+          configured={savings.configured}
+          netExpenses={savings.netExpenses}
+          salary={savings.salary}
+          saved={savings.saved}
+        />
         <RecentTransactions transactions={recent} />
       </div>
 

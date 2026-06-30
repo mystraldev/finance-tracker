@@ -636,6 +636,30 @@
   font-size: 0.8rem;
   color: var(--text-faint);
 }
+.savings__setup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem 0.25rem 0.5rem;
+}
+.savings__setup-text {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.field--check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+}
+.field__check {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--indigo);
+  flex-shrink: 0;
+}
 
 .badge {
   font-size: 0.74rem;

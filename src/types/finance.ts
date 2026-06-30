@@ -23,6 +23,8 @@ export type Category = {
   color: string
   /** Optional monthly spending budget, in EUR. Undefined = no budget. */
   budget?: number
+  /** Whether transactions in this category count as real income (salary) for the savings rate. */
+  isIncome?: boolean
 }
 
 export type BudgetStatus = 'ok' | 'warning' | 'over'

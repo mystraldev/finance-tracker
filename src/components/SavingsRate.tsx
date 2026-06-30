@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 import { formatCurrency, formatPercent } from '../utils/format'
 
 const RADIUS = 80
@@ -10,24 +12,45 @@ const tiers = {
 }
 
 type SavingsRateProperties = {
-  income: number
-  expenses: number
+  /** Real income (salary). */
+  salary: number
+  /** Spending net of reimbursements. */
+  netExpenses: number
+  saved: number
+  /** Whether an income category has been configured. */
+  configured: boolean
 }
 
-function SavingsRate({ income, expenses }: SavingsRateProperties) {
-  const saved = income - expenses
-  const rate = income > 0 ? saved / income : 0
+function tierFor(rate: number): 'good' | 'mid' | 'low' {
+  if (rate >= 0.2) return 'good'
+  if (rate >= 0.1) return 'mid'
+  return 'low'
+}
+
+function SavingsRate({ salary, netExpenses, saved, configured }: SavingsRateProperties) {
+  if (!configured) {
+    return (
+      <section className="card savings">
+        <header className="card__header">
+          <h3 className="card__title">Tasa de ahorro</h3>
+        </header>
+        <div className="savings__setup">
+          <p className="savings__setup-text">
+            Marca qué categoría es tu nómina para calcular tu tasa de ahorro real (sin contar
+            Bizums ni reembolsos).
+          </p>
+          <Link className="btn-ghost" to="/categorias">
+            Elegir categoría de ingresos
+          </Link>
+        </div>
+      </section>
+    )
+  }
+
+  const rate = salary > 0 ? saved / salary : 0
   const clamped = Math.max(0, Math.min(1, rate))
   const dash = clamped * CIRCUMFERENCE
-
-  let tierKey: 'good' | 'mid' | 'low'
-  if (rate >= 0.2) {
-    tierKey = 'good'
-  } else if (rate >= 0.1) {
-    tierKey = 'mid'
-  } else {
-    tierKey = 'low'
-  }
+  const tierKey = tierFor(rate)
   const tier = tiers[tierKey]
 
   return (
@@ -56,20 +79,20 @@ function SavingsRate({ income, expenses }: SavingsRateProperties) {
         </svg>
         <div className="savings__center">
           <span className="savings__pct tnum">{formatPercent(rate)}</span>
-          <span className="savings__sub">de tus ingresos</span>
+          <span className="savings__sub">de tu nómina</span>
         </div>
       </div>
 
       <div className="savings__stats">
         <div className="stat">
           <span className="stat__dot stat__dot--in" />
-          <span className="stat__label">Ingresos</span>
-          <span className="stat__value tnum">{formatCurrency(income)}</span>
+          <span className="stat__label">Nómina</span>
+          <span className="stat__value tnum">{formatCurrency(salary)}</span>
         </div>
         <div className="stat">
           <span className="stat__dot stat__dot--out" />
-          <span className="stat__label">Gastos</span>
-          <span className="stat__value tnum">{formatCurrency(expenses)}</span>
+          <span className="stat__label">Gastos netos</span>
+          <span className="stat__value tnum">{formatCurrency(netExpenses)}</span>
         </div>
         <div className="stat">
           <span className="stat__dot stat__dot--save" />

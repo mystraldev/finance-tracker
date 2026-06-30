@@ -25,6 +25,17 @@ describe('CategoryForm', () => {
     })
   })
 
+  it('submits the income flag when the income checkbox is checked', async () => {
+    const onSubmit = vi.fn()
+    const { container } = render(<CategoryForm onCancel={vi.fn()} onSubmit={onSubmit} />)
+    fireEvent.change(container.querySelector('input[type="text"]')!, { target: { value: 'Nómina' } })
+    fireEvent.click(container.querySelector('input[type="checkbox"]')!)
+    fireEvent.submit(container.querySelector('form')!)
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ label: 'Nómina', isIncome: true }))
+    })
+  })
+
   it('pre-fills fields when editing an existing category', () => {
     render(
       <CategoryForm

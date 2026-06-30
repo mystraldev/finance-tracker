@@ -15,9 +15,7 @@ export function newId(): string {
   return randomUUID()
 }
 
-// ---------------------------------------------------------------------------
 // Row shapes (snake_case, as stored in Postgres)
-// ---------------------------------------------------------------------------
 
 type AccountRow = {
   id: string
@@ -35,6 +33,7 @@ type CategoryRow = {
   icon: string
   color: string
   budget: number | string | null
+  is_income: boolean
 }
 
 type TransactionRow = {
@@ -57,9 +56,7 @@ type SavingsGoalRow = {
   target_date: string | null
 }
 
-// ---------------------------------------------------------------------------
 // Row -> model
-// ---------------------------------------------------------------------------
 
 function toNumber(value: number | string): number {
   return typeof value === 'number' ? value : Number(value)
@@ -93,6 +90,7 @@ function toCategory(row: CategoryRow): Category {
   const category: Category = { id: row.id, label: row.label, icon: row.icon, color: row.color }
   const budget = optionalNumber(row.budget)
   if (budget !== undefined) category.budget = budget
+  if (row.is_income) category.isIncome = true
   return category
 }
 
@@ -148,6 +146,7 @@ function categoryRow(userId: string, category: Category): Record<string, unknown
     label: category.label,
     icon: category.icon,
     color: category.color,
+    is_income: category.isIncome === true,
   }
   if (category.budget !== undefined) row.budget = category.budget
   return row
