@@ -180,7 +180,14 @@ async function selectAll<T>(table: string): Promise<T[]> {
   let from = 0
   let batch: T[]
   do {
-    const { data, error } = await supabase.from(table).select('*').range(from, from + PAGE_SIZE - 1)
+    // Order by the primary key so the pages form a stable, non-overlapping
+    // sequence: without an explicit order Postgres may return rows in a
+    // different order between range requests, duplicating or skipping rows.
+    const { data, error } = await supabase
+      .from(table)
+      .select('*')
+      .order('id', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1)
     if (error) throw error
     batch = (data ?? []) as T[]
     rows.push(...batch)

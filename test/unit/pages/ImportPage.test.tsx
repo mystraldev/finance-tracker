@@ -3,12 +3,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import ImportPage from '../../../src/pages/ImportPage'
 
-const mocks = vi.hoisted(() => ({ extract: vi.fn(), bulkInsert: vi.fn() }))
+const mocks = vi.hoisted(() => ({ extract: vi.fn(), bulkInsert: vi.fn(), reload: vi.fn() }))
 
 vi.mock('../../../src/lib/pdfText', () => ({ extractPdfLines: mocks.extract }))
 vi.mock('../../../src/store/authContext', () => ({ useAuth: () => ({ user: { id: 'user-1' } }) }))
 vi.mock('../../../src/store/financeContext', () => ({
-  useFinance: () => ({ accounts: [], categories: [], transactions: [] }),
+  useFinance: () => ({ accounts: [], categories: [], transactions: [], reload: mocks.reload }),
 }))
 vi.mock('../../../src/data/supabaseFinanceRepo', () => ({
   bulkInsert: mocks.bulkInsert,
@@ -25,6 +25,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   mocks.extract.mockResolvedValue(lines)
   mocks.bulkInsert.mockResolvedValue(undefined)
+  mocks.reload.mockResolvedValue(undefined)
 })
 
 function selectFile() {
@@ -52,6 +53,8 @@ describe('ImportPage', () => {
     fireEvent.click(await screen.findByRole('button', { name: /Importar 2 movimientos/ }))
     await waitFor(() => expect(mocks.bulkInsert).toHaveBeenCalled())
     expect(await screen.findByText(/importados correctamente/)).toBeInTheDocument()
+    // Store is refreshed from the DB so a follow-up import dedups against the new rows.
+    expect(mocks.reload).toHaveBeenCalled()
   })
 
   it('reports when no EUR accounts are found', async () => {

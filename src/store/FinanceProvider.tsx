@@ -15,25 +15,48 @@ type Dispatch = (action: FinanceAction) => void
 type Persist = (operation: () => Promise<void>) => void
 
 // Serialise writes so dependent rows (e.g. an account then a transaction that
-// references it) reach the database in call order, avoiding FK races.
+// references it) reach the database in call order, avoiding FK races. `onSettled`
+// fires once the queue drains, reporting whether any write in the batch failed,
+// so the caller can resync a single time instead of racing a reload against
+// still-pending writes.
 function makeWriteQueue() {
   let tail: Promise<void> = Promise.resolve()
-  return (operation: () => Promise<void>, onError: (error: unknown) => void): void => {
-    tail = runNext(tail, operation, onError)
+  let pending = 0
+  let hasFailed = false
+  return (
+    operation: () => Promise<void>,
+    onError: (error: unknown) => void,
+    onSettled: (didFail: boolean) => void,
+  ): void => {
+    pending += 1
+    const previous = tail
+    tail = drain(previous, operation, onError, () => {
+      pending -= 1
+      if (pending > 0) return
+      const didFail = hasFailed
+      hasFailed = false
+      onSettled(didFail)
+    }, () => {
+      hasFailed = true
+    })
   }
 }
 
-async function runNext(
+async function drain(
   previous: Promise<void>,
   operation: () => Promise<void>,
   onError: (error: unknown) => void,
+  onDone: () => void,
+  onFail: () => void,
 ): Promise<void> {
   await previous
   try {
     await operation()
   } catch (error) {
+    onFail()
     onError(error)
   }
+  onDone()
 }
 
 function createFinanceActions(state: FinanceState, userId: string | undefined, dispatch: Dispatch, persist: Persist) {
@@ -155,14 +178,18 @@ export function FinanceProvider({ children }: FinanceProviderProperties) {
   const persist = useCallback<Persist>(
     (operation) => {
       enqueueWrite(
-        async () => {
-          await operation()
-          setSaveError(false)
-        },
+        operation,
         (error) => {
           // eslint-disable-next-line no-console -- surface persistence failures while debugging
           console.error('[finance] failed to save change', error)
+          // Keep the banner until the user dismisses it: clearing it on a later
+          // successful write would hide an earlier failure the user never saw.
           setSaveError(true)
+        },
+        (didFail) => {
+          // Roll the optimistic state back to the server's truth once, after the
+          // whole batch settles, so a failed write does not leave stale rows.
+          if (!didFail) return
           void reload()
         },
       )
@@ -195,8 +222,8 @@ export function FinanceProvider({ children }: FinanceProviderProperties) {
   }, [userId])
 
   const value = useMemo(
-    () => ({ ...state, ...createFinanceActions(state, userId, dispatch, persist) }),
-    [state, userId, persist],
+    () => ({ ...state, ...createFinanceActions(state, userId, dispatch, persist), reload }),
+    [state, userId, persist, reload],
   )
 
   return (

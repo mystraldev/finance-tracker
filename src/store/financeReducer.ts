@@ -10,14 +10,17 @@ const EMPTY_DATA: FinanceData = {
   savingsGoals: [],
 }
 
-function selectInitialMonth(data: FinanceData): string {
-  const month = currentMonth()
+function resolveMonth(data: FinanceData, preferred?: string): string {
   const months = financeRepo.availableMonths(data)
+  // Keep the month the user is already viewing when it still has data (e.g. on a
+  // reload after a failed save); otherwise fall back to the current or latest month.
+  if (preferred && months.includes(preferred)) return preferred
+  const month = currentMonth()
   return months.includes(month) ? month : months[0] ?? month
 }
 
-export function createState(data: FinanceData): FinanceState {
-  return { ...data, selectedMonth: selectInitialMonth(data) }
+export function createState(data: FinanceData, preferredMonth?: string): FinanceState {
+  return { ...data, selectedMonth: resolveMonth(data, preferredMonth) }
 }
 
 export function initEmpty(): FinanceState {
@@ -110,7 +113,11 @@ export function reducer(state: FinanceState, action: FinanceAction): FinanceStat
     case 'SET_MONTH': {
       return { ...state, selectedMonth: action.payload }
     }
-    case 'SET_DATA':
+    case 'SET_DATA': {
+      // A reload (e.g. after a failed save) should not yank the user out of the
+      // month they were viewing.
+      return createState(action.payload, state.selectedMonth)
+    }
     case 'IMPORT_DATA': {
       return createState(action.payload)
     }
