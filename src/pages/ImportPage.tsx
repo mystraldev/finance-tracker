@@ -173,7 +173,7 @@ function ImportBody({ phase, plan, error, accountName, categoryLabel, onFile, on
 
 export default function ImportPage() {
   const { user } = useAuth()
-  const { accounts, categories, transactions } = useFinance()
+  const { accounts, categories, transactions, reload } = useFinance()
   const [phase, setPhase] = useState<Phase>('idle')
   const [plan, setPlan] = useState<ImportPlan | undefined>(undefined)
   const [error, setError] = useState<string | undefined>(undefined)
@@ -217,8 +217,16 @@ export default function ImportPage() {
         transactions: plan.newTransactions,
       })
       await Promise.all(plan.updatedAccounts.map((account) => supabaseRepo.upsertAccount(userId, account)))
+      await reload()
       setPhase('done')
     } catch {
+      // Resync the store with whatever actually persisted (a partial insert has
+      // no rollback), so a retry dedups against it instead of duplicating rows.
+      try {
+        await reload()
+      } catch {
+        // Best-effort refresh; keep reporting the original import failure.
+      }
       setError('No se han podido guardar los movimientos.')
       setPhase('error')
     }

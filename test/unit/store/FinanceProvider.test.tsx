@@ -309,6 +309,30 @@ describe('FinanceProvider store', () => {
     expect(await screen.findByText(/No se ha podido guardar/)).toBeInTheDocument()
   })
 
+  it('keeps the save-error banner even after a later write succeeds', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {
+      // swallow the expected persistence error log
+    })
+    mocks.upsertTransaction.mockRejectedValueOnce(new Error('network')).mockResolvedValue(undefined)
+    const { result } = await setupReady()
+
+    act(() => {
+      result.current.addTransaction({
+        date: '2026-06-15', amount: -10, description: 'x', accountId: 'acc-1', categoryId: 'cat-food',
+      })
+    })
+    expect(await screen.findByText(/No se ha podido guardar/)).toBeInTheDocument()
+
+    act(() => {
+      result.current.addTransaction({
+        date: '2026-06-16', amount: -20, description: 'y', accountId: 'acc-1', categoryId: 'cat-food',
+      })
+    })
+    await waitFor(() => expect(mocks.upsertTransaction).toHaveBeenCalledTimes(2))
+    // A later success must not hide the earlier failure the user never acknowledged.
+    expect(screen.getByText(/No se ha podido guardar/)).toBeInTheDocument()
+  })
+
   it('shows an error state when the initial load fails', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {
       // swallow the expected error log

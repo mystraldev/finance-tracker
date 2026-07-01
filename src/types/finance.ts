@@ -132,4 +132,5 @@ export interface FinanceContextValue extends FinanceState {
   setMonth: (_m: string) => void
   importData: (_data: FinanceData) => void
   reset: () => void
+  reload: () => Promise<void>
 }
